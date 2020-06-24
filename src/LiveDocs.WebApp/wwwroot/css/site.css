@@ -1,0 +1,290 @@
+﻿@import url("open-iconic/font/css/open-iconic-bootstrap.min.css");
+html,
+body {
+  overflow-x: hidden;
+  /* Prevent scroll on narrow devices */ }
+
+body {
+  padding-top: 56px; }
+
+#blazor-error-ui {
+  background: lightyellow;
+  bottom: 0;
+  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+  display: none;
+  left: 0;
+  padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+  position: fixed;
+  width: 100%;
+  z-index: 1000; }
+
+#blazor-error-ui .dismiss {
+  cursor: pointer;
+  position: absolute;
+  right: 0.75rem;
+  top: 0.5rem; }
+
+.nav-content, div.main {
+  max-width: 80rem; }
+
+div.sidebar {
+  width: 15rem; }
+
+.nav-scroller {
+  position: relative;
+  z-index: 2;
+  height: 2.75rem;
+  overflow-y: hidden; }
+
+.nav-scroller .nav {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  padding-bottom: 1rem;
+  margin-top: -1px;
+  overflow-x: auto;
+  color: rgba(255, 255, 255, 0.75);
+  text-align: center;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch; }
+
+.nav-scroller .nav .btn {
+  margin-left: .5em; }
+
+.nav-underline .nav-link {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  font-size: .875rem;
+  color: #6c757d; }
+
+.nav-underline .nav-link:hover {
+  color: #007bff; }
+
+.nav-link-breadcrumb + .nav-link-breadcrumb {
+  padding-left: 0; }
+
+.nav-link-breadcrumb + .nav-link-breadcrumb::before {
+  display: inline-block;
+  padding-right: 1rem;
+  color: #6c757d;
+  content: "/"; }
+
+.nav-link-breadcrumb + .nav-link-pill-breadcrumb::before {
+  padding-right: .75rem; }
+
+.nav-underline .active {
+  font-weight: 500;
+  color: #343a40; }
+
+.nav-underline .form-inline {
+  margin-right: .5em; }
+
+.text-white-50 {
+  color: rgba(255, 255, 255, 0.5); }
+
+.lh-100 {
+  line-height: 1; }
+
+.lh-125 {
+  line-height: 1.25; }
+
+.lh-150 {
+  line-height: 1.5; }
+
+.ph-item {
+  border: none; }
+
+a.nav-link.dropdown-toggle:hover {
+  cursor: pointer; }
+
+input[type="search"] {
+  width: 20vw !important;
+  -webkit-transition: width .5s;
+  -moz-transition: width .5s;
+  transition: width .5s; }
+
+.card-deck {
+  justify-content: center; }
+
+.dropdown-menu a.dropdown-item:hover {
+  cursor: pointer; }
+
+.table .tr-sm td {
+  padding: .3rem;
+  font-size: .875rem; }
+
+textarea.http-response-data[readonly] {
+  font-family: 'Lucida Console', Monaco, monospace;
+  font-size: 12px;
+  background-color: #000; }
+
+@media (max-width: 991.98px) {
+  .offcanvas-collapse {
+    position: fixed;
+    top: 56px;
+    /* Height of navbar */
+    bottom: 0;
+    left: 100%;
+    width: 100%;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    overflow-y: auto;
+    visibility: hidden;
+    background-color: #343a40;
+    transition: visibility .3s ease-in-out, -webkit-transform .3s ease-in-out;
+    transition: transform .3s ease-in-out, visibility .3s ease-in-out;
+    transition: transform .3s ease-in-out, visibility .3s ease-in-out, -webkit-transform .3s ease-in-out; }
+  .offcanvas-collapse.open {
+    visibility: visible;
+    -webkit-transform: translateX(-100%);
+    transform: translateX(-100%); } }
+
+@media (min-width: 991.99px) {
+  input[type="search"]:focus, input[type="search"]:not(:placeholder-shown) {
+    width: 33vw !important; }
+  .navbar-nav .nav-item:first-child {
+    margin-left: 1em; }
+  /*ul.navbar-nav li.dropdown:hover > .dropdown-menu {
+        display: block;
+    }*/ }
+
+@media (prefers-color-scheme: dark) {
+  /*$main-bg-color: #343a40;
+    $secondary-bg-color: rgba(0, 0, 0, 0.2);
+    $main-text-color: rgba(255, 255, 255, .5);
+    $secondary-text-color: #6c757d;
+    $nav-link-hover-color: rgba(255, 255, 255, .5);
+    $btn-primary-color: #6c757d;
+    $btn-secondary-hover-color: #6c757d;
+
+    body {
+        background-color: $main-bg-color;
+        color: $main-text-color;
+    }
+
+    .table {
+        color: $main-text-color;
+    }
+
+    .table thead th {
+        border-bottom: 1px solid $main-text-color;
+    }
+
+    .table tr td, .table tbody tr th {
+        border-color: rgba(255,255,255,.1);
+    }
+
+    .table tr th {
+        border-color: $main-text-color;
+    }
+
+    .nav-underline a.nav-link:hover {
+        color: $nav-link-hover-color;
+    }
+
+    nav.navbar-dark.bg-dark {
+        background-color: $main-bg-color !important;
+        color: $main-text-color;
+    }
+
+    div.nav-scroller {
+        background-color: $secondary-bg-color !important;
+    }
+
+    div.nav-scroller a.nav-link {
+        color: $main-text-color;
+    }
+
+    div.nav-scroller a.nav-link span.badge {
+        color: $secondary-text-color;
+    }
+
+    .btn-outline-primary {
+        color: $nav-link-hover-color;
+        border-color: $btn-primary-color;
+    }
+
+    .btn-outline-primary:hover, .btn-outline-primary:not(:disabled):not(.disabled):active {
+        background-color: $secondary-bg-color;
+        color: $main-text-color;
+        border-color: $btn-primary-color;
+    }
+
+    .btn.btn-primary {
+        background-color: $btn-primary-color;
+        border-color: $btn-primary-color;
+    }
+
+    .btn.btn-primary:hover, .btn.btn-primary:not(:disabled):not(.disabled):active {
+        background-color: $nav-link-hover-color;
+        border-color: $nav-link-hover-color;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: $btn-secondary-hover-color;
+    }
+
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        color: $main-text-color;
+        background-color: $btn-primary-color;
+    }
+
+    .nav-pills .nav-link.active:hover, .nav-pills .show > .nav-link:hover {
+        background-color: $nav-link-hover-color;
+    }
+
+    .dropdown-menu {
+        background-color: $secondary-bg-color;
+    }
+
+    .dropdown-menu a.dropdown-item {
+        color: $main-text-color;
+    }
+
+    .dropdown-item.active, .dropdown-item:active, .dropdown-menu a.dropdown-item:hover {
+        background-color: $btn-primary-color;
+        color: $main-text-color;
+    }
+
+    .text-muted {
+        color: $secondary-text-color !important;
+    }
+
+    .text-muted a, td .nav-link {
+        color: $nav-link-hover-color !important;
+    }
+
+    .custom-control-input:checked ~ .custom-control-label::before {
+        color: $main-text-color;
+        border-color: $btn-primary-color;
+        background-color: $btn-primary-color;
+    }
+
+    .card-header {
+        background-color: $secondary-bg-color;
+        border-bottom: 1px solid $main-text-color;
+    }
+
+    .card-body {
+        background-color: $main-bg-color;
+    }
+
+    .card-footer {
+        background-color: $main-bg-color;
+        border-top: 1px solid $main-text-color;
+    }    
+
+    .badge-primary {
+        color: $main-text-color;
+        background-color: $btn-primary-color;
+    }
+
+    .modal-content {
+        background-color: $main-bg-color;
+    }
+
+    .modal-content .close {
+        color: #FFF;
+        text-shadow: 0 1px 0 #000;
+    }*/ }

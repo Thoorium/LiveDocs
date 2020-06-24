@@ -1,0 +1,26 @@
+﻿@inject Microsoft.Extensions.Options.IOptions<LiveDocs.WebApp.Options.LiveDocsOptions> _LiveDocsOptions
+<nav class="navbar navbar-expand-lg justify-content-center fixed-top navbar-dark bg-dark mx-auto">
+    <a class="navbar-brand mr-auto mr-lg-0" href="#">@_LiveDocsOptions.Value.ApplicationName</a>
+    <button class="navbar-toggler p-0 border-0" type="button" data-toggle="offcanvas" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="navbar-collapse offcanvas-collapse @NavMenuCssClass" style="max-width:75rem;">
+        <ul class="navbar-nav mr-auto">
+        </ul>
+        <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" />
+        </form>
+    </div>
+</nav>
+
+@code {
+    bool collapseNavMenu = false;
+
+    string NavMenuCssClass => collapseNavMenu ? "open" : null;
+
+    void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}
