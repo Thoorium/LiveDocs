@@ -28,7 +28,8 @@ body {
   max-width: 80rem; }
 
 div.sidebar {
-  width: 15rem; }
+  min-width: 15rem;
+  max-width: 15rem; }
 
 .nav-scroller {
   position: relative;
