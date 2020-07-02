@@ -1,0 +1,22 @@
+﻿@inject LiveDocs.Shared.Services.IDocumentationService _DocumentationService
+
+<div class="sidebar">
+    <ul class="nav flex-column">
+        @foreach (var item in _DocumentationService.DocumentationIndex.Documents.Where(w => w.Key.ToLower() != "index").GroupBy(g => g.Key).Select(s => s.First()))
+        {
+            if (item.DocumentType == Services.DocumentationDocumentType.Folder)
+            {
+                <li class="nav-item py-1">
+                    <span class="oi oi-caret-right" aria-hidden="true"></span> @item.Name
+                </li>
+            } else
+            {
+                <li class="nav-item py-1">
+                    <NavLink href="@("docs/" + item.Key)">
+                        @item.Name
+                    </NavLink>
+                </li>
+            }
+        }
+    </ul>
+</div>

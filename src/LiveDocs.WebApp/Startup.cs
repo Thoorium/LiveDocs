@@ -11,6 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using LiveDocs.WebApp.Data;
 using LiveDocs.WebApp.Options;
+using Markdig;
+using LiveDocs.WebApp.Services;
+using LiveDocs.Shared.Services;
 
 namespace LiveDocs.WebApp
 {
@@ -32,6 +35,12 @@ namespace LiveDocs.WebApp
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
+
+            MarkdownPipeline markdownPipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseBootstrap().Build();
+            services.AddSingleton(markdownPipeline);
+            services.AddSingleton<IDocumentationService, DocumentationService>();
+
+            services.AddHostedService<ScheduledHostedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

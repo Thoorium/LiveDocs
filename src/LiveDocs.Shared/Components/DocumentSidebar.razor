@@ -1,0 +1,34 @@
+﻿@inject LiveDocs.Shared.Services.IDocumentationService _DocumentationService
+
+<div class="sidebar">
+    <ul class="nav flex-column">
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> @Document.DocumentType
+            </NavLink>
+        </li>
+        @*<li class="nav-item px-3">
+            <NavLink class="nav-link" href="counter">
+                <span class="oi oi-plus" aria-hidden="true"></span> Counter
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="fetchdata">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
+            </NavLink>
+        </li>*@
+        @*@foreach (var item in _DocumentationService.DocumentationIndex.Documents.Where(w => w.DocumentType == Services.DocumentationDocumentType.Markdown))
+        {
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="@("docs/" + System.Net.WebUtility.UrlEncode(item.Path))">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> @System.IO.Path.GetFileNameWithoutExtension(item.Path)
+                </NavLink>
+            </li>
+        }*@
+    </ul>
+</div>
+
+@code {
+    [Parameter]
+    public LiveDocs.Shared.Services.IDocumentationDocument Document { get; set; }
+}

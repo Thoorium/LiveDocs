@@ -1,82 +1,44 @@
 @page "/docs/{path1?}/{path2?}/{path3?}/{path4?}/{path5?}/{path6?}/{path7?}/{path8?}/"
 @inject MarkdownPipeline _MarkdownPipeline
 @inject Microsoft.Extensions.Options.IOptions<LiveDocs.WebApp.Options.LiveDocsOptions> _Options
-@inject LiveDocs.WebApp.Services.IDocumentationService _DocumentationService
+@inject LiveDocs.Shared.Services.IDocumentationService _DocumentationService
 
-<div class="sidebar">
-    <ul class="nav flex-column">
-        @*<li class="nav-item px-3">
-                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                    <span class="oi oi-home" aria-hidden="true"></span> Home
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="counter">
-                    <span class="oi oi-plus" aria-hidden="true"></span> Counter
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="fetchdata">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-                </NavLink>
-            </li>*@
-        @foreach (var item in _DocumentationService.DocumentationIndex.Documents.Where(w => w.DocumentType == Services.DocumentationDocumentType.Markdown))
+<div class="content d-flex mx-auto">
+
+    <LiveDocs.Shared.Components.DocumentationSidebar></LiveDocs.Shared.Components.DocumentationSidebar>
+
+    <div class="content px-4 align-self-stretch flex-lg-fill">
+        @if (string.IsNullOrWhiteSpace(renderContent))
         {
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="@("docs/" + System.Net.WebUtility.UrlEncode(item.Path))">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> @System.IO.Path.GetFileNameWithoutExtension(item.Path)
-                </NavLink>
-            </li>
-        }
-    </ul>
-</div>
-
-<div class="content px-4 align-self-stretch flex-lg-fill">
-    @if (string.IsNullOrWhiteSpace(renderContent))
-    {
-        <div class="ph-item">
-            <div class="ph-col-12">
-                <div class="ph-picture"></div>
-                <div class="ph-row">
-                    <div class="ph-col-6 big"></div>
-                    <div class="ph-col-4 empty big"></div>
-                    <div class="ph-col-2 big"></div>
-                    <div class="ph-col-4"></div>
-                    <div class="ph-col-8 empty"></div>
-                    <div class="ph-col-6"></div>
-                    <div class="ph-col-6 empty"></div>
-                    <div class="ph-col-12"></div>
+            <div class="ph-item">
+                <div class="ph-col-12">
+                    <div class="ph-picture"></div>
+                    <div class="ph-row">
+                        <div class="ph-col-6 big"></div>
+                        <div class="ph-col-4 empty big"></div>
+                        <div class="ph-col-2 big"></div>
+                        <div class="ph-col-4"></div>
+                        <div class="ph-col-8 empty"></div>
+                        <div class="ph-col-6"></div>
+                        <div class="ph-col-6 empty"></div>
+                        <div class="ph-col-12"></div>
+                    </div>
                 </div>
             </div>
-        </div>
-    } else @((MarkupString)renderContent)
-</div>
-<div class="sidebar">
-    <ul class="nav flex-column">
-        @*<li class="nav-item px-3">
-                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                    <span class="oi oi-home" aria-hidden="true"></span> Home
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="counter">
-                    <span class="oi oi-plus" aria-hidden="true"></span> Counter
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="fetchdata">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-                </NavLink>
-            </li>*@
-        @foreach (var item in System.IO.Directory.EnumerateFiles(_Options.Value.DocumentationFolder, "*.md"))
+        } else
         {
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="@("docs/" + System.Net.WebUtility.UrlEncode(item.Replace(_Options.Value.DocumentationFolder + "\\","")))">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> @System.IO.Path.GetFileNameWithoutExtension(item)
-                </NavLink>
-            </li>
+            <div class="bd-callout bd-callout-info">
+                <p>There is multiple files for this document.</p>
+                <p>
+                    <button type="button" class="btn btn-info btn-sm">Markdown</button>
+                    <button type="button" class="btn btn-outline-info btn-sm">Html</button>
+                    <button type="button" class="btn btn-outline-info btn-sm">PDF</button>
+                </p>
+            </div>
+            @((MarkupString)renderContent)
         }
-    </ul>
+    </div>
+    <LiveDocs.Shared.Components.DocumentSidebar Document="documentationDocument"></LiveDocs.Shared.Components.DocumentSidebar>
 </div>
 
 @code {
@@ -106,19 +68,36 @@
 
     private string renderContent = "";
 
+    private bool loadNewContent = false;
+
+    private LiveDocs.Shared.Services.IDocumentationDocument documentationDocument = new LiveDocs.WebApp.Services.DocumentationDocument();
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        //if (!firstRender)
-        //    return;
+        if (!loadNewContent)
+            return;
 
-        //await Task.Delay(1500);
         if (string.IsNullOrWhiteSpace(path1))
-            renderContent = Markdown.ToHtml(System.IO.File.ReadAllText(@"C:\Users\oli_2\Projects\LiveDocs\tests\docs\complex.md"), _MarkdownPipeline);
+            renderContent = "";
         else
         {
-            renderContent = Markdown.ToHtml(System.IO.File.ReadAllText(System.IO.Path.Combine(_Options.Value.DocumentationFolder, System.Net.WebUtility.UrlDecode(path1))));
+            var d = _DocumentationService.DocumentationIndex.Documents.Where(w => w.Key == path1);
+            if (d.Any())
+            {
+                documentationDocument = d.First();
+                var mddoc = Markdown.Parse(System.IO.File.ReadAllText(System.IO.Path.Combine(_Options.Value.DocumentationFolder, documentationDocument.Path)));
+                renderContent = Markdown.ToHtml(System.IO.File.ReadAllText(System.IO.Path.Combine(_Options.Value.DocumentationFolder, documentationDocument.Path)));
+            } else
+                renderContent = "Document not found";
         }
         StateHasChanged();
+        loadNewContent = false;
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        loadNewContent = true;
+        return base.OnParametersSetAsync();
     }
 }
