@@ -2,6 +2,7 @@
 @inject MarkdownPipeline _MarkdownPipeline
 @inject Microsoft.Extensions.Options.IOptions<LiveDocs.WebApp.Options.LiveDocsOptions> _Options
 @inject LiveDocs.Shared.Services.IDocumentationService _DocumentationService
+@inject NavigationManager _NavManager
 
 <div class="content d-flex mx-auto">
 
@@ -30,9 +31,9 @@
             <div class="bd-callout bd-callout-info">
                 <p>There is multiple files for this document.</p>
                 <p>
-                    <button type="button" class="btn btn-info btn-sm">Markdown</button>
-                    <button type="button" class="btn btn-outline-info btn-sm">Html</button>
-                    <button type="button" class="btn btn-outline-info btn-sm">PDF</button>
+                    <NavLink type="button" class="btn btn-outline-info btn-sm" href="@($"/{relativePath}?file=markdown")">Markdown</NavLink>
+                    <NavLink type="button" class="btn btn-outline-info btn-sm" href="@($"/{relativePath}?file=html")">Html</NavLink>
+                    <NavLink type="button" class="btn btn-outline-info btn-sm" href="@($"/{relativePath}?file=pdf")">PDF</NavLink>
                 </p>
             </div>
             @((MarkupString)renderContent)
@@ -70,7 +71,15 @@
 
     private bool loadNewContent = false;
 
+    private string relativePath = "";
+
     private LiveDocs.Shared.Services.IDocumentationDocument documentationDocument = new LiveDocs.WebApp.Services.DocumentationDocument();
+
+    protected async override Task OnInitializedAsync()
+    {
+        _NavManager.LocationChanged += HandleLocationChanged;
+        await base.OnInitializedAsync();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -81,7 +90,17 @@
             renderContent = "";
         else
         {
+            relativePath = _NavManager.ToBaseRelativePath(_NavManager.Uri);
+
             var d = _DocumentationService.DocumentationIndex.Documents.Where(w => w.Key == path1);
+
+
+            if(!_NavManager.TryGetQueryString<string>("file", out _))
+            {
+                if (d.Any(a => a.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Markdown))
+                    _NavManager.NavigateTo($"/{relativePath}?file=markdown");                
+            }
+
             if (d.Any())
             {
                 documentationDocument = d.First();
@@ -90,8 +109,8 @@
             } else
                 renderContent = "Document not found";
         }
-        StateHasChanged();
         loadNewContent = false;
+        StateHasChanged();
         await base.OnAfterRenderAsync(firstRender);
     }
 
@@ -99,5 +118,16 @@
     {
         loadNewContent = true;
         return base.OnParametersSetAsync();
+    }
+
+    void HandleLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        //GetQueryStringValues();
+        //StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        _NavManager.LocationChanged -= HandleLocationChanged;
     }
 }
