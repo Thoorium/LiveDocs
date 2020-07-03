@@ -3,7 +3,7 @@
 // DATE: 2020-07-01
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.WebUtilities;
+using System.Web;
 
 namespace LiveDocs.Shared
 {
@@ -12,7 +12,8 @@ namespace LiveDocs.Shared
         public static bool TryGetQueryString<T>(this NavigationManager navManager, string key, out T value)
         {
             var uri = navManager.ToAbsoluteUri(navManager.Uri);
-            if (QueryHelpers.ParseQuery(uri.Query).TryGetValue(key, out var valueFromQueryString))
+            var valueFromQueryString = HttpUtility.ParseQueryString(uri.Query).Get(key);
+            if (valueFromQueryString != null)
             {
                 if (typeof(T) == typeof(int) && int.TryParse(valueFromQueryString, out var valueAsInt))
                 {

@@ -20,25 +20,36 @@ namespace LiveDocs.Shared.Services
             return Task.FromResult<IList<IDocumentationDocument>>(DocumentationIndex.Documents.Where(w => w.Key == path).ToList());
         }
 
-        Task<IDocumentationDocument> GetDocumentFor(string path, string documentType = "")
+        Task<IDocumentationDocument> GetDocumentFor(string[] path, string documentType = "")
         {
             IDocumentationDocument document = null;
-            var d = DocumentationIndex.Documents.Where(w => w.Key == path);
+            var documents = DocumentationIndex.Documents.Where(w => w.Key == path[0]);
+
+            
+            IDocumentationDocument tempDoc = null;
+            for (int i = 0; i < path.Length - 1; i++)
+            {
+                if (string.IsNullOrWhiteSpace(path[i + 1]))
+                    break;
+
+                tempDoc = documents.FirstOrDefault(w => w.DocumentType == DocumentationDocumentType.Folder && w.Key == path[i]);
+                documents = tempDoc.SubDocuments;
+            }
 
             if (string.IsNullOrWhiteSpace(documentType))
             {
-                document = d.FirstOrDefault(f => f.DocumentType == DocumentationDocumentType.Markdown);
+                document = documents.FirstOrDefault(f => f.DocumentType == DocumentationDocumentType.Markdown);
                 if (document != null)
                     return Task.FromResult(document);
 
-                document = d.FirstOrDefault(f => f.DocumentType == DocumentationDocumentType.Html);
+                document = documents.FirstOrDefault(f => f.DocumentType == DocumentationDocumentType.Html);
                 if (document != null)
                     return Task.FromResult(document);
 
-                return Task.FromResult(d.FirstOrDefault());
+                return Task.FromResult(documents.FirstOrDefault());
             }
 
-            document = d.FirstOrDefault(f => f.DocumentType == GetDocumentationDocumentTypeFromString(documentType));
+            document = documents.FirstOrDefault(f => f.DocumentType == GetDocumentationDocumentTypeFromString(documentType));
 
             return Task.FromResult(document);
         }

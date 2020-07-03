@@ -41,15 +41,15 @@
                     <p>
                         @if (extraDocuments.Any(a => a.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Markdown))
                         {
-                            <NavLink type="button" class="btn btn-outline-info btn-sm" href="@(QueryHelpers.AddQueryString(relativePath, "file", "Markdown"))">Markdown</NavLink>
+                            <NavLink type="button" class="btn btn-outline-info btn-sm" href="@(AddOrUpdateQueryString(relativePath,"file", "Markdown"))">Markdown</NavLink>
                         }
                         @if (extraDocuments.Any(a => a.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Html))
                         {
-                            <NavLink type="button" class="btn btn-outline-info btn-sm" href="@(QueryHelpers.AddQueryString(relativePath, "file", "Html"))">Html</NavLink>
+                            <NavLink type="button" class="btn btn-outline-info btn-sm" href="@(AddOrUpdateQueryString(relativePath,"file", "Html"))">Html</NavLink>
                         }
                         @if (extraDocuments.Any(a => a.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Pdf))
                         {
-                            <NavLink type="button" class="btn btn-outline-info btn-sm" href="@(QueryHelpers.AddQueryString(relativePath, "file", "Pdf"))">PDF</NavLink>
+                            <NavLink type="button" class="btn btn-outline-info btn-sm" href="@(AddOrUpdateQueryString(relativePath,"file", "Pdf"))">Pdf</NavLink>
                         }
                     </p>
                 </div>
@@ -94,8 +94,35 @@
     private LiveDocs.Shared.Services.IDocumentationDocument documentationDocument = new LiveDocs.WebApp.Services.DocumentationDocument();
     private string documentType = "";
     private string previousDocumentType = "";
+    private bool removePreviousDocumentType = false;
 
     private IList<LiveDocs.Shared.Services.IDocumentationDocument> extraDocuments = null;
+
+    private string AddOrUpdateQueryString(string url, string name, string value)
+    {
+        var urlQueryRegex = System.Text.RegularExpressions.Regex.Match(url, "\\?(.*)$");
+        string urlQuery = "";
+
+        if(urlQueryRegex.Success)
+            urlQuery = urlQueryRegex.Groups[1].Value;
+
+        var queries = System.Web.HttpUtility.ParseQueryString(urlQuery);
+
+        queries[name] = value;
+
+        string path = url.Substring(0, url.IndexOf("?") > 0 ? url.IndexOf("?") : url.Length);
+        string query = "?";
+
+        for (int i = 0; i < queries.Count; i++)
+        {
+            if (i > 0)
+                query += "&";
+            string key = queries.Keys[i];
+            query += $"{key}={queries[key]}";
+        }
+
+        return path + query;
+    }
 
     protected async override Task OnInitializedAsync()
     {
@@ -108,16 +135,19 @@
         if (!loadNewContent)
             return;
 
-        loadNewContent = false;
-
-        if (!string.IsNullOrWhiteSpace(previousDocumentType))
+        if (removePreviousDocumentType && !string.IsNullOrWhiteSpace(previousDocumentType))
+        {
             previousDocumentType = "";
+            removePreviousDocumentType = false;
+        }
 
+        loadNewContent = false;
         if (string.IsNullOrWhiteSpace(path1))
             renderContent = "";
         else
         {
             relativePath = _NavManager.ToBaseRelativePath(_NavManager.Uri);
+            var uri = new Uri(relativePath, UriKind.Relative);
 
             LiveDocs.Shared.Services.IDocumentationDocument document = null;
 
@@ -125,7 +155,7 @@
 
             // Document type is specified.
             if (hasDocumentType)
-                document = await _DocumentationService.GetDocumentFor(path1, documentType);
+                document = await _DocumentationService.GetDocumentFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }, documentType);
 
             // Document type is not specified or the specified type had no document, let's find the default document instead.
             if (!hasDocumentType || document == null)
@@ -133,7 +163,9 @@
                 if (document == null)
                     previousDocumentType = documentType;
 
-                document = await _DocumentationService.GetDocumentFor(path1);
+                document = await _DocumentationService.GetDocumentFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 });
+                _NavManager.NavigateTo(AddOrUpdateQueryString(relativePath, "file", document.DocumentType.ToString()));
+                return;
             }
 
             // The document type was specified and the document was found.
@@ -148,6 +180,7 @@
                 extraDocuments = await _DocumentationService.GetDocumentsFor(path1);
 
                 StateHasChanged();
+                removePreviousDocumentType = true;
                 return;
             }
 
@@ -155,9 +188,7 @@
             // The document type was specified, a document for this type was not found but a default document was found.
             if (!hasDocumentType && document != null)
             {
-                _NavManager.NavigateTo(QueryHelpers.AddQueryString(relativePath, "file", document.DocumentType.ToString()));
-                loadNewContent = true;
-                StateHasChanged();
+                _NavManager.NavigateTo(AddOrUpdateQueryString(relativePath, "file", document.DocumentType.ToString()));
                 return;
             }
 

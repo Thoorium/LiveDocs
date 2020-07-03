@@ -34,14 +34,14 @@ namespace LiveDocs.WebApp.Services
 
             IDocumentationIndex documentationIndex = new DocumentationIndex();
 
-            var documents = BuildDocumentationSubTree(directoryInfo);
+            var documents = BuildDocumentationSubTree(directoryInfo, directoryInfo);
 
             documentationIndex.Documents.AddRange(documents);
 
             return Task.FromResult(documentationIndex);
         }
 
-        private List<IDocumentationDocument> BuildDocumentationSubTree(DirectoryInfo directoryInfo)
+        private List<IDocumentationDocument> BuildDocumentationSubTree(DirectoryInfo directoryInfo, DirectoryInfo topDirectoryInfo)
         {
             List<IDocumentationDocument> documents = new List<IDocumentationDocument>();
 
@@ -53,7 +53,7 @@ namespace LiveDocs.WebApp.Services
                 {
                     documents.Add(new DocumentationDocument
                     {
-                        Path = file.FullName.Replace(directoryInfo.FullName + "\\", "").Replace("\\", "/"),
+                        Path = file.FullName.Replace(topDirectoryInfo.FullName + "\\", "").Replace("\\", "/"),
                         DocumentType = docType,
                         LastUpdate = file.LastWriteTimeUtc
                     });
@@ -65,10 +65,10 @@ namespace LiveDocs.WebApp.Services
                 var documentationDirectory = new DocumentationDocument
                 {
                     DocumentType = DocumentationDocumentType.Folder,
-                    Path = directory.FullName.Replace(directoryInfo.FullName + "\\", "").Replace("\\", "/"),
+                    Path = directory.FullName.Replace(topDirectoryInfo.FullName + "\\", "").Replace("\\", "/"),
                     LastUpdate = directory.LastWriteTimeUtc
                 };
-                var subdocuments = BuildDocumentationSubTree(directory);
+                var subdocuments = BuildDocumentationSubTree(directory, topDirectoryInfo);
 
                 if(subdocuments.Any())
                 {
