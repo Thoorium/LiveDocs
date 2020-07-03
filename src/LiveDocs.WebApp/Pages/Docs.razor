@@ -28,14 +28,32 @@
             </div>
         } else
         {
-            <div class="bd-callout bd-callout-info">
-                <p>There is multiple files for this document.</p>
-                <p>
-                    <NavLink type="button" class="btn btn-outline-info btn-sm" href="@($"/{relativePath}?file=markdown")">Markdown</NavLink>
-                    <NavLink type="button" class="btn btn-outline-info btn-sm" href="@($"/{relativePath}?file=html")">Html</NavLink>
-                    <NavLink type="button" class="btn btn-outline-info btn-sm" href="@($"/{relativePath}?file=pdf")">PDF</NavLink>
-                </p>
-            </div>
+            if (!string.IsNullOrWhiteSpace(previousDocumentType))
+            {
+                <div class="bd-callout bd-callout-warning">
+                    <p>No document of type <code>@previousDocumentType</code> found. Defaulting to <code>@documentType</code>.</p>
+                </div>
+            }
+            if (extraDocuments != null && extraDocuments.Count > 1)
+            {
+                <div class="bd-callout bd-callout-info">
+                    <p>There is multiple files for this document.</p>
+                    <p>
+                        @if (extraDocuments.Any(a => a.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Markdown))
+                        {
+                            <NavLink type="button" class="btn btn-outline-info btn-sm" href="@(QueryHelpers.AddQueryString(relativePath, "file", "Markdown"))">Markdown</NavLink>
+                        }
+                        @if (extraDocuments.Any(a => a.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Html))
+                        {
+                            <NavLink type="button" class="btn btn-outline-info btn-sm" href="@(QueryHelpers.AddQueryString(relativePath, "file", "Html"))">Html</NavLink>
+                        }
+                        @if (extraDocuments.Any(a => a.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Pdf))
+                        {
+                            <NavLink type="button" class="btn btn-outline-info btn-sm" href="@(QueryHelpers.AddQueryString(relativePath, "file", "Pdf"))">PDF</NavLink>
+                        }
+                    </p>
+                </div>
+            }
             @((MarkupString)renderContent)
         }
     </div>
@@ -74,6 +92,10 @@
     private string relativePath = "";
 
     private LiveDocs.Shared.Services.IDocumentationDocument documentationDocument = new LiveDocs.WebApp.Services.DocumentationDocument();
+    private string documentType = "";
+    private string previousDocumentType = "";
+
+    private IList<LiveDocs.Shared.Services.IDocumentationDocument> extraDocuments = null;
 
     protected async override Task OnInitializedAsync()
     {
@@ -86,31 +108,63 @@
         if (!loadNewContent)
             return;
 
+        loadNewContent = false;
+
+        if (!string.IsNullOrWhiteSpace(previousDocumentType))
+            previousDocumentType = "";
+
         if (string.IsNullOrWhiteSpace(path1))
             renderContent = "";
         else
         {
             relativePath = _NavManager.ToBaseRelativePath(_NavManager.Uri);
 
-            var d = _DocumentationService.DocumentationIndex.Documents.Where(w => w.Key == path1);
+            LiveDocs.Shared.Services.IDocumentationDocument document = null;
 
+            bool hasDocumentType = _NavManager.TryGetQueryString("file", out documentType);
 
-            if(!_NavManager.TryGetQueryString<string>("file", out _))
+            // Document type is specified.
+            if (hasDocumentType)
+                document = await _DocumentationService.GetDocumentFor(path1, documentType);
+
+            // Document type is not specified or the specified type had no document, let's find the default document instead.
+            if (!hasDocumentType || document == null)
             {
-                if (d.Any(a => a.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Markdown))
-                    _NavManager.NavigateTo($"/{relativePath}?file=markdown");                
+                if (document == null)
+                    previousDocumentType = documentType;
+
+                document = await _DocumentationService.GetDocumentFor(path1);
             }
 
-            if (d.Any())
+            // The document type was specified and the document was found.
+            if (hasDocumentType && document != null)
             {
-                documentationDocument = d.First();
+                documentType = document.DocumentType.ToString();
+                documentationDocument = document;
                 var mddoc = Markdown.Parse(System.IO.File.ReadAllText(System.IO.Path.Combine(_Options.Value.DocumentationFolder, documentationDocument.Path)));
                 renderContent = Markdown.ToHtml(System.IO.File.ReadAllText(System.IO.Path.Combine(_Options.Value.DocumentationFolder, documentationDocument.Path)));
-            } else
-                renderContent = "Document not found";
+
+                // Look for extra documents
+                extraDocuments = await _DocumentationService.GetDocumentsFor(path1);
+
+                StateHasChanged();
+                return;
+            }
+
+            // The document type was not specified but a default document was found.
+            // The document type was specified, a document for this type was not found but a default document was found.
+            if (!hasDocumentType && document != null)
+            {
+                _NavManager.NavigateTo(QueryHelpers.AddQueryString(relativePath, "file", document.DocumentType.ToString()));
+                loadNewContent = true;
+                StateHasChanged();
+                return;
+            }
+
+            renderContent = "Document not found";
+            StateHasChanged();
         }
-        loadNewContent = false;
-        StateHasChanged();
+
         await base.OnAfterRenderAsync(firstRender);
     }
 
@@ -123,7 +177,8 @@
     void HandleLocationChanged(object sender, LocationChangedEventArgs e)
     {
         //GetQueryStringValues();
-        //StateHasChanged();
+        loadNewContent = true;
+        StateHasChanged();
     }
 
     public void Dispose()

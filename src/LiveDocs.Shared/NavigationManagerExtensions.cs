@@ -12,7 +12,6 @@ namespace LiveDocs.Shared
         public static bool TryGetQueryString<T>(this NavigationManager navManager, string key, out T value)
         {
             var uri = navManager.ToAbsoluteUri(navManager.Uri);
-
             if (QueryHelpers.ParseQuery(uri.Query).TryGetValue(key, out var valueFromQueryString))
             {
                 if (typeof(T) == typeof(int) && int.TryParse(valueFromQueryString, out var valueAsInt))
