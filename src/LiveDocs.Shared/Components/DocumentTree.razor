@@ -1,0 +1,61 @@
+﻿@inject LiveDocs.Shared.Services.IDocumentationService _DocumentationService
+
+@if (headerTexts.Count != 0)
+{
+    <div class="sidebar">
+        <ul class="nav flex-column document-tree text-secondary">
+            @if (markdownDocument == null)
+            {
+                @("Loading")
+            } else
+            {
+                @for (int i = 0; i < headerTexts.Count; i++)
+                {
+                    <DocumentTreeItem Text="@headerTexts[i]" Url="@headerLinks[i]" Level="@headerLevels[i]"></DocumentTreeItem>
+                }
+            }
+        </ul>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public LiveDocs.Shared.Services.IDocumentationDocument Document { get; set; }
+
+    private LiveDocs.Shared.Services.IDocumentationDocument previousDocument = null;
+
+    private Markdig.Syntax.MarkdownDocument markdownDocument = null;
+
+    private List<string> headerLinks = new List<string>();
+    private List<string> headerTexts = new List<string>();
+    private List<int> headerLevels = new List<int>();
+
+    protected override Task OnParametersSetAsync()
+    {
+        if (previousDocument == Document)
+            return base.OnParametersSetAsync();
+
+        previousDocument = Document;
+
+        headerTexts.Clear();
+        headerLinks.Clear();
+        headerLevels.Clear();
+
+        markdownDocument = Markdig.Markdown.Parse(System.IO.File.ReadAllText(Document.Path));
+        foreach (Markdig.Syntax.HeadingBlock header in markdownDocument.Where(w => w is Markdig.Syntax.HeadingBlock))
+        {
+            string headerText = string.Join("", header.Inline);
+            string headerLink = Markdig.Helpers.LinkHelper.Urilize(headerText, allowOnlyAscii: true);
+
+            string uniqueHeaderLink = headerLink;
+            int numPad = 1;
+            while (headerLinks.Contains(uniqueHeaderLink))
+                uniqueHeaderLink += $"-{numPad++}";
+
+            headerTexts.Add(headerText);
+            headerLinks.Add(uniqueHeaderLink);
+            headerLevels.Add(header.Level);
+        }
+        return base.OnParametersSetAsync();
+    }
+}

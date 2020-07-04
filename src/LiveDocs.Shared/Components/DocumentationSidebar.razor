@@ -1,7 +1,7 @@
 ﻿@inject LiveDocs.Shared.Services.IDocumentationService _DocumentationService
 
 <div class="sidebar">
-    <ul class="nav flex-column">
+    <ul class="nav flex-column documentation-sidebar text-secondary">
         @foreach (var item in _DocumentationService.DocumentationIndex.Documents.Where(w => w.Key.ToLower() != "index").GroupBy(g => g.Key).Select(s => s.First()))
         {
             <DocumentationSidebarItem Item="item" Path="@("/docs")"></DocumentationSidebarItem>

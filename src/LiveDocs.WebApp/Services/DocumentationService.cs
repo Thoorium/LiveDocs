@@ -53,7 +53,7 @@ namespace LiveDocs.WebApp.Services
                 {
                     documents.Add(new DocumentationDocument
                     {
-                        Path = file.FullName.Replace(topDirectoryInfo.FullName + "\\", "").Replace("\\", "/"),
+                        Path = file.FullName,//.Replace(topDirectoryInfo.FullName + "\\", "").Replace("\\", "/"),
                         DocumentType = docType,
                         LastUpdate = file.LastWriteTimeUtc
                     });
@@ -65,7 +65,7 @@ namespace LiveDocs.WebApp.Services
                 var documentationDirectory = new DocumentationDocument
                 {
                     DocumentType = DocumentationDocumentType.Folder,
-                    Path = directory.FullName.Replace(topDirectoryInfo.FullName + "\\", "").Replace("\\", "/"),
+                    Path = directory.FullName,//.Replace(topDirectoryInfo.FullName + "\\", "").Replace("\\", "/"),
                     LastUpdate = directory.LastWriteTimeUtc
                 };
                 var subdocuments = BuildDocumentationSubTree(directory, topDirectoryInfo);

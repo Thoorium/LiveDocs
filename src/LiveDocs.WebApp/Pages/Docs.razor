@@ -47,7 +47,10 @@
             @((MarkupString)renderContent)
         }
     </div>
-    <LiveDocs.Shared.Components.DocumentSidebar Document="documentationDocument"></LiveDocs.Shared.Components.DocumentSidebar>
+    @if (documentationDocument != null && documentationDocument.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Markdown)
+    {
+        <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument"></LiveDocs.Shared.Components.DocumentTree>
+    }
 </div>
 
 @code {
@@ -81,7 +84,7 @@
 
     private string relativePath = "";
 
-    private LiveDocs.Shared.Services.IDocumentationDocument documentationDocument = new LiveDocs.WebApp.Services.DocumentationDocument();
+    private LiveDocs.Shared.Services.IDocumentationDocument documentationDocument = null;
     private string documentType = "";
     private string previousDocumentType = "";
     private bool removePreviousDocumentType = false;
@@ -170,8 +173,8 @@
             {
                 documentType = document.DocumentType.ToString();
                 documentationDocument = document;
-                var mddoc = Markdown.Parse(System.IO.File.ReadAllText(System.IO.Path.Combine(_Options.Value.DocumentationFolder, documentationDocument.Path)));
-                renderContent = Markdown.ToHtml(System.IO.File.ReadAllText(System.IO.Path.Combine(_Options.Value.DocumentationFolder, documentationDocument.Path)));
+                
+                renderContent = Markdown.ToHtml(System.IO.File.ReadAllText(documentationDocument.Path), _MarkdownPipeline);
 
                 // Look for extra documents
                 extraDocuments = await _DocumentationService.GetDocumentsFor(path1);

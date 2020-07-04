@@ -35,5 +35,16 @@
     </div>
 
     <script src="_framework/blazor.server.js"></script>
+    <script>
+        window.scrollToElementId = (elementId) => {
+            var element = document.getElementById(elementId);
+            if (!element) {
+                return false;
+            }
+            element.scrollIntoView();
+            window.scrollBy(0, -100);
+            return true;
+        }
+    </script>
 </body>
 </html>

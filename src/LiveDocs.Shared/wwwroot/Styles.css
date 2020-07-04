@@ -58,11 +58,21 @@ div.sidebar {
 .nav-item .oi-caret-right, .nav-item .oi-caret-bottom {
   font-size: 0.75rem; }
 
-li.nav-item.nested {
+li.nav-item.nested, ul.document-tree li {
   cursor: pointer; }
 
-li.nav-item.nested + ul {
+li.nav-item.nested + ul, ul.document-tree li {
   list-style: none; }
+
+ul.documentation-sidebar a {
+  color: var(--secondary); }
+
+ul.document-tree, ul.document-tree ul {
+  border-left: 1px solid; }
+
+ul.document-tree ul:hover, ul.document-tree li:hover {
+  color: var(--primary);
+  border-left-color: var(--primary); }
 
 .text-white-50 {
   color: rgba(255, 255, 255, 0.5); }
