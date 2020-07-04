@@ -1,13 +1,15 @@
+using LiveDocs.Shared.Services;
+using LiveDocs.WebApp.Data;
+using LiveDocs.WebApp.Options;
+using LiveDocs.WebApp.Services;
+using Markdig;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using LiveDocs.WebApp.Data;
-using LiveDocs.WebApp.Options;
-using LiveDocs.WebApp.Services;
-using LiveDocs.Shared.Services;
-using Markdig;
+using Microsoft.Extensions.Options;
 
 namespace LiveDocs.WebApp
 {
@@ -38,7 +40,7 @@ namespace LiveDocs.WebApp
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IOptions<LiveDocsOptions> liveDocsOptions)
         {
             if (env.IsDevelopment())
             {
@@ -53,6 +55,17 @@ namespace LiveDocs.WebApp
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+
+            StaticFileOptions staticFileOptions = new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(liveDocsOptions.Value.GetDocumentationFolderAsAbsolute(env.ContentRootPath).FullName),
+                RequestPath = "/docs",
+                ServeUnknownFileTypes = true,
+                DefaultContentType = "application/octet-stream"
+            };
+
+            app.UseStaticFiles(staticFileOptions);
 
             app.UseRouting();
 

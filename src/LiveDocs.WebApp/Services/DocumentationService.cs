@@ -27,10 +27,7 @@ namespace LiveDocs.WebApp.Services
 
         public Task<IDocumentationIndex> IndexFiles()
         {
-            DirectoryInfo directoryInfo;
-            if (Path.IsPathRooted(_Options.DocumentationFolder))
-                directoryInfo = new DirectoryInfo(_Options.DocumentationFolder);
-            else directoryInfo = new DirectoryInfo(Path.Combine(_HostingEnvironment.ContentRootPath, _Options.DocumentationFolder));
+            DirectoryInfo directoryInfo = _Options.GetDocumentationFolderAsAbsolute(_HostingEnvironment.ContentRootPath);
 
             IDocumentationIndex documentationIndex = new DocumentationIndex();
 

@@ -176,7 +176,7 @@
                 documentationDocument = document;
 
                 markdownDocument = Markdown.Parse(System.IO.File.ReadAllText(documentationDocument.Path), _MarkdownPipeline);
-                renderContent = await markdownDocument.ToHtml(documentationDocument.Path, _NavManager.Uri);
+                renderContent = await markdownDocument.ToHtml(_NavManager.Uri);
 
                 // Look for extra documents
                 extraDocuments = await _DocumentationService.GetDocumentsFor(path1);

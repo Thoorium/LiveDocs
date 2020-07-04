@@ -9,7 +9,7 @@ namespace LiveDocs.Shared
 {
     public static class MarkdownDocumentExtensions
     {
-        public static async Task<string> ToHtml(this MarkdownDocument markdownDocument, string documentPath, string urlBase = "")
+        public static async Task<string> ToHtml(this MarkdownDocument markdownDocument, string urlBase = "")
         {
             using StringWriter stringWriter = new StringWriter();
             HtmlRenderer htmlRenderer = new HtmlRenderer(stringWriter);
