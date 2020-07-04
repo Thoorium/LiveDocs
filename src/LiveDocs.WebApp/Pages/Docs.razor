@@ -11,19 +11,9 @@
     <div class="content px-4 align-self-stretch flex-lg-fill">
         @if (string.IsNullOrWhiteSpace(renderContent))
         {
-            <div class="ph-item">
-                <div class="ph-col-12">
-                    <div class="ph-picture"></div>
-                    <div class="ph-row">
-                        <div class="ph-col-6 big"></div>
-                        <div class="ph-col-4 empty big"></div>
-                        <div class="ph-col-2 big"></div>
-                        <div class="ph-col-4"></div>
-                        <div class="ph-col-8 empty"></div>
-                        <div class="ph-col-6"></div>
-                        <div class="ph-col-6 empty"></div>
-                        <div class="ph-col-12"></div>
-                    </div>
+            <div class="loading-document-wrapper mx-auto mt-4">
+                <div class="loading-document mx-auto">
+                    <img src="img/building.svg" onerror="this.onerror=null; this.src='image.png'">
                 </div>
             </div>
         } else
@@ -103,7 +93,7 @@
         var urlQueryRegex = System.Text.RegularExpressions.Regex.Match(url, "\\?(.*)$");
         string urlQuery = "";
 
-        if(urlQueryRegex.Success)
+        if (urlQueryRegex.Success)
             urlQuery = urlQueryRegex.Groups[1].Value;
 
         var queries = System.Web.HttpUtility.ParseQueryString(urlQuery);
@@ -164,7 +154,14 @@
                     previousDocumentType = documentType;
 
                 document = await _DocumentationService.GetDocumentFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 });
-                _NavManager.NavigateTo(AddOrUpdateQueryString(relativePath, "file", document.DocumentType.ToString()));
+
+                if (document == null)
+                {
+                    renderContent = "Document not found";
+                    previousDocumentType = "";
+                    StateHasChanged();
+                } else
+                    _NavManager.NavigateTo(AddOrUpdateQueryString(relativePath, "file", document.DocumentType.ToString()));
                 return;
             }
 

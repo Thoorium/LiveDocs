@@ -33,6 +33,10 @@ namespace LiveDocs.Shared.Services
                     break;
 
                 tempDoc = documents.FirstOrDefault(w => w.DocumentType == DocumentationDocumentType.Folder && w.Key == path[i]);
+
+                if (tempDoc == null)
+                    return Task.FromResult(tempDoc);
+
                 documents = tempDoc.SubDocuments;
             }
 
