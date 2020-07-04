@@ -67,6 +67,14 @@ li.nav-item.nested + ul, ul.document-tree li {
 ul.documentation-sidebar a {
   color: var(--secondary); }
 
+ul.documentation-sidebar, ul.document-tree {
+  position: fixed;
+  overflow-y: auto;
+  max-height: calc(100vh - 6rem);
+  flex-wrap: nowrap;
+  min-width: 15rem;
+  max-width: 15rem; }
+
 ul.document-tree, ul.document-tree ul {
   border-left: 1px solid; }
 
