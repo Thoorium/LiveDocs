@@ -89,7 +89,6 @@ namespace LiveDocs.WebApp.Services
         public Task RefreshDocumentationIndex(IDocumentationIndex documentationIndex)
         {
             DocumentationIndex = documentationIndex;
-            DocumentationIndex.Documents.RemoveAll(w => w.DocumentType == DocumentationDocumentType.Unknown);
             return Task.CompletedTask;
         }
 

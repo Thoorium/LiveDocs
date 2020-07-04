@@ -1,5 +1,5 @@
 @page "/docs/{path1?}/{path2?}/{path3?}/{path4?}/{path5?}/{path6?}/{path7?}/{path8?}/"
-@inject MarkdownPipeline _MarkdownPipeline
+@inject Markdig.MarkdownPipeline _MarkdownPipeline
 @inject Microsoft.Extensions.Options.IOptions<LiveDocs.WebApp.Options.LiveDocsOptions> _Options
 @inject LiveDocs.Shared.Services.IDocumentationService _DocumentationService
 @inject NavigationManager _NavManager
@@ -49,7 +49,7 @@
     </div>
     @if (documentationDocument != null && documentationDocument.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Markdown)
     {
-        <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument"></LiveDocs.Shared.Components.DocumentTree>
+        <LiveDocs.Shared.Components.DocumentTree MarkdownDocument="markdownDocument"></LiveDocs.Shared.Components.DocumentTree>
     }
 </div>
 
@@ -85,6 +85,7 @@
     private string relativePath = "";
 
     private LiveDocs.Shared.Services.IDocumentationDocument documentationDocument = null;
+    private Markdig.Syntax.MarkdownDocument markdownDocument = null;
     private string documentType = "";
     private string previousDocumentType = "";
     private bool removePreviousDocumentType = false;
@@ -173,8 +174,9 @@
             {
                 documentType = document.DocumentType.ToString();
                 documentationDocument = document;
-                
-                renderContent = Markdown.ToHtml(System.IO.File.ReadAllText(documentationDocument.Path), _MarkdownPipeline);
+
+                markdownDocument = Markdown.Parse(System.IO.File.ReadAllText(documentationDocument.Path), _MarkdownPipeline);
+                renderContent = await markdownDocument.ToHtml(documentationDocument.Path, _NavManager.Uri);
 
                 // Look for extra documents
                 extraDocuments = await _DocumentationService.GetDocumentsFor(path1);

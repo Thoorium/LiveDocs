@@ -118,6 +118,35 @@ textarea.http-response-data[readonly] {
   font-size: 12px;
   background-color: #000; }
 
+.loading-document-wrapper {
+  direction: ltr;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  overflow: hidden;
+  margin-bottom: 30px;
+  background-color: #fff; }
+
+.loading-document {
+  display: block; }
+
+.loading-document-wrapper, .loading-document-wrapper img {
+  max-width: 350px; }
+
+.loading-document:before {
+  content: " ";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 1;
+  width: 500%;
+  margin-left: -250%;
+  -webkit-animation: phAnimation .8s linear infinite;
+  animation: phAnimation .8s linear infinite;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 46%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0) 54%) 50% 50%; }
+
 @media (max-width: 991.98px) {
   .offcanvas-collapse {
     position: fixed;
@@ -287,3 +316,15 @@ textarea.http-response-data[readonly] {
         color: #FFF;
         text-shadow: 0 1px 0 #000;
     }*/ }
+
+@-webkit-keyframes phAnimation {
+  0% {
+    transform: translate3d(-30%, 0, 0); }
+  to {
+    transform: translate3d(30%, 0, 0); } }
+
+@keyframes phAnimation {
+  0% {
+    transform: translate3d(-30%, 0, 0); }
+  to {
+    transform: translate3d(30%, 0, 0); } }

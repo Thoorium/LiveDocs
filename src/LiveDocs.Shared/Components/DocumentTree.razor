@@ -4,7 +4,7 @@
 {
     <div class="sidebar">
         <ul class="nav flex-column document-tree text-secondary">
-            @if (markdownDocument == null)
+            @if (MarkdownDocument == null)
             {
                 @("Loading")
             } else
@@ -20,11 +20,9 @@
 
 @code {
     [Parameter]
-    public LiveDocs.Shared.Services.IDocumentationDocument Document { get; set; }
+    public Markdig.Syntax.MarkdownDocument MarkdownDocument { get; set; }
 
-    private LiveDocs.Shared.Services.IDocumentationDocument previousDocument = null;
-
-    private Markdig.Syntax.MarkdownDocument markdownDocument = null;
+    private Markdig.Syntax.MarkdownDocument previousMarkdownDocument = null;
 
     private List<string> headerLinks = new List<string>();
     private List<string> headerTexts = new List<string>();
@@ -32,17 +30,16 @@
 
     protected override Task OnParametersSetAsync()
     {
-        if (previousDocument == Document)
+        if (previousMarkdownDocument == MarkdownDocument)
             return base.OnParametersSetAsync();
 
-        previousDocument = Document;
+        previousMarkdownDocument = MarkdownDocument;
 
         headerTexts.Clear();
         headerLinks.Clear();
         headerLevels.Clear();
 
-        markdownDocument = Markdig.Markdown.Parse(System.IO.File.ReadAllText(Document.Path));
-        foreach (Markdig.Syntax.HeadingBlock header in markdownDocument.Where(w => w is Markdig.Syntax.HeadingBlock))
+        foreach (Markdig.Syntax.HeadingBlock header in MarkdownDocument.Where(w => w is Markdig.Syntax.HeadingBlock))
         {
             string headerText = string.Join("", header.Inline);
             string headerLink = Markdig.Helpers.LinkHelper.Urilize(headerText, allowOnlyAscii: true);
