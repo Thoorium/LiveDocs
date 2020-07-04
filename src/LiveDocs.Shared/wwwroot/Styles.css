@@ -58,6 +58,12 @@ div.sidebar {
 .nav-item .oi-caret-right, .nav-item .oi-caret-bottom {
   font-size: 0.75rem; }
 
+li.nav-item.nested {
+  cursor: pointer; }
+
+li.nav-item.nested + ul {
+  list-style: none; }
+
 .text-white-50 {
   color: rgba(255, 255, 255, 0.5); }
 
@@ -69,9 +75,6 @@ div.sidebar {
 
 .lh-150 {
   line-height: 1.5; }
-
-.ph-item {
-  border: none; }
 
 a.nav-link.dropdown-toggle:hover {
   cursor: pointer; }

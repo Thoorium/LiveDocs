@@ -71,6 +71,14 @@ div.sidebar {
     font-size: 0.75rem;
 }
 
+li.nav-item.nested {
+    cursor: pointer;
+}
+
+li.nav-item.nested + ul {
+    list-style: none;
+}
+
 .text-white-50 {
     color: rgba(255, 255, 255, .5);
 }
@@ -85,10 +93,6 @@ div.sidebar {
 
 .lh-150 {
     line-height: 1.5;
-}
-
-.ph-item {
-    border: none;
 }
 
 a.nav-link.dropdown-toggle:hover {

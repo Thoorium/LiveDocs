@@ -1,0 +1,27 @@
+﻿<li class="nav-item py-1 nested" @onclick="@(Expand)">
+    <span class="oi @(expanded ? "oi-caret-bottom" : "oi-caret-right")" aria-hidden="true"></span> @Item.Name
+</li>
+@if(expanded)
+{
+    <ul class="pl-4">
+        @foreach (var item in Item.SubDocuments)
+        {
+            <DocumentationSidebarItem Item="item" Path="@($"{Path}")"></DocumentationSidebarItem>
+        }
+    </ul>
+}
+
+@code {
+    [Parameter]
+    public LiveDocs.Shared.Services.IDocumentationDocument Item { get; set; }
+
+    [Parameter]
+    public string Path { get; set; }
+
+    private bool expanded = false;
+
+    private void Expand()
+    {
+        expanded = !expanded;
+    }
+}
