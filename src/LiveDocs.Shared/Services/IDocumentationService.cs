@@ -22,15 +22,18 @@ namespace LiveDocs.Shared.Services
 
         Task<IDocumentationDocument> GetDocumentFor(string[] path, string documentType = "")
         {
+            // Remove empty entries
+            path = path.Where(w => !string.IsNullOrWhiteSpace(w)).ToArray();
+
             IDocumentationDocument document = null;
             var documents = DocumentationIndex.Documents.Where(w => w.Key == path[0]);
 
-            string finalKey = "";
+            string finalKey = path[0];
             
             IDocumentationDocument tempDoc = null;
-            for (int i = 0; i < path.Length - 1; i++)
+            for (int i = 0; i < path.Length; i++)
             {
-                if (string.IsNullOrWhiteSpace(path[i + 1]))
+                if (i == path.Length - 1)
                 {
                     finalKey = path[i];
                     break;
@@ -51,6 +54,10 @@ namespace LiveDocs.Shared.Services
                     return Task.FromResult(document);
 
                 document = documents.FirstOrDefault(f => f.DocumentType == DocumentationDocumentType.Html && f.Key == finalKey);
+                if (document != null)
+                    return Task.FromResult(document);
+
+                document = documents.FirstOrDefault(f => f.DocumentType == DocumentationDocumentType.Pdf && f.Key == finalKey);
                 if (document != null)
                     return Task.FromResult(document);
 

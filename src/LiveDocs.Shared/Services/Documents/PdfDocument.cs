@@ -21,8 +21,7 @@ namespace LiveDocs.Shared.Services.Documents
             string path = baseUri.Substring(0, baseUri.IndexOf("#") > 0 ? baseUri.IndexOf("#") : baseUri.Length);
             path = path.Substring(0, path.IndexOf("?") > 0 ? path.IndexOf("?") : path.Length);
 
-            // TODO: Figure how to serve the file using the key instead of the name.
-            string pdfPath = $"{path.Replace(Key, Name)}.pdf";
+            string pdfPath = $"{path}.pdf";
             return Task.FromResult($"<object class=\"pdf\" data=\"{pdfPath}\" type =\"application/pdf\" width =\"100%\" height=\"100 %\">This browser does not support embedded pdf. Please download the pdf to view it: <a href=\"{pdfPath}\" target=\"_blank\" rel=\"noopener noreferrer\">{Name}.pdf</a>.</object>");
         }
     }

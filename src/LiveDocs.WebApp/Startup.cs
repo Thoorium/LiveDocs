@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
@@ -55,22 +54,11 @@ namespace LiveDocs.WebApp
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
-
-            StaticFileOptions staticFileOptions = new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(liveDocsOptions.Value.GetDocumentationFolderAsAbsolute(env.ContentRootPath).FullName),
-                RequestPath = "/docs",
-                ServeUnknownFileTypes = true,
-                DefaultContentType = "application/octet-stream"
-            };
-
-            app.UseStaticFiles(staticFileOptions);
-
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
