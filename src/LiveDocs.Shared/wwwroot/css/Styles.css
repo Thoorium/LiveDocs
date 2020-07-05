@@ -1,4 +1,5 @@
-﻿.nav-content, div.content {
+﻿@import url("open-iconic/font/css/open-iconic-bootstrap.min.css");
+.nav-content, div.content {
   max-width: 80rem; }
 
 div.sidebar {
@@ -124,8 +125,7 @@ textarea.http-response-data[readonly] {
   display: flex;
   flex-wrap: wrap;
   overflow: hidden;
-  margin-bottom: 30px;
-  background-color: #fff; }
+  margin-bottom: 30px; }
 
 .loading-document {
   display: block; }
@@ -178,144 +178,14 @@ textarea.http-response-data[readonly] {
     }*/ }
 
 @media (prefers-color-scheme: dark) {
-  /*$main-bg-color: #343a40;
-    $secondary-bg-color: rgba(0, 0, 0, 0.2);
-    $main-text-color: rgba(255, 255, 255, .5);
-    $secondary-text-color: #6c757d;
-    $nav-link-hover-color: rgba(255, 255, 255, .5);
-    $btn-primary-color: #6c757d;
-    $btn-secondary-hover-color: #6c757d;
-
-    body {
-        background-color: $main-bg-color;
-        color: $main-text-color;
-    }
-
-    .table {
-        color: $main-text-color;
-    }
-
-    .table thead th {
-        border-bottom: 1px solid $main-text-color;
-    }
-
-    .table tr td, .table tbody tr th {
-        border-color: rgba(255,255,255,.1);
-    }
-
-    .table tr th {
-        border-color: $main-text-color;
-    }
-
-    .nav-underline a.nav-link:hover {
-        color: $nav-link-hover-color;
-    }
-
-    nav.navbar-dark.bg-dark {
-        background-color: $main-bg-color !important;
-        color: $main-text-color;
-    }
-
-    div.nav-scroller {
-        background-color: $secondary-bg-color !important;
-    }
-
-    div.nav-scroller a.nav-link {
-        color: $main-text-color;
-    }
-
-    div.nav-scroller a.nav-link span.badge {
-        color: $secondary-text-color;
-    }
-
-    .btn-outline-primary {
-        color: $nav-link-hover-color;
-        border-color: $btn-primary-color;
-    }
-
-    .btn-outline-primary:hover, .btn-outline-primary:not(:disabled):not(.disabled):active {
-        background-color: $secondary-bg-color;
-        color: $main-text-color;
-        border-color: $btn-primary-color;
-    }
-
-    .btn.btn-primary {
-        background-color: $btn-primary-color;
-        border-color: $btn-primary-color;
-    }
-
-    .btn.btn-primary:hover, .btn.btn-primary:not(:disabled):not(.disabled):active {
-        background-color: $nav-link-hover-color;
-        border-color: $nav-link-hover-color;
-    }
-
-    .btn-outline-secondary:hover {
-        background-color: $btn-secondary-hover-color;
-    }
-
-    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-        color: $main-text-color;
-        background-color: $btn-primary-color;
-    }
-
-    .nav-pills .nav-link.active:hover, .nav-pills .show > .nav-link:hover {
-        background-color: $nav-link-hover-color;
-    }
-
-    .dropdown-menu {
-        background-color: $secondary-bg-color;
-    }
-
-    .dropdown-menu a.dropdown-item {
-        color: $main-text-color;
-    }
-
-    .dropdown-item.active, .dropdown-item:active, .dropdown-menu a.dropdown-item:hover {
-        background-color: $btn-primary-color;
-        color: $main-text-color;
-    }
-
-    .text-muted {
-        color: $secondary-text-color !important;
-    }
-
-    .text-muted a, td .nav-link {
-        color: $nav-link-hover-color !important;
-    }
-
-    .custom-control-input:checked ~ .custom-control-label::before {
-        color: $main-text-color;
-        border-color: $btn-primary-color;
-        background-color: $btn-primary-color;
-    }
-
-    .card-header {
-        background-color: $secondary-bg-color;
-        border-bottom: 1px solid $main-text-color;
-    }
-
-    .card-body {
-        background-color: $main-bg-color;
-    }
-
-    .card-footer {
-        background-color: $main-bg-color;
-        border-top: 1px solid $main-text-color;
-    }    
-
-    .badge-primary {
-        color: $main-text-color;
-        background-color: $btn-primary-color;
-    }
-
-    .modal-content {
-        background-color: $main-bg-color;
-    }
-
-    .modal-content .close {
-        color: #FFF;
-        text-shadow: 0 1px 0 #000;
-    }*/ }
+  a {
+    color: var(--cyan); }
+  pre {
+    color: #adadad; }
+  .form-control {
+    background-color: #191d21; }
+  ul.documentation-sidebar a {
+    color: #adadad; } }
 
 @-webkit-keyframes phAnimation {
   0% {
