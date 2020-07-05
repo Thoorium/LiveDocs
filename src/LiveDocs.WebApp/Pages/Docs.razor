@@ -2,6 +2,7 @@
 @inject Markdig.MarkdownPipeline _MarkdownPipeline
 @inject Microsoft.Extensions.Options.IOptions<LiveDocs.WebApp.Options.LiveDocsOptions> _Options
 @inject LiveDocs.Shared.Services.IDocumentationService _DocumentationService
+@inject Microsoft.JSInterop.IJSRuntime _JSRuntime
 @inject NavigationManager _NavManager
 
 <div class="content d-flex mx-auto">
@@ -57,29 +58,29 @@
 </div>
 
 @code {
-        [Parameter]
-        public string path1 { get; set; }
+    [Parameter]
+    public string path1 { get; set; }
 
-        [Parameter]
-        public string path2 { get; set; }
+    [Parameter]
+    public string path2 { get; set; }
 
-        [Parameter]
-        public string path3 { get; set; }
+    [Parameter]
+    public string path3 { get; set; }
 
-        [Parameter]
-        public string path4 { get; set; }
+    [Parameter]
+    public string path4 { get; set; }
 
-        [Parameter]
-        public string path5 { get; set; }
+    [Parameter]
+    public string path5 { get; set; }
 
-        [Parameter]
-        public string path6 { get; set; }
+    [Parameter]
+    public string path6 { get; set; }
 
-        [Parameter]
-        public string path7 { get; set; }
+    [Parameter]
+    public string path7 { get; set; }
 
-        [Parameter]
-        public string path8 { get; set; }
+    [Parameter]
+    public string path8 { get; set; }
 
     private string renderContent = "";
 
@@ -96,13 +97,31 @@
 
     private IList<LiveDocs.Shared.Services.IDocumentationDocument> extraDocuments = null;
 
+    private string GetUrlId(string url)
+    {
+        var urlIdRegex = System.Text.RegularExpressions.Regex.Match(url, "#(.*?)($|#|\\?)");
+        string urlId = "";
+
+        if (urlIdRegex.Success)
+            urlId = urlIdRegex.Groups[1].Value;
+        return urlId;
+    }
+
     private string AddOrUpdateQueryString(string url, string name, string value)
     {
-        var urlQueryRegex = System.Text.RegularExpressions.Regex.Match(url, "\\?(.*)$");
+        var urlQueryRegex = System.Text.RegularExpressions.Regex.Match(url, "\\?(.*?)($|#|\\?)");
         string urlQuery = "";
 
         if (urlQueryRegex.Success)
             urlQuery = urlQueryRegex.Groups[1].Value;
+
+        string urlId = GetUrlId(url);
+
+        if (!string.IsNullOrWhiteSpace(urlId))
+        {
+            urlId = "#" + urlId;
+            url = url.Replace(urlId, "");
+        }
 
         var queries = System.Web.HttpUtility.ParseQueryString(urlQuery);
 
@@ -119,7 +138,12 @@
             query += $"{key}={queries[key]}";
         }
 
-        return path + query;
+        return path + query + urlId;
+    }
+
+    private async Task ScrollTo(string id)
+    {
+        await _JSRuntime.InvokeAsync<bool>("scrollToElementId", new[] { id });
     }
 
     protected async override Task OnInitializedAsync()
@@ -140,13 +164,11 @@
         }
 
         loadNewContent = false;
+        relativePath = _NavManager.ToBaseRelativePath(_NavManager.Uri);
+        LiveDocs.Shared.Services.IDocumentationDocument document = null;
+
         if (string.IsNullOrWhiteSpace(path1))
             path1 = "readme";
-        
-        relativePath = _NavManager.ToBaseRelativePath(_NavManager.Uri);
-        var uri = new Uri(relativePath, UriKind.Relative);
-
-        LiveDocs.Shared.Services.IDocumentationDocument document = null;
 
         bool hasDocumentType = _NavManager.TryGetQueryString("file", out documentType);
 
@@ -187,6 +209,12 @@
 
             StateHasChanged();
             removePreviousDocumentType = true;
+
+            // If there's a # parameter specified, let's scroll to it.
+            string urlId = GetUrlId(relativePath);
+            if (!string.IsNullOrWhiteSpace(urlId))
+                await ScrollTo(urlId);
+
             return;
         }
 
@@ -199,7 +227,7 @@
         }
 
         renderContent = "Document not found";
-        StateHasChanged();        
+        StateHasChanged();
 
         await base.OnAfterRenderAsync(firstRender);
     }
@@ -213,9 +241,22 @@
 
     void HandleLocationChanged(object sender, LocationChangedEventArgs e)
     {
-        //GetQueryStringValues();
-        loadNewContent = true;
-        StateHasChanged();
+        // If the event is throw by a # parameter being appended, we want to scroll to it.
+        // Also compare the current url with the previous one to allow inter-document navigation with a id.
+        string urlId = GetUrlId(e.Location);
+        string cleanUrl = _NavManager.ToBaseRelativePath(e.Location).Replace($"#{urlId}", "");
+        if (!string.IsNullOrWhiteSpace(urlId) && relativePath == cleanUrl)
+        {
+            loadNewContent = false;
+
+            // Do not call .Wait() here, it is blocking.
+            ScrollTo(urlId);
+        } else
+        {
+            // We went to a new page, let's load it.
+            loadNewContent = true;
+            StateHasChanged();
+        }
     }
 
     public void Dispose()

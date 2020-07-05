@@ -1,9 +1,9 @@
-﻿@inject Microsoft.JSInterop.IJSRuntime _JSRuntime
+﻿@inject NavigationManager _NavManager
 
 @if (Level == 1)
 {
     <li class="nav-item px-3">
-        <a @onclick="() => ScrollTo(Url)">@Text</a>
+        <a href="@(AddOrUpdateUrlId(_NavManager.ToBaseRelativePath(_NavManager.Uri), Url))">@Text</a>
     </li>
 } else
 {
@@ -22,8 +22,9 @@
     [Parameter]
     public int Level { get; set; }
 
-    private async Task ScrollTo(string id)
+    private string AddOrUpdateUrlId(string url, string id)
     {
-        await _JSRuntime.InvokeAsync<bool>("scrollToElementId", new[] { id });
+        string path = url.Substring(0, url.IndexOf("#") > 0 ? url.IndexOf("#") : url.Length);
+        return $"{path}#{id}";
     }
 }
