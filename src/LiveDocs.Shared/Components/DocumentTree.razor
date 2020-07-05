@@ -4,7 +4,7 @@
 {
     <div class="sidebar">
         <ul class="nav flex-column document-tree text-secondary">
-            @if (MarkdownDocument == null)
+            @if (Document == null)
             {
                 @("Loading")
             } else
@@ -19,10 +19,10 @@
 }
 
 @code {
-    [Parameter]
-    public Markdig.Syntax.MarkdownDocument MarkdownDocument { get; set; }
+        [Parameter]
+        public LiveDocs.Shared.Services.IDocumentationDocument Document { get; set; }
 
-    private Markdig.Syntax.MarkdownDocument previousMarkdownDocument = null;
+    private LiveDocs.Shared.Services.IDocumentationDocument previousDocument = null;
 
     private List<string> headerLinks = new List<string>();
     private List<string> headerTexts = new List<string>();
@@ -30,28 +30,31 @@
 
     protected override Task OnParametersSetAsync()
     {
-        if (previousMarkdownDocument == MarkdownDocument)
+        if (previousDocument == Document)
             return base.OnParametersSetAsync();
 
-        previousMarkdownDocument = MarkdownDocument;
+        previousDocument = Document;
 
         headerTexts.Clear();
         headerLinks.Clear();
         headerLevels.Clear();
 
-        foreach (Markdig.Syntax.HeadingBlock header in MarkdownDocument.Where(w => w is Markdig.Syntax.HeadingBlock))
-        {
-            string headerText = string.Join("", header.Inline);
-            string headerLink = Markdig.Helpers.LinkHelper.Urilize(headerText, allowOnlyAscii: true);
+        if (Document is LiveDocs.Shared.Services.Documents.MarkdownDocument markdownDocument)
+        {            
+            foreach (Markdig.Syntax.HeadingBlock header in markdownDocument.Markdown.Where(w => w is Markdig.Syntax.HeadingBlock))
+            {
+                string headerText = string.Join("", header.Inline);
+                string headerLink = Markdig.Helpers.LinkHelper.Urilize(headerText, allowOnlyAscii: true);
 
-            string uniqueHeaderLink = headerLink;
-            int numPad = 1;
-            while (headerLinks.Contains(uniqueHeaderLink))
-                uniqueHeaderLink += $"-{numPad++}";
+                string uniqueHeaderLink = headerLink;
+                int numPad = 1;
+                while (headerLinks.Contains(uniqueHeaderLink))
+                    uniqueHeaderLink += $"-{numPad++}";
 
-            headerTexts.Add(headerText);
-            headerLinks.Add(uniqueHeaderLink);
-            headerLevels.Add(header.Level);
+                headerTexts.Add(headerText);
+                headerLinks.Add(uniqueHeaderLink);
+                headerLevels.Add(header.Level);
+            }
         }
         return base.OnParametersSetAsync();
     }

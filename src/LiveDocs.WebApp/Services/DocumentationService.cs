@@ -1,5 +1,7 @@
 ﻿using LiveDocs.Shared.Services;
+using LiveDocs.Shared.Services.Documents;
 using LiveDocs.WebApp.Options;
+using Markdig;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,14 +17,16 @@ namespace LiveDocs.WebApp.Services
         private readonly ILogger<DocumentationService> _Logger;
         private readonly LiveDocsOptions _Options;
         private readonly IWebHostEnvironment _HostingEnvironment;
+        private readonly MarkdownPipeline _MarkdownPipeline;
 
         public IDocumentationIndex DocumentationIndex { get; set; }
 
-        public DocumentationService(ILogger<DocumentationService> logger, IOptions<LiveDocsOptions> options, IWebHostEnvironment hostingEnvironment)
+        public DocumentationService(ILogger<DocumentationService> logger, IOptions<LiveDocsOptions> options, IWebHostEnvironment hostingEnvironment, MarkdownPipeline markdownPipeline)
         {
             _Logger = logger;
             _Options = options.Value;
             _HostingEnvironment = hostingEnvironment;
+            _MarkdownPipeline = markdownPipeline;
         }
 
         public Task<IDocumentationIndex> IndexFiles()
@@ -46,14 +50,36 @@ namespace LiveDocs.WebApp.Services
             {
                 var docType = GetDocumentType(Path.GetExtension(file.FullName));
 
-                if (docType != DocumentationDocumentType.Unknown)
+                switch (docType)
                 {
-                    documents.Add(new DocumentationDocument
-                    {
-                        Path = file.FullName,//.Replace(topDirectoryInfo.FullName + "\\", "").Replace("\\", "/"),
-                        DocumentType = docType,
-                        LastUpdate = file.LastWriteTimeUtc
-                    });
+                    case DocumentationDocumentType.Markdown:
+                        documents.Add(new MarkdownDocument(_MarkdownPipeline)
+                        {
+                            Path = file.FullName,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
+                    case DocumentationDocumentType.Pdf:
+                        documents.Add(new PdfDocument
+                        {
+                            Path = file.FullName,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
+                    case DocumentationDocumentType.Word:
+                    case DocumentationDocumentType.Html:
+                    case DocumentationDocumentType.Folder:
+                        documents.Add(new DocumentationDocument
+                        {
+                            Path = file.FullName,
+                            DocumentType = docType,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
+                    case DocumentationDocumentType.Unknown:
+                        break;
+                    default:
+                        break;
                 }
             }
 

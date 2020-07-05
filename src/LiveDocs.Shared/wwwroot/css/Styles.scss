@@ -1,5 +1,9 @@
 ﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
+object.pdf {
+    min-height: 100vh;
+}
+
 .nav-content, div.content {
     max-width: 80rem;
 }
@@ -85,6 +89,10 @@ ul.documentation-sidebar a {
     color:var(--secondary);
 }
 
+ul.document-tree a {
+    color: var(--secondary);
+}
+
 ul.documentation-sidebar, ul.document-tree {
     position: fixed;
     overflow-y: auto;
@@ -101,6 +109,11 @@ ul.document-tree, ul.document-tree ul {
 ul.document-tree ul:hover, ul.document-tree li:hover {
     color: var(--primary);
     border-left-color: var(--primary);
+}
+
+ul.document-tree a:hover {
+    color: var(--primary);
+    text-decoration: none;
 }
 
 .text-white-50 {
@@ -219,19 +232,30 @@ textarea.http-response-data[readonly] {
 }
 
 @media (prefers-color-scheme: dark) {
-    a {
+    a, a:hover {
         color: var(--cyan);
     }
 
     pre {
         color: #adadad;
     }
+
     .form-control {
         background-color: #191d21;
     }
 
     ul.documentation-sidebar a {
         color: #adadad;
+    }
+
+    ul.document-tree a:hover {
+        color: var(--cyan);
+        text-decoration: none;
+    }
+
+    ul.document-tree ul:hover, ul.document-tree li:hover {
+        color: var(--cyan);
+        border-left-color: var(--cyan);
     }
 }
 

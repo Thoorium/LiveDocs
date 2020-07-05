@@ -53,7 +53,7 @@
     </div>
     @if (documentationDocument != null && documentationDocument.DocumentType == DocumentationDocumentType.Markdown)
     {
-        <LiveDocs.Shared.Components.DocumentTree MarkdownDocument="markdownDocument"></LiveDocs.Shared.Components.DocumentTree>
+        <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument"></LiveDocs.Shared.Components.DocumentTree>
     }
 </div>
 
@@ -89,7 +89,6 @@
     private string relativePath = "";
 
     private IDocumentationDocument documentationDocument = null;
-    private Markdig.Syntax.MarkdownDocument markdownDocument = null;
     private string documentType = "";
     private string previousDocumentType = "";
     private bool removePreviousDocumentType = false;
@@ -201,11 +200,7 @@
             documentType = document.DocumentType.ToString();
             documentationDocument = document;
 
-            if (document.DocumentType == DocumentationDocumentType.Markdown)
-            {
-                markdownDocument = Markdown.Parse(System.IO.File.ReadAllText(documentationDocument.Path), _MarkdownPipeline);
-                renderContent = await markdownDocument.ToHtml(_NavManager.Uri);
-            } else renderContent = System.IO.File.ReadAllText(documentationDocument.Path);
+            renderContent = await documentationDocument.ToHtml(_NavManager.Uri);
 
             // Look for extra documents
             extraDocuments = await _DocumentationService.GetDocumentsFor(path1);
