@@ -80,7 +80,8 @@ ul.documentation-sidebar, ul.document-tree {
   max-height: calc(100vh - 6rem);
   flex-wrap: nowrap;
   min-width: 15rem;
-  max-width: 15rem; }
+  max-width: 15rem;
+  font-size: 0.875rem; }
 
 ul.document-tree, ul.document-tree ul {
   border-left: 1px solid; }
@@ -194,7 +195,7 @@ textarea.http-response-data[readonly] {
     color: #adadad; }
   .form-control {
     background-color: #191d21; }
-  ul.documentation-sidebar a {
+  ul.documentation-sidebar a, li.nav-item.nested, ul.document-tree li {
     color: #adadad; }
   ul.document-tree a:hover {
     color: var(--cyan);
