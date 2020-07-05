@@ -1,7 +1,7 @@
 @page "/docs/{path1?}/{path2?}/{path3?}/{path4?}/{path5?}/{path6?}/{path7?}/{path8?}/"
 @inject Markdig.MarkdownPipeline _MarkdownPipeline
 @inject Microsoft.Extensions.Options.IOptions<LiveDocs.WebApp.Options.LiveDocsOptions> _Options
-@inject LiveDocs.Shared.Services.IDocumentationService _DocumentationService
+@inject IDocumentationService _DocumentationService
 @inject Microsoft.JSInterop.IJSRuntime _JSRuntime
 @inject NavigationManager _NavManager
 
@@ -33,17 +33,17 @@
                 <div class="bd-callout bd-callout-info">
                     <p>There is multiple files for this document.</p>
                     <p>
-                        @if (extraDocuments.Any(a => a.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Markdown))
+                        @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Markdown))
                         {
-                            <NavLink type="button" class="btn btn-outline-info btn-sm" href="@(AddOrUpdateQueryString(relativePath,"file", "Markdown"))">Markdown</NavLink>
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm {(documentationDocument.DocumentType == DocumentationDocumentType.Markdown ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Markdown"))">Markdown</NavLink>
                         }
-                        @if (extraDocuments.Any(a => a.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Html))
+                        @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Html))
                         {
-                            <NavLink type="button" class="btn btn-outline-info btn-sm" href="@(AddOrUpdateQueryString(relativePath,"file", "Html"))">Html</NavLink>
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm {(documentationDocument.DocumentType == DocumentationDocumentType.Html ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Html"))">Html</NavLink>
                         }
-                        @if (extraDocuments.Any(a => a.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Pdf))
+                        @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Pdf))
                         {
-                            <NavLink type="button" class="btn btn-outline-info btn-sm" href="@(AddOrUpdateQueryString(relativePath,"file", "Pdf"))">Pdf</NavLink>
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm {(documentationDocument.DocumentType == DocumentationDocumentType.Pdf ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Pdf"))">Pdf</NavLink>
                         }
                     </p>
                 </div>
@@ -51,7 +51,7 @@
             @((MarkupString)renderContent)
         }
     </div>
-    @if (documentationDocument != null && documentationDocument.DocumentType == LiveDocs.Shared.Services.DocumentationDocumentType.Markdown)
+    @if (documentationDocument != null && documentationDocument.DocumentType == DocumentationDocumentType.Markdown)
     {
         <LiveDocs.Shared.Components.DocumentTree MarkdownDocument="markdownDocument"></LiveDocs.Shared.Components.DocumentTree>
     }
@@ -88,14 +88,14 @@
 
     private string relativePath = "";
 
-    private LiveDocs.Shared.Services.IDocumentationDocument documentationDocument = null;
+    private IDocumentationDocument documentationDocument = null;
     private Markdig.Syntax.MarkdownDocument markdownDocument = null;
     private string documentType = "";
     private string previousDocumentType = "";
     private bool removePreviousDocumentType = false;
     private bool notFound = false;
 
-    private IList<LiveDocs.Shared.Services.IDocumentationDocument> extraDocuments = null;
+    private IList<IDocumentationDocument> extraDocuments = null;
 
     private string GetUrlId(string url)
     {
@@ -165,7 +165,7 @@
 
         loadNewContent = false;
         relativePath = _NavManager.ToBaseRelativePath(_NavManager.Uri);
-        LiveDocs.Shared.Services.IDocumentationDocument document = null;
+        IDocumentationDocument document = null;
 
         if (string.IsNullOrWhiteSpace(path1))
             path1 = "readme";
@@ -190,9 +190,9 @@
                     notFound = true;
                 previousDocumentType = "";
                 StateHasChanged();
+                return;
             } else
-                _NavManager.NavigateTo(AddOrUpdateQueryString(relativePath, "file", document.DocumentType.ToString()));
-            return;
+                hasDocumentType = true;
         }
 
         // The document type was specified and the document was found.
@@ -201,8 +201,11 @@
             documentType = document.DocumentType.ToString();
             documentationDocument = document;
 
-            markdownDocument = Markdown.Parse(System.IO.File.ReadAllText(documentationDocument.Path), _MarkdownPipeline);
-            renderContent = await markdownDocument.ToHtml(_NavManager.Uri);
+            if (document.DocumentType == DocumentationDocumentType.Markdown)
+            {
+                markdownDocument = Markdown.Parse(System.IO.File.ReadAllText(documentationDocument.Path), _MarkdownPipeline);
+                renderContent = await markdownDocument.ToHtml(_NavManager.Uri);
+            } else renderContent = System.IO.File.ReadAllText(documentationDocument.Path);
 
             // Look for extra documents
             extraDocuments = await _DocumentationService.GetDocumentsFor(path1);
