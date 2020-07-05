@@ -9,7 +9,10 @@
     <LiveDocs.Shared.Components.DocumentationSidebar></LiveDocs.Shared.Components.DocumentationSidebar>
 
     <div class="content px-4 align-self-stretch flex-lg-fill">
-        @if (string.IsNullOrWhiteSpace(renderContent))
+        @if (notFound == true)
+        {
+            <LiveDocs.Shared.Components.DocumentNotFound documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).Last())"></LiveDocs.Shared.Components.DocumentNotFound>
+        } else if (string.IsNullOrWhiteSpace(renderContent))
         {
             <div class="loading-document-wrapper mx-auto mt-4">
                 <div class="loading-document mx-auto">
@@ -54,29 +57,29 @@
 </div>
 
 @code {
-    [Parameter]
-    public string path1 { get; set; }
+        [Parameter]
+        public string path1 { get; set; }
 
-    [Parameter]
-    public string path2 { get; set; }
+        [Parameter]
+        public string path2 { get; set; }
 
-    [Parameter]
-    public string path3 { get; set; }
+        [Parameter]
+        public string path3 { get; set; }
 
-    [Parameter]
-    public string path4 { get; set; }
+        [Parameter]
+        public string path4 { get; set; }
 
-    [Parameter]
-    public string path5 { get; set; }
+        [Parameter]
+        public string path5 { get; set; }
 
-    [Parameter]
-    public string path6 { get; set; }
+        [Parameter]
+        public string path6 { get; set; }
 
-    [Parameter]
-    public string path7 { get; set; }
+        [Parameter]
+        public string path7 { get; set; }
 
-    [Parameter]
-    public string path8 { get; set; }
+        [Parameter]
+        public string path8 { get; set; }
 
     private string renderContent = "";
 
@@ -89,6 +92,7 @@
     private string documentType = "";
     private string previousDocumentType = "";
     private bool removePreviousDocumentType = false;
+    private bool notFound = false;
 
     private IList<LiveDocs.Shared.Services.IDocumentationDocument> extraDocuments = null;
 
@@ -137,66 +141,65 @@
 
         loadNewContent = false;
         if (string.IsNullOrWhiteSpace(path1))
-            renderContent = "";
-        else
+            path1 = "readme";
+        
+        relativePath = _NavManager.ToBaseRelativePath(_NavManager.Uri);
+        var uri = new Uri(relativePath, UriKind.Relative);
+
+        LiveDocs.Shared.Services.IDocumentationDocument document = null;
+
+        bool hasDocumentType = _NavManager.TryGetQueryString("file", out documentType);
+
+        // Document type is specified.
+        if (hasDocumentType)
+            document = await _DocumentationService.GetDocumentFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }, documentType);
+
+        // Document type is not specified or the specified type had no document, let's find the default document instead.
+        if (!hasDocumentType || document == null)
         {
-            relativePath = _NavManager.ToBaseRelativePath(_NavManager.Uri);
-            var uri = new Uri(relativePath, UriKind.Relative);
+            if (document == null)
+                previousDocumentType = documentType;
 
-            LiveDocs.Shared.Services.IDocumentationDocument document = null;
+            document = await _DocumentationService.GetDocumentFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 });
 
-            bool hasDocumentType = _NavManager.TryGetQueryString("file", out documentType);
-
-            // Document type is specified.
-            if (hasDocumentType)
-                document = await _DocumentationService.GetDocumentFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }, documentType);
-
-            // Document type is not specified or the specified type had no document, let's find the default document instead.
-            if (!hasDocumentType || document == null)
+            if (document == null)
             {
-                if (document == null)
-                    previousDocumentType = documentType;
-
-                document = await _DocumentationService.GetDocumentFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 });
-
-                if (document == null)
-                {
-                    renderContent = "Document not found";
-                    previousDocumentType = "";
-                    StateHasChanged();
-                } else
-                    _NavManager.NavigateTo(AddOrUpdateQueryString(relativePath, "file", document.DocumentType.ToString()));
-                return;
-            }
-
-            // The document type was specified and the document was found.
-            if (hasDocumentType && document != null)
-            {
-                documentType = document.DocumentType.ToString();
-                documentationDocument = document;
-
-                markdownDocument = Markdown.Parse(System.IO.File.ReadAllText(documentationDocument.Path), _MarkdownPipeline);
-                renderContent = await markdownDocument.ToHtml(_NavManager.Uri);
-
-                // Look for extra documents
-                extraDocuments = await _DocumentationService.GetDocumentsFor(path1);
-
+                if (path1 != "readme")
+                    notFound = true;
+                previousDocumentType = "";
                 StateHasChanged();
-                removePreviousDocumentType = true;
-                return;
-            }
-
-            // The document type was not specified but a default document was found.
-            // The document type was specified, a document for this type was not found but a default document was found.
-            if (!hasDocumentType && document != null)
-            {
+            } else
                 _NavManager.NavigateTo(AddOrUpdateQueryString(relativePath, "file", document.DocumentType.ToString()));
-                return;
-            }
-
-            renderContent = "Document not found";
-            StateHasChanged();
+            return;
         }
+
+        // The document type was specified and the document was found.
+        if (hasDocumentType && document != null)
+        {
+            documentType = document.DocumentType.ToString();
+            documentationDocument = document;
+
+            markdownDocument = Markdown.Parse(System.IO.File.ReadAllText(documentationDocument.Path), _MarkdownPipeline);
+            renderContent = await markdownDocument.ToHtml(_NavManager.Uri);
+
+            // Look for extra documents
+            extraDocuments = await _DocumentationService.GetDocumentsFor(path1);
+
+            StateHasChanged();
+            removePreviousDocumentType = true;
+            return;
+        }
+
+        // The document type was not specified but a default document was found.
+        // The document type was specified, a document for this type was not found but a default document was found.
+        if (!hasDocumentType && document != null)
+        {
+            _NavManager.NavigateTo(AddOrUpdateQueryString(relativePath, "file", document.DocumentType.ToString()));
+            return;
+        }
+
+        renderContent = "Document not found";
+        StateHasChanged();        
 
         await base.OnAfterRenderAsync(firstRender);
     }
@@ -204,6 +207,7 @@
     protected override Task OnParametersSetAsync()
     {
         loadNewContent = true;
+        notFound = false;
         return base.OnParametersSetAsync();
     }
 

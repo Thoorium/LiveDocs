@@ -25,12 +25,16 @@ namespace LiveDocs.Shared.Services
             IDocumentationDocument document = null;
             var documents = DocumentationIndex.Documents.Where(w => w.Key == path[0]);
 
+            string finalKey = "";
             
             IDocumentationDocument tempDoc = null;
             for (int i = 0; i < path.Length - 1; i++)
             {
                 if (string.IsNullOrWhiteSpace(path[i + 1]))
+                {
+                    finalKey = path[i];
                     break;
+                }
 
                 tempDoc = documents.FirstOrDefault(w => w.DocumentType == DocumentationDocumentType.Folder && w.Key == path[i]);
 
@@ -42,18 +46,18 @@ namespace LiveDocs.Shared.Services
 
             if (string.IsNullOrWhiteSpace(documentType))
             {
-                document = documents.FirstOrDefault(f => f.DocumentType == DocumentationDocumentType.Markdown);
+                document = documents.FirstOrDefault(f => f.DocumentType == DocumentationDocumentType.Markdown && f.Key == finalKey);
                 if (document != null)
                     return Task.FromResult(document);
 
-                document = documents.FirstOrDefault(f => f.DocumentType == DocumentationDocumentType.Html);
+                document = documents.FirstOrDefault(f => f.DocumentType == DocumentationDocumentType.Html && f.Key == finalKey);
                 if (document != null)
                     return Task.FromResult(document);
 
                 return Task.FromResult(documents.FirstOrDefault());
             }
 
-            document = documents.FirstOrDefault(f => f.DocumentType == GetDocumentationDocumentTypeFromString(documentType));
+            document = documents.FirstOrDefault(f => f.DocumentType == GetDocumentationDocumentTypeFromString(documentType) && f.Key == finalKey);
 
             return Task.FromResult(document);
         }
