@@ -15,15 +15,41 @@ namespace LiveDocs.Shared.Services
 
         Task<ISearchIndex> RefreshSearchIndex(IDocumentationIndex documentationIndex);
 
-        Task<IList<IDocumentationDocument>> GetDocumentsFor(string path)
+        Task<List<IDocumentationDocument>> GetDocumentsFor(string[] path)
         {
-            return Task.FromResult<IList<IDocumentationDocument>>(DocumentationIndex.Documents.Where(w => w.Key == path).ToList());
+            // Remove empty entries
+            path = path.Where(w => !string.IsNullOrWhiteSpace(w)).ToArray();
+
+            var documents = DocumentationIndex.Documents.Where(w => w.Key == path[0]);
+            string finalKey = path[0];
+            IDocumentationDocument tempDoc = null;
+
+            for (int i = 0; i < path.Length; i++)
+            {
+                if (i == path.Length - 1)
+                {
+                    finalKey = path[i];
+                    break;
+                }
+
+                tempDoc = documents.FirstOrDefault(w => w.DocumentType == DocumentationDocumentType.Folder && w.Key == path[i]);
+
+                if (tempDoc == null)
+                    return Task.FromResult(new List<IDocumentationDocument>());
+
+                documents = tempDoc.SubDocuments;
+            }
+
+            return Task.FromResult(documents.Where(w => w.Key == finalKey).ToList());
         }
 
         Task<IDocumentationDocument> GetDocumentFor(string[] path, string documentType = "")
         {
             // Remove empty entries
             path = path.Where(w => !string.IsNullOrWhiteSpace(w)).ToArray();
+
+            if (path.Length == 0)
+                return null;
 
             IDocumentationDocument document = null;
             var documents = DocumentationIndex.Documents.Where(w => w.Key == path[0]);
@@ -80,5 +106,8 @@ namespace LiveDocs.Shared.Services
                 _ => DocumentationDocumentType.Unknown
             };
         }
+
+        Task<IDocumentationDocument> GetDocumentationDefaultDocument(string documentType = "");
+        Task<IDocumentationDocument[]> GetDocumentationDefaultDocuments(string documentType = "");
     }
 }

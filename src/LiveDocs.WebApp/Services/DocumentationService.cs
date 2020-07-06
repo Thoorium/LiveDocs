@@ -111,6 +111,10 @@ namespace LiveDocs.WebApp.Services
 
         public Task RefreshDocumentationIndex(IDocumentationIndex documentationIndex)
         {
+            if (DocumentationIndex == null)
+                _Logger.LogInformation($"Initializing documentation index. {documentationIndex.Documents.Count} documents added.");
+            else _Logger.LogInformation($"Refreshing documentation index. Before {DocumentationIndex.Documents.Count}; After {documentationIndex.Documents.Count}.");
+
             DocumentationIndex = documentationIndex;
             return Task.CompletedTask;
         }
@@ -133,6 +137,25 @@ namespace LiveDocs.WebApp.Services
                 _ => DocumentationDocumentType.Unknown
             };
         }
-            
+
+        public async Task<IDocumentationDocument> GetDocumentationDefaultDocument(string documentType = "")
+        {
+            var defaultDocuments = await GetDocumentationDefaultDocuments(documentType);
+            return defaultDocuments.FirstOrDefault();
+        }
+
+        public async Task<IDocumentationDocument[]> GetDocumentationDefaultDocuments(string documentType = "")
+        {
+            List<IDocumentationDocument> documentationDefaultDocuments = new List<IDocumentationDocument>();
+
+            foreach (var item in _Options.DefaultDocuments)
+            {
+                var document = await ((IDocumentationService)this).GetDocumentFor(new[] { item }, documentType);
+                if(document != null)
+                    documentationDefaultDocuments.Add(document);
+            }
+
+            return documentationDefaultDocuments.ToArray();
+        }
     }
 }

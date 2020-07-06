@@ -2,9 +2,22 @@
 
 <div class="sidebar">
     <ul class="nav flex-column documentation-sidebar text-secondary">
-        @foreach (var item in _DocumentationService.DocumentationIndex.Documents.Where(w => w.Key.ToLower() != "readme").GroupBy(g => g.Key).Select(s => s.First()))
+        @foreach (var item in documents)
         {
             <DocumentationSidebarItem Item="item" Path="@("/docs")"></DocumentationSidebarItem>
         }
     </ul>
 </div>
+
+@code { 
+
+    private List<LiveDocs.Shared.Services.IDocumentationDocument> documents;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var defaultDocuments = await _DocumentationService.GetDocumentationDefaultDocuments();
+        documents = _DocumentationService.DocumentationIndex.Documents.Where(w => !defaultDocuments.Any(a => a.Key == w.Key)).GroupBy(g => g.Key).Select(s => s.First()).ToList();
+
+        await base.OnInitializedAsync();
+    }
+}
