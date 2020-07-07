@@ -3,11 +3,14 @@ object.pdf {
   min-height: 100vh; }
 
 .nav-content, div.content {
-  max-width: 80rem; }
+  max-width: 95rem; }
+
+nav.navbar {
+  max-width: 100rem; }
 
 div.sidebar {
-  min-width: 15rem;
-  max-width: 15rem; }
+  min-width: 17.5rem;
+  max-width: 17.5rem; }
 
 .nav-scroller {
   position: relative;
@@ -68,6 +71,12 @@ li.nav-item.nested, ul.document-tree li {
 li.nav-item.nested + ul, ul.document-tree li {
   list-style: none; }
 
+ul.documentation-sidebar {
+  margin-left: 1rem; }
+
+ul.document-tree {
+  margin-right: 1rem; }
+
 ul.documentation-sidebar a {
   color: var(--secondary); }
 
@@ -79,8 +88,8 @@ ul.documentation-sidebar, ul.document-tree {
   overflow-y: auto;
   max-height: calc(100vh - 6rem);
   flex-wrap: nowrap;
-  min-width: 15rem;
-  max-width: 15rem;
+  min-width: 16.5rem;
+  max-width: 16.5rem;
   font-size: 0.875rem; }
 
 ul.document-tree, ul.document-tree ul {
@@ -177,7 +186,11 @@ textarea.http-response-data[readonly] {
   .offcanvas-collapse.open {
     visibility: visible;
     -webkit-transform: translateX(-100%);
-    transform: translateX(-100%); } }
+    transform: translateX(-100%); }
+  ul.navbar-nav {
+    margin-right: 1rem !important; }
+  .sidebar.tree {
+    display: none; } }
 
 @media (min-width: 991.99px) {
   input[type="search"]:focus, input[type="search"]:not(:placeholder-shown) {
