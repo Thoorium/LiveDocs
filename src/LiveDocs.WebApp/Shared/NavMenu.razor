@@ -1,4 +1,5 @@
 ﻿@inject Microsoft.Extensions.Options.IOptions<LiveDocs.WebApp.Options.LiveDocsOptions> _LiveDocsOptions
+@inject IDocumentationService _DocumentationService
     <div class="fixed-top navbar-dark bg-dark mx-auto">
         <nav class="navbar navbar-expand-lg justify-content-center mx-auto">
             <a class="navbar-brand mr-auto mr-lg-0" href="">@_LiveDocsOptions.Value.ApplicationName</a>
@@ -8,9 +9,17 @@
 
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <NavLink class="nav-link" href="docs" Match="NavLinkMatch.Prefix">
-                        Documentation
-                    </NavLink>
+                    @if (_DocumentationService.DocumentationIndex.DefaultDocuments.Count > 0 && _DocumentationService.DocumentationIndex.LandingPage != null)
+                    {
+                        <NavLink class="nav-link" href="@(_DocumentationService.DocumentationIndex.DefaultDocuments.First().Key)" Match="NavLinkMatch.Prefix">
+                            Documentation
+                        </NavLink>
+                    } else
+                    {
+                        <NavLink class="nav-link" href="" Match="NavLinkMatch.Prefix">
+                            Documentation
+                        </NavLink>
+                    }
                 </li>
             </ul>
 

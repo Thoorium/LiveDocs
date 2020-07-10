@@ -109,14 +109,18 @@ namespace LiveDocs.WebApp.Services
             return default;
         }
 
-        public Task RefreshDocumentationIndex(IDocumentationIndex documentationIndex)
+        public async Task RefreshDocumentationIndex(IDocumentationIndex documentationIndex)
         {
             if (DocumentationIndex == null)
                 _Logger.LogInformation($"Initializing documentation index. {documentationIndex.Documents.Count} documents added.");
             else _Logger.LogInformation($"Refreshing documentation index. Before {DocumentationIndex.Documents.Count}; After {documentationIndex.Documents.Count}.");
 
             DocumentationIndex = documentationIndex;
-            return Task.CompletedTask;
+
+            DocumentationIndex.LandingPage = await GetDocumentationLandingPageDocument();
+
+            DocumentationIndex.DefaultDocuments.Clear();
+            DocumentationIndex.DefaultDocuments.AddRange(await GetDocumentationDefaultDocuments());
         }
 
         private DocumentationDocumentType GetDocumentType(string extension)
@@ -156,6 +160,11 @@ namespace LiveDocs.WebApp.Services
             }
 
             return documentationDefaultDocuments.ToArray();
+        }
+
+        public async Task<IDocumentationDocument> GetDocumentationLandingPageDocument()
+        {
+            return await ((IDocumentationService)this).GetDocumentFor(new[] { _Options.LandingPageDocument }, "");
         }
     }
 }

@@ -33,18 +33,18 @@ namespace LiveDocs.WebApp.Services
         {
             _Logger.LogInformation("Scheduled Hosted Service is running.");
 
-            fastTimer = new Timer(async (object state) => await FastDoWork(stoppingToken, state), null, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(500));
+            //fastTimer = new Timer(async (object state) => await FastDoWork(stoppingToken, state), null, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(500));
             slowTimer = new Timer(async (object state) => await SlowDoWork(stoppingToken, state), null, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(1));
 
             return Task.CompletedTask;
         }
 
-        private async Task FastDoWork(CancellationToken stoppingToken, object state)
-        {
-            using (var scope = _Services.CreateScope())
-            {
-            }
-        }
+        //private async Task FastDoWork(CancellationToken stoppingToken, object state)
+        //{
+        //    using (var scope = _Services.CreateScope())
+        //    {
+        //    }
+        //}
 
         private async Task SlowDoWork(CancellationToken stoppingToken, object state)
         {

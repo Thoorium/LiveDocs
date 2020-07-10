@@ -1,4 +1,4 @@
-@page "/docs/{path1?}/{path2?}/{path3?}/{path4?}/{path5?}/{path6?}/{path7?}/{path8?}/"
+@page "/{path1?}/{path2?}/{path3?}/{path4?}/{path5?}/{path6?}/{path7?}/{path8?}/"
 @inject Markdig.MarkdownPipeline _MarkdownPipeline
 @inject Microsoft.Extensions.Options.IOptions<LiveDocs.WebApp.Options.LiveDocsOptions> _Options
 @inject IDocumentationService _DocumentationService
@@ -7,7 +7,10 @@
 
 <div class="content d-flex mx-auto">
 
-    <LiveDocs.Shared.Components.DocumentationSidebar></LiveDocs.Shared.Components.DocumentationSidebar>
+    @if (!landingPage && !firstLoad)
+    {
+        <LiveDocs.Shared.Components.DocumentationSidebar></LiveDocs.Shared.Components.DocumentationSidebar>
+    }
 
     <div class="content px-4 align-self-stretch flex-lg-fill">
         @if (notFound == true)
@@ -28,7 +31,7 @@
                     <p>No document of type <code>@previousDocumentType</code> found. Defaulting to <code>@documentType</code>.</p>
                 </div>
             }
-            if (extraDocuments != null && extraDocuments.Count > 1)
+            if (!landingPage && extraDocuments != null && extraDocuments.Count > 1)
             {
                 <div class="bd-callout bd-callout-info">
                     <p>There is multiple files for this document.</p>
@@ -51,7 +54,7 @@
             @((MarkupString)renderContent)
         }
     </div>
-    @if (documentationDocument != null && documentationDocument.DocumentType == DocumentationDocumentType.Markdown)
+    @if (!firstLoad && !landingPage && documentationDocument != null && documentationDocument.DocumentType == DocumentationDocumentType.Markdown)
     {
         <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument"></LiveDocs.Shared.Components.DocumentTree>
     }
@@ -93,6 +96,8 @@
     private string previousDocumentType = "";
     private bool removePreviousDocumentType = false;
     private bool notFound = false;
+    private bool landingPage = false;
+    private bool firstLoad = true;
 
     private IList<IDocumentationDocument> extraDocuments = null;
 
@@ -126,7 +131,7 @@
 
         queries[name] = value;
 
-        string path = url.Substring(0, url.IndexOf("?") > 0 ? url.IndexOf("?") : url.Length);
+        string path = url.Substring(0, url.IndexOf("?") >= 0 ? url.IndexOf("?") : url.Length);
         string query = "?";
 
         for (int i = 0; i < queries.Count; i++)
@@ -170,9 +175,14 @@
 
         if (string.IsNullOrWhiteSpace(path1))
         {
-            if (hasDocumentType)
-                document = await _DocumentationService.GetDocumentationDefaultDocument(documentType);
-            else document = await _DocumentationService.GetDocumentationDefaultDocument();
+            document = _DocumentationService.DocumentationIndex.LandingPage;
+
+            if (document == null)
+            {
+                if (hasDocumentType)
+                    document = await _DocumentationService.GetDocumentationDefaultDocument(documentType);
+                else document = await _DocumentationService.GetDocumentationDefaultDocument();
+            } else landingPage = true;
 
         }
         // Document type is specified.
@@ -183,6 +193,9 @@
         // Document type is not specified and the specified type had no document, let's find the default document instead.
         if (document == null)
         {
+            landingPage = false;
+            firstLoad = false;
+
             if (document == null)
                 previousDocumentType = documentType;
 
@@ -202,6 +215,7 @@
         // The document type was specified and the document was found.
         if (document != null)
         {
+            firstLoad = false;
             documentType = document.DocumentType.ToString();
             documentationDocument = document;
 

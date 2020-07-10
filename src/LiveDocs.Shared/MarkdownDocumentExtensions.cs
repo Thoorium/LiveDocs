@@ -1,4 +1,5 @@
-﻿using Markdig.Renderers;
+﻿using Markdig.Extensions.Tables;
+using Markdig.Renderers;
 using Markdig.Syntax;
 using System;
 using System.IO;
@@ -13,14 +14,16 @@ namespace LiveDocs.Shared
             using StringWriter stringWriter = new StringWriter();
             HtmlRenderer htmlRenderer = new HtmlRenderer(stringWriter);
 
+            htmlRenderer.ObjectRenderers.AddIfNotAlready(new HtmlTableRenderer());
+
             if (!string.IsNullOrWhiteSpace(urlBase))
             {
                 // If the url is a file, we want to remove the query string.
                 if (Path.GetExtension(urlBase) == "")
                     htmlRenderer.BaseUrl = new Uri(urlBase, UriKind.Absolute);
-                else htmlRenderer.BaseUrl = new Uri(urlBase.Substring(0, urlBase.IndexOf("?") > 0 ? urlBase.IndexOf("?") : urlBase.Length), UriKind.Absolute);
+                else htmlRenderer.BaseUrl = new Uri(urlBase.Substring(0, urlBase.IndexOf("?") >= 0 ? urlBase.IndexOf("?") : urlBase.Length), UriKind.Absolute);
             }
-            
+
             htmlRenderer.Render(markdownDocument);
             await stringWriter.FlushAsync();
 

@@ -109,5 +109,7 @@ namespace LiveDocs.Shared.Services
 
         Task<IDocumentationDocument> GetDocumentationDefaultDocument(string documentType = "");
         Task<IDocumentationDocument[]> GetDocumentationDefaultDocuments(string documentType = "");
+        Task<IDocumentationDocument> GetDocumentationLandingPageDocument();
+
     }
 }

@@ -1,4 +1,7 @@
 ﻿@import url("open-iconic/font/css/open-iconic-bootstrap.css");
+html {
+  overflow-y: scroll; }
+
 object.pdf {
   min-height: 100vh; }
 

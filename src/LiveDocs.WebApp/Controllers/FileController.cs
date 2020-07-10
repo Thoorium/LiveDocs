@@ -23,14 +23,14 @@ namespace LiveDocs.WebApp.Controllers
             _DocumentationService = documentationService;
         }
 
-        [HttpGet("docs/{path1}.{ext}")]
-        [HttpGet("docs/{path1}/{path2}.{ext}")]
-        [HttpGet("docs/{path1}/{path2}/{path3}.{ext}")]
-        [HttpGet("docs/{path1}/{path2}/{path3}/{path4}.{ext}")]
-        [HttpGet("docs/{path1}/{path2}/{path3}/{path4}/{path5}.{ext}")]
-        [HttpGet("docs/{path1}/{path2}/{path3}/{path4}/{path5}/{path6}.{ext}")]
-        [HttpGet("docs/{path1}/{path2}/{path3}/{path4}/{path5}/{path6}/{path7}.{ext}")]
-        [HttpGet("docs/{path1}/{path2}/{path3}/{path4}/{path5}/{path6}/{path7}/{path8}.{ext}")]
+        [HttpGet("{path1}.{ext}")]
+        [HttpGet("{path1}/{path2}.{ext}")]
+        [HttpGet("{path1}/{path2}/{path3}.{ext}")]
+        [HttpGet("{path1}/{path2}/{path3}/{path4}.{ext}")]
+        [HttpGet("{path1}/{path2}/{path3}/{path4}/{path5}.{ext}")]
+        [HttpGet("{path1}/{path2}/{path3}/{path4}/{path5}/{path6}.{ext}")]
+        [HttpGet("{path1}/{path2}/{path3}/{path4}/{path5}/{path6}/{path7}.{ext}")]
+        [HttpGet("{path1}/{path2}/{path3}/{path4}/{path5}/{path6}/{path7}/{path8}.{ext}")]
         public async Task<IActionResult> DownloadFile(string path1, string path2, string path3, string path4, string path5, string path6, string path7, string path8, string ext)
         {
             var paths = new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).ToArray();
