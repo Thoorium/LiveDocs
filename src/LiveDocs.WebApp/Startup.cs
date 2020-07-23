@@ -1,5 +1,4 @@
 using LiveDocs.Shared.Services;
-using LiveDocs.WebApp.Data;
 using LiveDocs.WebApp.Options;
 using LiveDocs.WebApp.Services;
 using Markdig;
@@ -29,7 +28,6 @@ namespace LiveDocs.WebApp
 
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
 
             MarkdownPipeline markdownPipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseBootstrap().Build();
             services.AddSingleton(markdownPipeline);
