@@ -1,0 +1,30 @@
+﻿@inject NavigationManager _NavManager
+
+@if (Level == 1)
+{
+    <li class="nav-item px-3">
+        <a href="@(AddOrUpdateUrlId(_NavManager.ToBaseRelativePath(_NavManager.Uri), Url))">@Text</a>
+    </li>
+} else
+{
+    <ul class="ml-3 pl-0">
+        <DocumentTreeItem Text="@Text" Url="@Url" Level="@(--Level)"></DocumentTreeItem>
+    </ul>
+}
+
+@code {
+    [Parameter]
+    public string Text { get; set; }
+
+    [Parameter]
+    public string Url { get; set; }
+
+    [Parameter]
+    public int Level { get; set; }
+
+    private string AddOrUpdateUrlId(string url, string id)
+    {
+        string path = url.Substring(0, url.IndexOf("#") >= 0 ? url.IndexOf("#") : url.Length);
+        return $"{path}#{id}";
+    }
+}

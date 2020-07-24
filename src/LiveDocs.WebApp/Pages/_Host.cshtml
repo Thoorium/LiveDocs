@@ -1,0 +1,50 @@
+﻿@page "/"
+@namespace LiveDocs.WebApp.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LiveDocs.WebApp</title>
+    <base href="~/" />
+
+    <link rel="stylesheet" href="_content/LiveDocs.Shared/css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" href="_content/LiveDocs.Shared/css/bootstrap/docs.css" />
+    <link href="_content/LiveDocs.Shared/css/styles.css" rel="stylesheet" />
+    <link href="css/site.css" rel="stylesheet" />
+</head>
+<body>
+    <app>
+        <component type="typeof(App)" render-mode="ServerPrerendered" />
+    </app>
+
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            An error has occurred. This application may no longer respond until reloaded.
+        </environment>
+        <environment include="Development">
+            An unhandled exception has occurred. See browser dev tools for details.
+        </environment>
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="_framework/blazor.server.js"></script>
+    <script>
+        window.scrollToElementId = (elementId) => {
+            var element = document.getElementById(elementId);
+            if (!element) {
+                return false;
+            }
+            element.scrollIntoView();
+            window.scrollBy(0, -100);
+            return true;
+        }
+    </script>
+</body>
+</html>

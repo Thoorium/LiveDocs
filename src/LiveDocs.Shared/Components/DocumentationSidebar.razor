@@ -1,0 +1,26 @@
+﻿@inject LiveDocs.Shared.Services.IDocumentationService _DocumentationService
+
+<div class="sidebar">
+    <ul class="nav flex-column documentation-sidebar text-secondary">
+        @foreach (var item in documents)
+        {
+            <DocumentationSidebarItem Item="item" Path=""></DocumentationSidebarItem>
+        }
+    </ul>
+</div>
+
+@code { 
+
+    private List<LiveDocs.Shared.Services.IDocumentationDocument> documents;
+
+    protected override async Task OnInitializedAsync()
+    {
+        documents = _DocumentationService.DocumentationIndex.Documents
+            .Where(w => !_DocumentationService.DocumentationIndex.DefaultDocuments.Any(a => a.Key == w.Key) 
+                && w.Key != _DocumentationService.DocumentationIndex.LandingPage?.Key)
+            .GroupBy(g => g.Key)
+            .Select(s => s.First()).ToList();
+
+        await base.OnInitializedAsync();
+    }
+}

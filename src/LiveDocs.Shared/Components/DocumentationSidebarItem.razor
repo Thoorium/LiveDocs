@@ -1,0 +1,19 @@
+﻿@if (Item.DocumentType == Services.DocumentationDocumentType.Folder)
+{
+    <DocumentationSidebarFolder Item="Item" Path="@($"{Path}/{Item.Key}")"></DocumentationSidebarFolder>
+} else
+{
+    <li class="nav-item pt-1">
+        <NavLink href="@($"{Path}/{Item.Key}")">
+            @Item.Name
+        </NavLink>
+    </li>
+}
+
+@code {
+    [Parameter]
+    public LiveDocs.Shared.Services.IDocumentationDocument Item { get; set; }
+
+    [Parameter]
+    public string Path { get; set; }
+}
