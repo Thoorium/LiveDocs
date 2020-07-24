@@ -5,9 +5,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,7 +16,7 @@ namespace LiveDocs.WebApp.Services
         private readonly IServiceProvider _Services;
         private readonly LiveDocsOptions _Options;
 
-        private Timer fastTimer;
+        //private Timer fastTimer;
         private Timer slowTimer;
 
         public ScheduledHostedService(IServiceProvider services, ILogger<ScheduledHostedService> logger, IOptions<LiveDocsOptions> options)
@@ -61,7 +58,7 @@ namespace LiveDocs.WebApp.Services
         {
             _Logger.LogInformation("Scheduled Hosted Service is stopping.");
 
-            fastTimer?.Change(Timeout.Infinite, 0);
+            //fastTimer?.Change(Timeout.Infinite, 0);
             slowTimer?.Change(Timeout.Infinite, 0);
 
             await Task.CompletedTask;
@@ -69,7 +66,7 @@ namespace LiveDocs.WebApp.Services
 
         public void Dispose()
         {
-            fastTimer?.Dispose();
+            //fastTimer?.Dispose();
             slowTimer?.Dispose();
         }
     }

@@ -15,7 +15,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var defaultDocuments = await _DocumentationService.GetDocumentationDefaultDocuments();
         documents = _DocumentationService.DocumentationIndex.Documents
             .Where(w => !_DocumentationService.DocumentationIndex.DefaultDocuments.Any(a => a.Key == w.Key) 
                 && w.Key != _DocumentationService.DocumentationIndex.LandingPage?.Key)

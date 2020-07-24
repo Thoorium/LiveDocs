@@ -88,7 +88,7 @@ namespace LiveDocs.WebApp.Services
                 var documentationDirectory = new DocumentationDocument
                 {
                     DocumentType = DocumentationDocumentType.Folder,
-                    Path = directory.FullName,//.Replace(topDirectoryInfo.FullName + "\\", "").Replace("\\", "/"),
+                    Path = directory.FullName,
                     LastUpdate = directory.LastWriteTimeUtc
                 };
                 var subdocuments = BuildDocumentationSubTree(directory, topDirectoryInfo);

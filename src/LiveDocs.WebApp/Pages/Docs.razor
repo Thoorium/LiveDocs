@@ -1,18 +1,16 @@
 @page "/{path1?}/{path2?}/{path3?}/{path4?}/{path5?}/{path6?}/{path7?}/{path8?}/"
-@inject Markdig.MarkdownPipeline _MarkdownPipeline
-@inject Microsoft.Extensions.Options.IOptions<LiveDocs.WebApp.Options.LiveDocsOptions> _Options
 @inject IDocumentationService _DocumentationService
 @inject Microsoft.JSInterop.IJSRuntime _JSRuntime
 @inject NavigationManager _NavManager
 
 <div class="content d-flex mx-auto">
 
-    @if (!landingPage && !firstLoad)
+    @if (!landingPage)
     {
         <LiveDocs.Shared.Components.DocumentationSidebar></LiveDocs.Shared.Components.DocumentationSidebar>
     }
 
-    <div class="content px-4 align-self-stretch flex-lg-fill">
+    <div class="content px-4 align-self-stretch flex-lg-fill overflow-hidden">
         @if (notFound == true)
         {
             <LiveDocs.Shared.Components.DocumentNotFound documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).Last())"></LiveDocs.Shared.Components.DocumentNotFound>
@@ -31,22 +29,22 @@
                     <p>No document of type <code>@previousDocumentType</code> found. Defaulting to <code>@documentType</code>.</p>
                 </div>
             }
-            if (!landingPage && extraDocuments != null && extraDocuments.Count > 1)
+            if (!landingPage && extraDocuments?.Count > 1)
             {
                 <div class="bd-callout bd-callout-info">
                     <p>There is multiple files for this document.</p>
                     <p>
                         @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Markdown))
                         {
-                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm {(documentationDocument.DocumentType == DocumentationDocumentType.Markdown ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Markdown"))">Markdown</NavLink>
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Markdown ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Markdown"))">Markdown</NavLink>
                         }
                         @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Html))
                         {
-                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm {(documentationDocument.DocumentType == DocumentationDocumentType.Html ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Html"))">Html</NavLink>
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Html ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Html"))">Html</NavLink>
                         }
                         @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Pdf))
                         {
-                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm {(documentationDocument.DocumentType == DocumentationDocumentType.Pdf ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Pdf"))">Pdf</NavLink>
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Pdf ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Pdf"))">Pdf</NavLink>
                         }
                     </p>
                 </div>
@@ -54,7 +52,7 @@
             @((MarkupString)renderContent)
         }
     </div>
-    @if (!firstLoad && !landingPage && documentationDocument != null && documentationDocument.DocumentType == DocumentationDocumentType.Markdown)
+    @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown)
     {
         <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument"></LiveDocs.Shared.Components.DocumentTree>
     }
@@ -91,13 +89,23 @@
 
     private string relativePath = "";
 
+    // The current document.
     private IDocumentationDocument documentationDocument = null;
+    
+    // The current document type.
     private string documentType = "";
+
+    // The previous, non-existing, document type.
     private string previousDocumentType = "";
+
+    // Flag to remove the PreviousDocumentType message on the next render.
     private bool removePreviousDocumentType = false;
+
+    // Current document is not found.
     private bool notFound = false;
+
+    // Is the current page the landing page.
     private bool landingPage = false;
-    private bool firstLoad = true;
 
     private IList<IDocumentationDocument> extraDocuments = null;
 
@@ -189,12 +197,10 @@
         else if (hasDocumentType)
             document = await _DocumentationService.GetDocumentFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }, documentType);
 
-
         // Document type is not specified and the specified type had no document, let's find the default document instead.
         if (document == null)
         {
             landingPage = false;
-            firstLoad = false;
 
             if (document == null)
                 previousDocumentType = documentType;
@@ -215,7 +221,6 @@
         // The document type was specified and the document was found.
         if (document != null)
         {
-            firstLoad = false;
             documentType = document.DocumentType.ToString();
             documentationDocument = document;
 

@@ -45,7 +45,7 @@ namespace LiveDocs.WebApp.Controllers
             if (!System.IO.File.Exists(path))
                 return NotFound(fullFilename);
 
-            var stream = new FileStream(path, FileMode.Open);
+            var fileStream = new FileStream(path, FileMode.Open);
 
             var provider = new FileExtensionContentTypeProvider();
             string contentType;
@@ -56,7 +56,7 @@ namespace LiveDocs.WebApp.Controllers
                 forceDownload = true;
             }
 
-            var result = new FileStreamResult(stream, contentType);
+            var result = new FileStreamResult(fileStream, contentType);
             // If the name is specified, the browser will automatically try to download the file. Sometimes.
             if (forceDownload)
                 result.FileDownloadName = fullFilename;
