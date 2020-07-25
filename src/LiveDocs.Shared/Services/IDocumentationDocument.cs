@@ -14,5 +14,7 @@ namespace LiveDocs.Shared.Services
         IDocumentationDocument[] SubDocuments { get; set; }
 
         Task<string> ToHtml(string baseUri = "");
+
+        Task<string> GetTitle() => Task.FromResult(Name);
     }
 }

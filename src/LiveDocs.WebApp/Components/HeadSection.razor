@@ -1,0 +1,18 @@
+﻿@using System.ComponentModel
+@inject Services.AppStateService _AppState
+        
+<title>@_AppState.Title</title>
+        
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        _AppState.PropertyChanged += (object sender, PropertyChangedEventArgs e) =>
+        {
+            InvokeAsync(() =>
+            {
+                StateHasChanged();
+            });
+        };
+        await base.OnInitializedAsync();
+    }
+}

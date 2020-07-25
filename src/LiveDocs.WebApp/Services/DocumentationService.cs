@@ -66,8 +66,14 @@ namespace LiveDocs.WebApp.Services
                             LastUpdate = file.LastWriteTimeUtc
                         });
                         break;
-                    case DocumentationDocumentType.Word:
                     case DocumentationDocumentType.Html:
+                        documents.Add(new HtmlDocument
+                        {
+                            Path = file.FullName,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
+                    case DocumentationDocumentType.Word:
                     case DocumentationDocumentType.Folder:
                         documents.Add(new DocumentationDocument
                         {
@@ -164,6 +170,9 @@ namespace LiveDocs.WebApp.Services
 
         public async Task<IDocumentationDocument> GetDocumentationLandingPageDocument()
         {
+            if (string.IsNullOrWhiteSpace(_Options.LandingPageDocument))
+                return null;
+
             return await ((IDocumentationService)this).GetDocumentFor(new[] { _Options.LandingPageDocument }, "");
         }
     }

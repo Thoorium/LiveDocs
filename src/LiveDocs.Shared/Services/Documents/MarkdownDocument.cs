@@ -1,5 +1,7 @@
 ﻿using Markdig;
+using Markdig.Syntax;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LiveDocs.Shared.Services.Documents
@@ -28,5 +30,16 @@ namespace LiveDocs.Shared.Services.Documents
         {
             return await Markdown.ToHtml(baseUri);
         }
+        
+        public Task<string> GetTitle()
+        {
+            HeadingBlock header = Markdown.FirstOrDefault(f => f is HeadingBlock) as HeadingBlock;
+
+            if(header != null)
+                return Task.FromResult(string.Join("", header.Inline));
+            return Task.FromResult(Name);
+        }
+
+
     }
 }

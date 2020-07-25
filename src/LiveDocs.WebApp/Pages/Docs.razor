@@ -2,6 +2,8 @@
 @inject IDocumentationService _DocumentationService
 @inject Microsoft.JSInterop.IJSRuntime _JSRuntime
 @inject NavigationManager _NavManager
+@inject IOptions<LiveDocs.WebApp.Options.LiveDocsOptions> _Options
+@inject Services.AppStateService _AppState
 
 <div class="content d-flex mx-auto">
 
@@ -158,6 +160,11 @@
         await _JSRuntime.InvokeAsync<bool>("scrollToElementId", new[] { id });
     }
 
+    private async Task SetDocumentTitle(string title)
+    {
+        _AppState.Title = $"{title} | {_Options.Value.ApplicationName}";
+    }
+
     protected async override Task OnInitializedAsync()
     {
         _NavManager.LocationChanged += HandleLocationChanged;
@@ -213,6 +220,7 @@
             {
                 notFound = true;
                 previousDocumentType = "";
+                await SetDocumentTitle("Not found");
                 StateHasChanged();
                 return;
             }
@@ -231,6 +239,7 @@
                 extraDocuments = await _DocumentationService.GetDocumentsFor(new[] { document.Key });
             else extraDocuments = await _DocumentationService.GetDocumentsFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 });
 
+            await SetDocumentTitle(await document.GetTitle());
             StateHasChanged();
             removePreviousDocumentType = true;
 
