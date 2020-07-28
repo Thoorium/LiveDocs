@@ -19,8 +19,8 @@
 }
 
 @code {
-        [Parameter]
-        public LiveDocs.Shared.Services.IDocumentationDocument Document { get; set; }
+    [Parameter]
+    public LiveDocs.Shared.Services.IDocumentationDocument Document { get; set; }
 
     private LiveDocs.Shared.Services.IDocumentationDocument previousDocument = null;
 
@@ -40,7 +40,7 @@
         headerLevels.Clear();
 
         if (Document is LiveDocs.Shared.Services.Documents.MarkdownDocument markdownDocument)
-        {            
+        {
             foreach (Markdig.Syntax.HeadingBlock header in markdownDocument.Markdown.Where(w => w is Markdig.Syntax.HeadingBlock))
             {
                 string headerText = string.Join("", header.Inline);

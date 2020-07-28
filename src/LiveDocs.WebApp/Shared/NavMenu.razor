@@ -9,9 +9,9 @@
 
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    @if (_DocumentationService.DocumentationIndex.DefaultDocuments.Count > 0 && _DocumentationService.DocumentationIndex.LandingPage != null)
+                    @if (_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.Count > 0 && _DocumentationService.DocumentationIndex.DefaultProject.LandingPage != null)
                     {
-                        <NavLink class="nav-link" href="@(_DocumentationService.DocumentationIndex.DefaultDocuments.First().Key)" Match="NavLinkMatch.Prefix">
+                        <NavLink class="nav-link" href="@(_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.First().Key)" Match="NavLinkMatch.Prefix">
                             Documentation
                         </NavLink>
                     } else

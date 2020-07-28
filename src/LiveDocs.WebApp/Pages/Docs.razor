@@ -7,9 +7,9 @@
 
 <div class="content d-flex mx-auto">
 
-    @if (!landingPage)
+    @if (!landingPage && currentProject != null)
     {
-        <LiveDocs.Shared.Components.DocumentationSidebar></LiveDocs.Shared.Components.DocumentationSidebar>
+        <LiveDocs.Shared.Components.DocumentationSidebar Project="currentProject"></LiveDocs.Shared.Components.DocumentationSidebar>
     }
 
     <div class="content px-4 align-self-stretch flex-lg-fill overflow-hidden">
@@ -109,6 +109,8 @@
     // Is the current page the landing page.
     private bool landingPage = false;
 
+    private IDocumentationProject currentProject = null;
+
     private IList<IDocumentationDocument> extraDocuments = null;
 
     private string GetUrlId(string url)
@@ -188,21 +190,23 @@
 
         bool hasDocumentType = _NavManager.TryGetQueryString("file", out documentType);
 
-        if (string.IsNullOrWhiteSpace(path1))
+        var isProjectFound = await _DocumentationService.DocumentationIndex.GetProjectFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }, out currentProject, out string[] documentPath);
+
+        if (documentPath.Length == 0)
         {
-            document = _DocumentationService.DocumentationIndex.LandingPage;
+            document = currentProject.LandingPage;
 
             if (document == null)
             {
                 if (hasDocumentType)
-                    document = await _DocumentationService.GetDocumentationDefaultDocument(documentType);
-                else document = await _DocumentationService.GetDocumentationDefaultDocument();
+                    document = await currentProject.GetDocumentationDefaultDocument(documentType);
+                else document = await currentProject.GetDocumentationDefaultDocument();
             } else landingPage = true;
 
         }
         // Document type is specified.
         else if (hasDocumentType)
-            document = await _DocumentationService.GetDocumentFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }, documentType);
+            document = await currentProject.GetDocumentFor(documentPath, documentType);
 
         // Document type is not specified and the specified type had no document, let's find the default document instead.
         if (document == null)
@@ -212,9 +216,9 @@
             if (document == null)
                 previousDocumentType = documentType;
 
-            if (string.IsNullOrWhiteSpace(path1))
-                document = await _DocumentationService.GetDocumentationDefaultDocument();
-            else document = await _DocumentationService.GetDocumentFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 });
+            if (documentPath.Length == 0)
+                document = await currentProject.GetDocumentationDefaultDocument();
+            else document = await currentProject.GetDocumentFor(documentPath);
 
             if (document == null)
             {
@@ -235,9 +239,9 @@
             renderContent = await documentationDocument.ToHtml(_NavManager.Uri);
 
             // Look for extra documents
-            if (string.IsNullOrWhiteSpace(path1))
-                extraDocuments = await _DocumentationService.GetDocumentsFor(new[] { document.Key });
-            else extraDocuments = await _DocumentationService.GetDocumentsFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 });
+            if (documentPath.Length == 0)
+                extraDocuments = await currentProject.GetDocumentsFor(new[] { document.Key });
+            else extraDocuments = await currentProject.GetDocumentsFor(documentPath);
 
             await SetDocumentTitle(await document.GetTitle());
             StateHasChanged();
