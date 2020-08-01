@@ -42,7 +42,12 @@
                 return false;
             }
             element.scrollIntoView();
-            window.scrollBy(0, -100);
+
+            // If the element is not at the end of the page, offset the scroll for the height of the nav bar.
+            if ((window.innerHeight + window.scrollY + 1) < document.body.offsetHeight) {
+                window.scrollBy(0, -100);
+            }
+
             return true;
         }
     </script>
