@@ -1,0 +1,26 @@
+<li class="nav-item dropdown">
+    <NavLink href="@(string.IsNullOrWhiteSpace(BaseRoute) ? Text : BaseRoute)" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+        @if (!string.IsNullOrWhiteSpace(IconName))
+        {
+            <span class="oi @($"oi-{IconName}")" aria-hidden="true"></span>
+        }
+        @Text
+    </NavLink>
+    <div class="dropdown-menu" aria-labelledby="dropdown">
+        @ChildContent
+    </div>
+</li>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string Text { get; set; }
+
+    [Parameter]
+    public string BaseRoute { get; set; } = "";
+
+    [Parameter]
+    public string IconName { get; set; } = "";
+}

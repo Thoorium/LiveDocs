@@ -11,6 +11,25 @@ object.pdf {
 nav.navbar {
   max-width: 100rem; }
 
+li.dropdown:hover > div.dropdown-menu {
+  display:block; }
+
+.navbar-nav .dropdown-menu {
+  margin-top: -1px; }
+
+.dropdown-item {
+  padding-left: 10px; }
+
+.dropdown-item:focus, .dropdown-item:hover {
+  border-left: 5px var(--cyan) solid;
+  padding-left: 5px; }
+
+.dropdown-item.active, .dropdown-item:active {
+  background: none;
+  border-left: 5px var(--cyan) solid;
+  color: #f8f9fa;
+  padding-left: 5px; }
+
 div.sidebar {
   min-width: 17.5rem;
   max-width: 17.5rem; }

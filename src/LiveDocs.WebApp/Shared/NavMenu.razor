@@ -9,7 +9,15 @@
 
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    @if (_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.Count > 0 && _DocumentationService.DocumentationIndex.DefaultProject.LandingPage != null)
+                    @if (_DocumentationService.DocumentationIndex.Projects.Count > 0)
+                    {
+                        <LiveDocs.Shared.Components.NavLinkDropdownItem Text="Documentation" BaseRoute="/">
+                            @foreach (var item in _DocumentationService.DocumentationIndex.Projects)
+                            {
+                                <NavLink class="dropdown-item" href="@(item.Key)">@item.Name</NavLink>
+                            }
+                        </LiveDocs.Shared.Components.NavLinkDropdownItem>
+                    } else if (_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.Count > 0 && _DocumentationService.DocumentationIndex.DefaultProject.LandingPage != null)
                     {
                         <NavLink class="nav-link" href="@(_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.First().Key)" Match="NavLinkMatch.Prefix">
                             Documentation
@@ -32,13 +40,13 @@
             </div>
         </nav>
     </div>
-    @code {
-        bool collapseNavMenu = false;
+@code {
+    bool collapseNavMenu = false;
 
-        string NavMenuCssClass => collapseNavMenu ? "open" : null;
+    string NavMenuCssClass => collapseNavMenu ? "open" : null;
 
-        void ToggleNavMenu()
-        {
-            collapseNavMenu = !collapseNavMenu;
-        }
+    void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
     }
+}
