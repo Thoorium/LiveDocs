@@ -43,7 +43,21 @@
         {
             foreach (Markdig.Syntax.HeadingBlock header in markdownDocument.Markdown.Where(w => w is Markdig.Syntax.HeadingBlock))
             {
-                string headerText = string.Join("", header.Inline);
+                List<string> headerStrings = new List<string>();
+                foreach (var inline in header.Inline)
+                {
+                    var headerString = inline switch
+                    {
+                        Markdig.Syntax.Inlines.LiteralInline literal =>
+                            literal.ToString(),
+                        Markdig.Syntax.Inlines.CodeInline code =>
+                            code.Content,
+                        _ => inline.ToString()
+                    };
+                    headerStrings.Add(headerString);
+                }
+
+                string headerText = string.Join("", headerStrings);
                 string headerLink = Markdig.Helpers.LinkHelper.Urilize(headerText, allowOnlyAscii: true);
 
                 string uniqueHeaderLink = headerLink;

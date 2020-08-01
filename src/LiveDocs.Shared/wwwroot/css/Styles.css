@@ -81,10 +81,12 @@ ul.document-tree {
   margin-right: 1rem; }
 
 ul.documentation-sidebar a {
-  color: var(--secondary); }
+  color: var(--secondary);
+  display: block; }
 
 ul.document-tree a {
-  color: var(--secondary); }
+  color: var(--secondary);
+  display: block; }
 
 ul.documentation-sidebar, ul.document-tree {
   position: fixed;

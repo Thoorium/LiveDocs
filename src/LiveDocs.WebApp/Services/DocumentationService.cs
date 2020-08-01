@@ -45,7 +45,7 @@ namespace LiveDocs.WebApp.Services
             }
 
             documentationIndex.DefaultProject = new DocumentationProject(_Options);
-            documentationIndex.DefaultProject.Documents.AddRange(documentationProject.Documents);
+            documentationIndex.DefaultProject.Documents.AddRange(documentationProject.Documents.OrderBy(o => o.Name));
 
             return Task.FromResult(documentationIndex);
         }
