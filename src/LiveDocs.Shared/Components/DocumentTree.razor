@@ -43,21 +43,7 @@
         {
             foreach (Markdig.Syntax.HeadingBlock header in markdownDocument.Markdown.Where(w => w is Markdig.Syntax.HeadingBlock))
             {
-                List<string> headerStrings = new List<string>();
-                foreach (var inline in header.Inline)
-                {
-                    var headerString = inline switch
-                    {
-                        Markdig.Syntax.Inlines.LiteralInline literal =>
-                            literal.ToString(),
-                        Markdig.Syntax.Inlines.CodeInline code =>
-                            code.Content,
-                        _ => inline.ToString()
-                    };
-                    headerStrings.Add(headerString);
-                }
-
-                string headerText = string.Join("", headerStrings);
+                string headerText = ExtractLiterals(header.Inline);
                 string headerLink = Markdig.Helpers.LinkHelper.Urilize(headerText, allowOnlyAscii: true);
 
                 string uniqueHeaderLink = headerLink;
@@ -71,5 +57,23 @@
             }
         }
         return base.OnParametersSetAsync();
+    }
+
+    private string ExtractLiterals(Markdig.Syntax.Inlines.ContainerInline parentInline, string text = "")
+    {
+        foreach (var inline in parentInline)
+        {
+            text += inline switch
+            {
+                Markdig.Syntax.Inlines.LiteralInline literal =>
+                    literal.ToString(),
+                Markdig.Syntax.Inlines.CodeInline code =>
+                    code.Content,
+                Markdig.Syntax.Inlines.ContainerInline container =>
+                    ExtractLiterals(container),
+                _ => inline.ToString()
+            };
+        }
+        return text;
     }
 }
