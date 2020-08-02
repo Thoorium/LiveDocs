@@ -7,15 +7,17 @@
 
 <div class="content d-flex mx-auto">
 
-    @if (!landingPage && currentProject != null)
+    @if (!landingPage && currentProject != null && !noDocument)
     {
         <LiveDocs.Shared.Components.DocumentationSidebar Project="currentProject"></LiveDocs.Shared.Components.DocumentationSidebar>
     }
 
     <div class="content px-4 align-self-stretch flex-lg-fill overflow-hidden">
-        @if (notFound == true)
+        @if (notFound)
         {
             <LiveDocs.Shared.Components.DocumentNotFound documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())"></LiveDocs.Shared.Components.DocumentNotFound>
+        } else if (noDocument) {
+            <LiveDocs.Shared.Components.NoDocumentFound />
         } else if (string.IsNullOrWhiteSpace(renderContent))
         {
             <div class="loading-document-wrapper mx-auto mt-4">
@@ -54,7 +56,7 @@
             @((MarkupString)renderContent)
         }
     </div>
-    @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown)
+    @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !noDocument)
     {
         <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument"></LiveDocs.Shared.Components.DocumentTree>
     }
@@ -93,7 +95,7 @@
 
     // The current document.
     private IDocumentationDocument documentationDocument = null;
-    
+
     // The current document type.
     private string documentType = "";
 
@@ -105,6 +107,9 @@
 
     // Current document is not found.
     private bool notFound = false;
+
+    // No document has been found for the current project.
+    private bool noDocument = false;
 
     // Is the current page the landing page.
     private bool landingPage = false;
@@ -227,14 +232,18 @@
                     document = currentProject.Documents.FirstOrDefault();
                     if (document != null)
                         _NavManager.NavigateTo(document.Key);
-                }
-
-                if (document == null)
+                    else
+                    {
+                        await SetDocumentTitle("No document found");
+                        noDocument = true;
+                    }
+                } else if (document == null)
                 {
                     notFound = true;
                     previousDocumentType = "";
                     await SetDocumentTitle("Not found");
                 }
+
                 StateHasChanged();
                 return;
             }
@@ -275,6 +284,7 @@
     {
         loadNewContent = true;
         notFound = false;
+        noDocument = false;
         return base.OnParametersSetAsync();
     }
 
