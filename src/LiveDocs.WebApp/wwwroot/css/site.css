@@ -7,18 +7,59 @@ body {
   padding-top: 56px; }
 
 #blazor-error-ui {
-  background: lightyellow;
+  display: none;
   bottom: 0;
   box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
-  display: none;
   left: 0;
-  padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+  padding: 0.1rem 1rem;
   position: fixed;
   width: 100%;
-  z-index: 1000; }
+  z-index: 1000;
+  height: 2rem;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.7); }
 
 #blazor-error-ui .dismiss {
   cursor: pointer;
   position: absolute;
-  right: 0.75rem;
-  top: 0.5rem; }
+  right: 0.75rem; }
+
+#components-reconnect-modal {
+  bottom: 0;
+  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+  left: 0;
+  padding: 0.1rem 1rem;
+  position: fixed;
+  width: 100%;
+  z-index: 1000;
+  height: 2rem;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.7); }
+
+#components-reconnect-modal.components-reconnect-hide {
+  display: none; }
+
+.components-reconnect-hide > div {
+  display: none; }
+
+.components-reconnect-show > div {
+  display: none; }
+
+.components-reconnect-show > .show {
+  display: block; }
+
+.components-reconnect-failed > div {
+  display: none; }
+
+.components-reconnect-failed > .failed {
+  display: block; }
+
+.components-reconnect-refused > div {
+  display: none; }
+
+.components-reconnect-refused > .refused {
+  display: block; }
+
+@media (prefers-color-scheme: dark) {
+  #components-reconnect-modal, #blazor-error-ui {
+    background-color: rgba(25, 29, 33, 0.7); } }

@@ -10,6 +10,8 @@
 - Nested
   - [Nested](nested/nested)
   - [Images](nested/images)
+- Another project
+  - [Document 1](test-project/document1)
 
 ## First title
 
