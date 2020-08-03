@@ -69,8 +69,10 @@
                     literal.ToString(),
                 Markdig.Syntax.Inlines.CodeInline code =>
                     code.Content,
+                 Markdig.Syntax.Inlines.HtmlInline htmlInline =>
+				    "", // The text between html tags is a literal.
                 Markdig.Syntax.Inlines.ContainerInline container =>
-                    ExtractLiterals(container),
+                    ExtractLiterals(container),               
                 _ => inline.ToString()
             };
         }
