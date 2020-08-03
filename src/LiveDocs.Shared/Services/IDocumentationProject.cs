@@ -91,7 +91,7 @@ namespace LiveDocs.Shared.Services
                 documents = tempDoc.SubDocuments;
             }
 
-            return Task.FromResult(documents.Where(w => w.Key == finalKey).ToList());
+            return Task.FromResult(documents.Where(w => w.Key == finalKey && w.DocumentType != DocumentationDocumentType.Folder).ToList());
         }
 
         Task<IDocumentationDocument> GetDocumentationDefaultDocument(string documentType = "");

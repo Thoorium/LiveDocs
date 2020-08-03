@@ -2,4 +2,4 @@
 
 A landing page for a project.
 
-View a [document](test-project/document1).
+View a [document](document1).

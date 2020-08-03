@@ -216,8 +216,6 @@
         // Document type is not specified and the specified type had no document, let's find the default document instead.
         if (document == null)
         {
-            landingPage = false;
-
             if (document == null)
                 previousDocumentType = documentType;
 
@@ -285,6 +283,7 @@
         loadNewContent = true;
         notFound = false;
         noDocument = false;
+        landingPage = false;
         return base.OnParametersSetAsync();
     }
 

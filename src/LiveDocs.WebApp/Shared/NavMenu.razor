@@ -13,14 +13,14 @@
                     <LiveDocs.Shared.Components.NavLinkDropdownItem Text="Documentation" BaseRoute="/">
                         @foreach (var item in _DocumentationService.DocumentationIndex.Projects)
                         {
-                            <NavLink class="dropdown-item" href="@(item.Key)">@item.Name</NavLink>
+                            <NavLink class="dropdown-item" href="@(item.Key + "/")">@item.Name</NavLink>
                         }
                     </LiveDocs.Shared.Components.NavLinkDropdownItem>
                 } else if (_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.Count > 0 && _DocumentationService.DocumentationIndex.DefaultProject.LandingPage != null)
                 {
                         
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="@(_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.First().Key)" Match="NavLinkMatch.Prefix">
+                        <NavLink class="nav-link" href="@(_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.First().Key + "/")" Match="NavLinkMatch.Prefix">
                             Documentation
                         </NavLink>
                     </li>
