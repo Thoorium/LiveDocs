@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 
 namespace LiveDocs.WebApp
 {
@@ -28,6 +27,8 @@ namespace LiveDocs.WebApp
 
             services.AddRazorPages();
             services.AddServerSideBlazor();
+
+            services.AddScoped<AppStateService>();
 
             MarkdownPipeline markdownPipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseBootstrap().Build();
             services.AddSingleton(markdownPipeline);

@@ -10,7 +10,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LiveDocs.WebApp</title>
+    <component type="typeof(Components.HeadSection)" render-mode="ServerPrerendered"/>
     <base href="~/" />
 
     <link rel="stylesheet" href="_content/LiveDocs.Shared/css/bootstrap/bootstrap.css" />
@@ -33,6 +33,24 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
+    
+    <div id="components-reconnect-modal" class="my-reconnect-modal components-reconnect-hide">
+        <div class="show">
+            <p>
+                Connection to the server has been lost. Navigation is limited. Reconnecting...
+            </p>
+        </div>
+        <div class="failed">
+            <p>
+                Reconnection to the server has failed. Navigation is limited. Please reload the application.
+            </p>
+        </div>
+        <div class="rejected">
+            <p>
+                Reconnection to the server has failed. Navigation is limited. Please reload the application.
+            </p>
+        </div>
+    </div>
 
     <script src="_framework/blazor.server.js"></script>
     <script>
@@ -42,7 +60,12 @@
                 return false;
             }
             element.scrollIntoView();
-            window.scrollBy(0, -100);
+
+            // If the element is not at the end of the page, offset the scroll for the height of the nav bar.
+            if ((window.innerHeight + window.scrollY + 1) < document.body.offsetHeight) {
+                window.scrollBy(0, -100);
+            }
+
             return true;
         }
     </script>

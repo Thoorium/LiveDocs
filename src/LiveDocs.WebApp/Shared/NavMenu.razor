@@ -8,37 +8,49 @@
             </button>
 
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    @if (_DocumentationService.DocumentationIndex.DefaultDocuments.Count > 0 && _DocumentationService.DocumentationIndex.LandingPage != null)
-                    {
-                        <NavLink class="nav-link" href="@(_DocumentationService.DocumentationIndex.DefaultDocuments.First().Key)" Match="NavLinkMatch.Prefix">
+                @if (_DocumentationService.DocumentationIndex.Projects.Count > 0)
+                {
+                    <LiveDocs.Shared.Components.NavLinkDropdownItem Text="Documentation" BaseRoute="/">
+                        @foreach (var item in _DocumentationService.DocumentationIndex.Projects)
+                        {
+                            <NavLink class="dropdown-item" href="@(item.Key + "/")">@item.Name</NavLink>
+                        }
+                    </LiveDocs.Shared.Components.NavLinkDropdownItem>
+                } else if (_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.Count > 0 && _DocumentationService.DocumentationIndex.DefaultProject.LandingPage != null)
+                {
+                        
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="@(_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.First().Key + "/")" Match="NavLinkMatch.Prefix">
                             Documentation
                         </NavLink>
-                    } else
-                    {
+                    </li>
+                } else
+                {
+                        
+                    <li class="nav-item">
                         <NavLink class="nav-link" href="" Match="NavLinkMatch.Prefix">
                             Documentation
                         </NavLink>
-                    }
-                </li>
+                    </li>
+                }
             </ul>
 
             <div class="navbar-collapse offcanvas-collapse @NavMenuCssClass" style="max-width:75rem;">
                 <ul class="navbar-nav mr-auto">
                 </ul>
-                <form class="form-inline my-2 my-lg-0">
+                <form class="form-inline my-2 my-lg-0" style="display:none;">
                     <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" />
                 </form>
             </div>
         </nav>
     </div>
-    @code {
-        bool collapseNavMenu = false;
+@code {
+    bool collapseNavMenu = false;
 
-        string NavMenuCssClass => collapseNavMenu ? "open" : null;
+    string NavMenuCssClass => collapseNavMenu ? "open" : null;
 
-        void ToggleNavMenu()
-        {
-            collapseNavMenu = !collapseNavMenu;
-        }
+    void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
     }
+}

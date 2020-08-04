@@ -35,7 +35,8 @@ namespace LiveDocs.WebApp.Controllers
         {
             var paths = new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).ToArray();
             string fullFilename = string.Join("/", paths) + "." + ext;
-            IDocumentationDocument document = await _DocumentationService.GetDocumentFor(paths, ext);
+            var isDefaultProject = _DocumentationService.DocumentationIndex.GetProjectFor(paths, out IDocumentationProject currentProject, out string[] documentPath);
+            IDocumentationDocument document = await currentProject.GetDocumentFor(documentPath, ext);
 
             string path;
             if (document != null)
@@ -43,7 +44,7 @@ namespace LiveDocs.WebApp.Controllers
             else path = Path.Combine(_Options.GetDocumentationFolderAsAbsolute(_HostEnvironment.ContentRootPath).FullName, fullFilename);
 
             if (!System.IO.File.Exists(path))
-                return NotFound(fullFilename);
+                return NotFound($"Not found: {fullFilename}");
 
             var fileStream = new FileStream(path, FileMode.Open);
 

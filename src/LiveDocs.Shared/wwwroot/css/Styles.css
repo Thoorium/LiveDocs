@@ -11,6 +11,28 @@ object.pdf {
 nav.navbar {
   max-width: 100rem; }
 
+li.dropdown:hover > div.dropdown-menu {
+  display: block; }
+
+.navbar-nav .dropdown-menu {
+  margin-top: -1px; }
+
+.dropdown-item {
+  padding-left: 10px; }
+
+.dropdown-item:focus, .dropdown-item:hover {
+  border-left: 5px solid var(--cyan);
+  padding-left: 5px; }
+
+.dropdown-item.active, .dropdown-item:active {
+  background: none;
+  border-left: 5px var(--cyan) solid;
+  color: #f8f9fa;
+  padding-left: 5px; }
+
+.dropdown-item.active:hover, .dropdown-item:active:hover {
+  background-color: #212529; }
+
 div.sidebar {
   min-width: 17.5rem;
   max-width: 17.5rem; }
@@ -81,10 +103,12 @@ ul.document-tree {
   margin-right: 1rem; }
 
 ul.documentation-sidebar a {
-  color: var(--secondary); }
+  color: var(--secondary);
+  display: block; }
 
 ul.document-tree a {
-  color: var(--secondary); }
+  color: var(--secondary);
+  display: block; }
 
 ul.documentation-sidebar, ul.document-tree {
   position: fixed;
@@ -211,6 +235,9 @@ textarea.http-response-data[readonly] {
     color: #adadad; }
   .form-control {
     background-color: #191d21; }
+  .navbar-nav .dropdown-menu {
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    background-color: #343a40 !important; }
   ul.documentation-sidebar a, li.nav-item.nested, ul.document-tree li {
     color: #adadad; }
   ul.document-tree a:hover {

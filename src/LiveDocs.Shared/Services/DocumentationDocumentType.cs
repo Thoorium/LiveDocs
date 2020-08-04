@@ -7,6 +7,8 @@
         Word,
         Html,
         Folder,
+        Project,
+        Version,
         Unknown
     }
 }

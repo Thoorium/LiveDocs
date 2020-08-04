@@ -4,23 +4,35 @@
     <ul class="nav flex-column documentation-sidebar text-secondary">
         @foreach (var item in documents)
         {
-            <DocumentationSidebarItem Item="item" Path=""></DocumentationSidebarItem>
+            <DocumentationSidebarItem Item="item" Path="@Project.Key"></DocumentationSidebarItem>
         }
     </ul>
 </div>
 
 @code { 
 
+    [Parameter]
+    public LiveDocs.Shared.Services.IDocumentationProject Project { get; set; }
+
+    private LiveDocs.Shared.Services.IDocumentationProject previousProject = null;
+
     private List<LiveDocs.Shared.Services.IDocumentationDocument> documents;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnParametersSetAsync()
     {
-        documents = _DocumentationService.DocumentationIndex.Documents
-            .Where(w => !_DocumentationService.DocumentationIndex.DefaultDocuments.Any(a => a.Key == w.Key) 
-                && w.Key != _DocumentationService.DocumentationIndex.LandingPage?.Key)
+        if (previousProject == Project)
+            return base.OnParametersSetAsync();
+
+        previousProject = Project;
+
+
+        documents = Project.Documents
+            .Where(w => !Project.DefaultDocuments.Any(a => a.Key == w.Key) 
+                && w.Key != Project.LandingPage?.Key
+                && w.DocumentType != Services.DocumentationDocumentType.Project)
             .GroupBy(g => g.Key)
             .Select(s => s.First()).ToList();
 
-        await base.OnInitializedAsync();
+        return base.OnParametersSetAsync();
     }
 }

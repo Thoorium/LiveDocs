@@ -2,18 +2,22 @@
 @inject IDocumentationService _DocumentationService
 @inject Microsoft.JSInterop.IJSRuntime _JSRuntime
 @inject NavigationManager _NavManager
+@inject IOptions<LiveDocs.WebApp.Options.LiveDocsOptions> _Options
+@inject Services.AppStateService _AppState
 
-<div class="content d-flex mx-auto">
+<div class="content d-flex mx-auto pb-4">
 
-    @if (!landingPage)
+    @if (!landingPage && currentProject != null && !noDocument)
     {
-        <LiveDocs.Shared.Components.DocumentationSidebar></LiveDocs.Shared.Components.DocumentationSidebar>
+        <LiveDocs.Shared.Components.DocumentationSidebar Project="currentProject"></LiveDocs.Shared.Components.DocumentationSidebar>
     }
 
     <div class="content px-4 align-self-stretch flex-lg-fill overflow-hidden">
-        @if (notFound == true)
+        @if (notFound)
         {
-            <LiveDocs.Shared.Components.DocumentNotFound documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).Last())"></LiveDocs.Shared.Components.DocumentNotFound>
+            <LiveDocs.Shared.Components.DocumentNotFound documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())"></LiveDocs.Shared.Components.DocumentNotFound>
+        } else if (noDocument) {
+            <LiveDocs.Shared.Components.NoDocumentFound />
         } else if (string.IsNullOrWhiteSpace(renderContent))
         {
             <div class="loading-document-wrapper mx-auto mt-4">
@@ -36,15 +40,15 @@
                     <p>
                         @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Markdown))
                         {
-                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Markdown ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Markdown"))">Markdown</NavLink>
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Markdown ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "Markdown"))">Markdown</NavLink>
                         }
                         @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Html))
                         {
-                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Html ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Html"))">Html</NavLink>
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Html ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "Html"))">Html</NavLink>
                         }
                         @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Pdf))
                         {
-                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Pdf ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Pdf"))">Pdf</NavLink>
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Pdf ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "Pdf"))">Pdf</NavLink>
                         }
                     </p>
                 </div>
@@ -52,7 +56,7 @@
             @((MarkupString)renderContent)
         }
     </div>
-    @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown)
+    @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !noDocument)
     {
         <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument"></LiveDocs.Shared.Components.DocumentTree>
     }
@@ -91,7 +95,7 @@
 
     // The current document.
     private IDocumentationDocument documentationDocument = null;
-    
+
     // The current document type.
     private string documentType = "";
 
@@ -104,58 +108,24 @@
     // Current document is not found.
     private bool notFound = false;
 
+    // No document has been found for the current project.
+    private bool noDocument = false;
+
     // Is the current page the landing page.
     private bool landingPage = false;
 
+    private IDocumentationProject currentProject = null;
+
     private IList<IDocumentationDocument> extraDocuments = null;
-
-    private string GetUrlId(string url)
-    {
-        var urlIdRegex = System.Text.RegularExpressions.Regex.Match(url, "#(.*?)($|#|\\?)");
-        string urlId = "";
-
-        if (urlIdRegex.Success)
-            urlId = urlIdRegex.Groups[1].Value;
-        return urlId;
-    }
-
-    private string AddOrUpdateQueryString(string url, string name, string value)
-    {
-        var urlQueryRegex = System.Text.RegularExpressions.Regex.Match(url, "\\?(.*?)($|#|\\?)");
-        string urlQuery = "";
-
-        if (urlQueryRegex.Success)
-            urlQuery = urlQueryRegex.Groups[1].Value;
-
-        string urlId = GetUrlId(url);
-
-        if (!string.IsNullOrWhiteSpace(urlId))
-        {
-            urlId = "#" + urlId;
-            url = url.Replace(urlId, "");
-        }
-
-        var queries = System.Web.HttpUtility.ParseQueryString(urlQuery);
-
-        queries[name] = value;
-
-        string path = url.Substring(0, url.IndexOf("?") >= 0 ? url.IndexOf("?") : url.Length);
-        string query = "?";
-
-        for (int i = 0; i < queries.Count; i++)
-        {
-            if (i > 0)
-                query += "&";
-            string key = queries.Keys[i];
-            query += $"{key}={queries[key]}";
-        }
-
-        return path + query + urlId;
-    }
 
     private async Task ScrollTo(string id)
     {
         await _JSRuntime.InvokeAsync<bool>("scrollToElementId", new[] { id });
+    }
+
+    private async Task SetDocumentTitle(string title)
+    {
+        _AppState.Title = $"{title} | {_Options.Value.ApplicationName}";
     }
 
     protected async override Task OnInitializedAsync()
@@ -181,38 +151,53 @@
 
         bool hasDocumentType = _NavManager.TryGetQueryString("file", out documentType);
 
-        if (string.IsNullOrWhiteSpace(path1))
+        var isProjectFound = await _DocumentationService.DocumentationIndex.GetProjectFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }, out currentProject, out string[] documentPath);
+
+        if (documentPath.Length == 0)
         {
-            document = _DocumentationService.DocumentationIndex.LandingPage;
+            document = currentProject.LandingPage;
 
             if (document == null)
             {
                 if (hasDocumentType)
-                    document = await _DocumentationService.GetDocumentationDefaultDocument(documentType);
-                else document = await _DocumentationService.GetDocumentationDefaultDocument();
+                    document = await currentProject.GetDocumentationDefaultDocument(documentType);
+                else document = await currentProject.GetDocumentationDefaultDocument();
             } else landingPage = true;
 
         }
         // Document type is specified.
         else if (hasDocumentType)
-            document = await _DocumentationService.GetDocumentFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }, documentType);
+            document = await currentProject.GetDocumentFor(documentPath, documentType);
 
         // Document type is not specified and the specified type had no document, let's find the default document instead.
         if (document == null)
         {
-            landingPage = false;
-
             if (document == null)
                 previousDocumentType = documentType;
 
-            if (string.IsNullOrWhiteSpace(path1))
-                document = await _DocumentationService.GetDocumentationDefaultDocument();
-            else document = await _DocumentationService.GetDocumentFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 });
+            if (documentPath.Length == 0)
+                document = await currentProject.GetDocumentationDefaultDocument();
+            else document = await currentProject.GetDocumentFor(documentPath);
 
             if (document == null)
             {
-                notFound = true;
-                previousDocumentType = "";
+                if (documentPath.Length == 0)
+                {
+                    document = currentProject.Documents.FirstOrDefault();
+                    if (document != null)
+                        _NavManager.NavigateTo(document.Key);
+                    else
+                    {
+                        await SetDocumentTitle("No document found");
+                        noDocument = true;
+                    }
+                } else if (document == null)
+                {
+                    notFound = true;
+                    previousDocumentType = "";
+                    await SetDocumentTitle("Not found");
+                }
+
                 StateHasChanged();
                 return;
             }
@@ -224,18 +209,19 @@
             documentType = document.DocumentType.ToString();
             documentationDocument = document;
 
-            renderContent = await documentationDocument.ToHtml(_NavManager.Uri);
+            renderContent = await documentationDocument.ToHtml(currentProject, _NavManager.Uri);
 
             // Look for extra documents
-            if (string.IsNullOrWhiteSpace(path1))
-                extraDocuments = await _DocumentationService.GetDocumentsFor(new[] { document.Key });
-            else extraDocuments = await _DocumentationService.GetDocumentsFor(new[] { path1, path2, path3, path4, path5, path6, path7, path8 });
+            if (documentPath.Length == 0)
+                extraDocuments = await currentProject.GetDocumentsFor(new[] { document.Key });
+            else extraDocuments = await currentProject.GetDocumentsFor(documentPath);
 
+            await SetDocumentTitle(await document.GetTitle());
             StateHasChanged();
             removePreviousDocumentType = true;
 
             // If there's a # parameter specified, let's scroll to it.
-            string urlId = GetUrlId(relativePath);
+            string urlId = UrlHelper.GetUrlId(relativePath);
             if (!string.IsNullOrWhiteSpace(urlId))
                 await ScrollTo(urlId);
 
@@ -252,6 +238,8 @@
     {
         loadNewContent = true;
         notFound = false;
+        noDocument = false;
+        landingPage = false;
         return base.OnParametersSetAsync();
     }
 
@@ -259,7 +247,7 @@
     {
         // If the event is throw by a # parameter being appended, we want to scroll to it.
         // Also compare the current url with the previous one to allow inter-document navigation with a id.
-        string urlId = GetUrlId(e.Location);
+        string urlId = UrlHelper.GetUrlId(e.Location);
         string cleanUrl = _NavManager.ToBaseRelativePath(e.Location).Replace($"#{urlId}", "");
         if (!string.IsNullOrWhiteSpace(urlId) && relativePath == cleanUrl)
         {
