@@ -11,13 +11,14 @@ namespace LiveDocs.Shared.Services.Documents
         public DocumentationDocumentType DocumentType => DocumentationDocumentType.Pdf;
 
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
+        public string FileName => System.IO.Path.GetFileName(Path);
 
         public IDocumentationDocument[] SubDocuments { get; set; } = null;
 
-        public Task<string> ToHtml(string baseUri)
+        public Task<string> ToHtml(IDocumentationProject documentationProject, string baseUri)
         {
-            string path = baseUri.Substring(0, baseUri.IndexOf("#") >= 0 ? baseUri.IndexOf("#") : baseUri.Length);
-            path = path.Substring(0, path.IndexOf("?") >= 0 ? path.IndexOf("?") : path.Length);
+            string path = UrlHelper.RemoveUrlId(baseUri);
+            path = UrlHelper.RemoveUrlQueryStrings(path);
 
             string pdfPath = $"{path}.pdf";
             return Task.FromResult($"<object class=\"pdf\" data=\"{pdfPath}\" type =\"application/pdf\" width =\"100%\" height=\"100 %\">This browser does not support embedded pdf. Please download the pdf to view it: <a href=\"{pdfPath}\" target=\"_blank\" rel=\"noopener noreferrer\">{Name}.pdf</a>.</object>");

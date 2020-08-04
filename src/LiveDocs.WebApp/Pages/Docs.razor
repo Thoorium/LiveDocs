@@ -40,15 +40,15 @@
                     <p>
                         @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Markdown))
                         {
-                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Markdown ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Markdown"))">Markdown</NavLink>
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Markdown ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "Markdown"))">Markdown</NavLink>
                         }
                         @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Html))
                         {
-                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Html ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Html"))">Html</NavLink>
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Html ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "Html"))">Html</NavLink>
                         }
                         @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Pdf))
                         {
-                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Pdf ? "active" : "")}")" href="@(AddOrUpdateQueryString(relativePath,"file", "Pdf"))">Pdf</NavLink>
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Pdf ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "Pdf"))">Pdf</NavLink>
                         }
                     </p>
                 </div>
@@ -117,50 +117,6 @@
     private IDocumentationProject currentProject = null;
 
     private IList<IDocumentationDocument> extraDocuments = null;
-
-    private string GetUrlId(string url)
-    {
-        var urlIdRegex = System.Text.RegularExpressions.Regex.Match(url, "#(.*?)($|#|\\?)");
-        string urlId = "";
-
-        if (urlIdRegex.Success)
-            urlId = urlIdRegex.Groups[1].Value;
-        return urlId;
-    }
-
-    private string AddOrUpdateQueryString(string url, string name, string value)
-    {
-        var urlQueryRegex = System.Text.RegularExpressions.Regex.Match(url, "\\?(.*?)($|#|\\?)");
-        string urlQuery = "";
-
-        if (urlQueryRegex.Success)
-            urlQuery = urlQueryRegex.Groups[1].Value;
-
-        string urlId = GetUrlId(url);
-
-        if (!string.IsNullOrWhiteSpace(urlId))
-        {
-            urlId = "#" + urlId;
-            url = url.Replace(urlId, "");
-        }
-
-        var queries = System.Web.HttpUtility.ParseQueryString(urlQuery);
-
-        queries[name] = value;
-
-        string path = url.Substring(0, url.IndexOf("?") >= 0 ? url.IndexOf("?") : url.Length);
-        string query = "?";
-
-        for (int i = 0; i < queries.Count; i++)
-        {
-            if (i > 0)
-                query += "&";
-            string key = queries.Keys[i];
-            query += $"{key}={queries[key]}";
-        }
-
-        return path + query + urlId;
-    }
 
     private async Task ScrollTo(string id)
     {
@@ -253,7 +209,7 @@
             documentType = document.DocumentType.ToString();
             documentationDocument = document;
 
-            renderContent = await documentationDocument.ToHtml(_NavManager.Uri);
+            renderContent = await documentationDocument.ToHtml(currentProject, _NavManager.Uri);
 
             // Look for extra documents
             if (documentPath.Length == 0)
@@ -265,7 +221,7 @@
             removePreviousDocumentType = true;
 
             // If there's a # parameter specified, let's scroll to it.
-            string urlId = GetUrlId(relativePath);
+            string urlId = UrlHelper.GetUrlId(relativePath);
             if (!string.IsNullOrWhiteSpace(urlId))
                 await ScrollTo(urlId);
 
@@ -291,7 +247,7 @@
     {
         // If the event is throw by a # parameter being appended, we want to scroll to it.
         // Also compare the current url with the previous one to allow inter-document navigation with a id.
-        string urlId = GetUrlId(e.Location);
+        string urlId = UrlHelper.GetUrlId(e.Location);
         string cleanUrl = _NavManager.ToBaseRelativePath(e.Location).Replace($"#{urlId}", "");
         if (!string.IsNullOrWhiteSpace(urlId) && relativePath == cleanUrl)
         {

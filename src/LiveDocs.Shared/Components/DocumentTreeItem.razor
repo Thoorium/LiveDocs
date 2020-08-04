@@ -24,7 +24,7 @@
 
     private string AddOrUpdateUrlId(string url, string id)
     {
-        string path = url.Substring(0, url.IndexOf("#") >= 0 ? url.IndexOf("#") : url.Length);
+        string path = UrlHelper.RemoveUrlId(url);
         return $"{path}#{id}";
     }
 }

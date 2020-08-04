@@ -44,7 +44,7 @@ namespace LiveDocs.WebApp.Controllers
             else path = Path.Combine(_Options.GetDocumentationFolderAsAbsolute(_HostEnvironment.ContentRootPath).FullName, fullFilename);
 
             if (!System.IO.File.Exists(path))
-                return NotFound(fullFilename);
+                return NotFound($"Not found: {fullFilename}");
 
             var fileStream = new FileStream(path, FileMode.Open);
 

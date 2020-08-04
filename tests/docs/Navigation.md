@@ -12,6 +12,11 @@
   - [Images](nested/images)
 - Another project
   - [Document 1](test-project/document1)
+- By name
+  - [Multi document pdf](Multi%20document.pdf.html)
+  - [Some document](Special%20Folder%20123/Another-folder/Some%20Document.pdf.md.html)
+  - [Some document header](Special%20Folder%20123/Another-folder/Some%20Document.pdf.md.html#my-other-id)
+  - [Another document header](Special%20Folder%20123/Another-folder/Some%20Document.pdf.md.html#another-id)
 
 ## First title
 

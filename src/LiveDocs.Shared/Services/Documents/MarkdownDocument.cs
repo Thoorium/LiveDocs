@@ -14,6 +14,7 @@ namespace LiveDocs.Shared.Services.Documents
         public DocumentationDocumentType DocumentType => DocumentationDocumentType.Markdown;
 
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
+        public string FileName => System.IO.Path.GetFileName(Path);
 
         public IDocumentationDocument[] SubDocuments { get; set; } = null;
 
@@ -26,9 +27,9 @@ namespace LiveDocs.Shared.Services.Documents
             _MarkdownPipeline = markdownPipeline;
         }
 
-        public async Task<string> ToHtml(string baseUri)
+        public async Task<string> ToHtml(IDocumentationProject documentationProject, string baseUri)
         {
-            return await Markdown.ToHtml(baseUri);
+            return await Markdown.ToHtml(documentationProject, baseUri);
         }
         
         public Task<string> GetTitle()
