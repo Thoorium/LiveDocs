@@ -9,6 +9,7 @@ namespace LiveDocs.WebApp.Services
     public class DocumentationProject : IDocumentationProject
     {
         public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
+        public string KeyPath => _KeyPath == null ? "" : _KeyPath + "/" + Key;
         public string Path { get; set; }
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path) ?? "";
         public List<IDocumentationDocument> DefaultDocuments { get; set; } = new List<IDocumentationDocument>();
@@ -17,10 +18,17 @@ namespace LiveDocs.WebApp.Services
         public IDocumentationDocument LandingPage { get; set; }
 
         private readonly LiveDocsOptions _LiveDocsOptions;
+        private readonly string _KeyPath;
 
-        public DocumentationProject(LiveDocsOptions liveDocsOptions)
+        /// <summary>
+        /// Create a documentation project.
+        /// </summary>
+        /// <param name="liveDocsOptions"></param>
+        /// <param name="keyPath">Previous KeyPath to the project. If null, the current KeyPath will be empty.</param>
+        public DocumentationProject(LiveDocsOptions liveDocsOptions, string keyPath)
         {
             _LiveDocsOptions = liveDocsOptions;
+            _KeyPath = keyPath;
         }
 
         public async Task<IDocumentationDocument> GetDocumentationDefaultDocument(string documentType = "")

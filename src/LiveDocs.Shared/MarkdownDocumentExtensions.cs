@@ -42,7 +42,7 @@ namespace LiveDocs.Shared
             var urlId = UrlHelper.GetUrlId(originalUrl);
 
             // Extract the url parts.
-            var urlParts = UrlHelper.RemoveUrlId(originalUrl).Replace(hostUrl, "").Replace("%20", " ").Split("/");
+            var urlParts = UrlHelper.RemoveUrlId(originalUrl).Replace(hostUrl + documentationProject.KeyPath, "").Replace("%20", " ").Split("/");
 
             // Normalize all the elements up to the file name to enable search by key.
             for (int i = 0; i < urlParts.Length - 1; i++)
@@ -61,7 +61,7 @@ namespace LiveDocs.Shared
             urlParts[^1] = document.Key;
 
             // Merge back the url parts into an url.
-            var finalUrl = string.Join("/", urlParts);
+            var finalUrl = documentationProject.KeyPath + string.Join("/", urlParts);
 
             // Put back the id if there was one.
             if (!string.IsNullOrWhiteSpace(urlId))

@@ -7,6 +7,7 @@ namespace LiveDocs.Shared.Services
     public interface IDocumentationProject
     {
         public string Key { get; }
+        public string KeyPath { get; }
         public string Name { get; }
         string Path { get; set; }
         List<IDocumentationDocument> DefaultDocuments { get; set; }

@@ -6,7 +6,6 @@ using Markdig;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,7 +35,7 @@ namespace LiveDocs.WebApp.Services
 
             IDocumentationIndex documentationIndex = new DocumentationIndex();
 
-            IDocumentationProject documentationProject = new DocumentationProject(_Options);
+            IDocumentationProject documentationProject = new DocumentationProject(_Options, null);
             BuildDocumentationSubTree(directoryInfo, directoryInfo, documentationProject);
 
             foreach (var project in documentationProject.SubProjects)
@@ -44,7 +43,7 @@ namespace LiveDocs.WebApp.Services
                 documentationIndex.Projects.Add(project);
             }
 
-            documentationIndex.DefaultProject = new DocumentationProject(_Options);
+            documentationIndex.DefaultProject = new DocumentationProject(_Options, "");
             documentationIndex.DefaultProject.Documents.AddRange(documentationProject.Documents.OrderBy(o => o.Name));
 
             return Task.FromResult(documentationIndex);
@@ -103,7 +102,7 @@ namespace LiveDocs.WebApp.Services
 
             foreach (var directory in directoryInfo.EnumerateDirectories())
             {
-                IDocumentationProject subProject = new DocumentationProject(_Options);
+                IDocumentationProject subProject = new DocumentationProject(_Options, project.KeyPath);
                 var subDocumentType = BuildDocumentationSubTree(directory, topDirectoryInfo, subProject);
 
                 if (subDocumentType == DocumentationDocumentType.Project)
