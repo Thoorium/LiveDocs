@@ -58,5 +58,25 @@ namespace LiveDocs.WebApp.Services
 
             return await ((IDocumentationProject)this).GetDocumentFor(new[] { _LiveDocsOptions.LandingPageDocument }, "");
         }
+
+        public async Task<string> GetFirstAvailableDocumentPath()
+        {
+            return await GetFirstAvailableDocumentPath(Documents.ToArray(), KeyPath);
+        }
+
+        private async Task<string> GetFirstAvailableDocumentPath(IDocumentationDocument[] currentDocuments, string basePath)
+        {
+            var document = currentDocuments.FirstOrDefault(f => f.DocumentType != DocumentationDocumentType.Folder && f.DocumentType != DocumentationDocumentType.Project);
+
+            if (document != null)
+                return basePath == "/" ? $"/{document.Key}" : $"{basePath}/{document.Key}";
+
+            foreach (var item in currentDocuments.Where(w => w.DocumentType == DocumentationDocumentType.Folder))
+            {
+                return await GetFirstAvailableDocumentPath(item.SubDocuments, basePath == "/" ? $"/{item.Key}" : $"{basePath}/{item.Key}");
+            }
+
+            return null;
+        }
     }
 }

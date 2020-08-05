@@ -130,6 +130,8 @@ namespace LiveDocs.Shared.Services
             return Task.FromResult(document);
         }
 
+        Task<string> GetFirstAvailableDocumentPath();
+
         Task<IDocumentationDocument> GetDocumentationDefaultDocument(string documentType = "");
         Task<IDocumentationDocument[]> GetDocumentationDefaultDocuments(string documentType = "");
         Task<IDocumentationDocument> GetDocumentationLandingPageDocument();
