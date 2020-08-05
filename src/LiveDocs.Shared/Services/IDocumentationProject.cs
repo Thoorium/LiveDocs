@@ -12,6 +12,7 @@ namespace LiveDocs.Shared.Services
         string Path { get; set; }
         List<IDocumentationDocument> DefaultDocuments { get; set; }
         List<IDocumentationDocument> Documents { get; set; }
+        int DocumentCount { get; }
         List<IDocumentationProject> SubProjects { get; set; }
         IDocumentationDocument LandingPage { get; set; }
 
