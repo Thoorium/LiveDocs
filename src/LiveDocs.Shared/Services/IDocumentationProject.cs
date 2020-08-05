@@ -12,6 +12,7 @@ namespace LiveDocs.Shared.Services
         string Path { get; set; }
         List<IDocumentationDocument> DefaultDocuments { get; set; }
         List<IDocumentationDocument> Documents { get; set; }
+        int DocumentCount { get; }
         List<IDocumentationProject> SubProjects { get; set; }
         IDocumentationDocument LandingPage { get; set; }
 
@@ -129,6 +130,8 @@ namespace LiveDocs.Shared.Services
 
             return Task.FromResult(document);
         }
+
+        Task<string> GetFirstAvailableDocumentPath();
 
         Task<IDocumentationDocument> GetDocumentationDefaultDocument(string documentType = "");
         Task<IDocumentationDocument[]> GetDocumentationDefaultDocuments(string documentType = "");

@@ -136,9 +136,14 @@ namespace LiveDocs.WebApp.Services
 
         public async Task RefreshDocumentationIndex(IDocumentationIndex documentationIndex)
         {
+            int documentCountBefore = documentationIndex.DefaultProject.DocumentCount + documentationIndex.Projects.Sum(s => s.DocumentCount);
             if (DocumentationIndex == null)
                 _Logger.LogInformation($"Initializing documentation index. {documentationIndex.DefaultProject.Documents.Count} documents added.");
-            else _Logger.LogInformation($"Refreshing documentation index. Before {DocumentationIndex.DefaultProject.Documents.Count}; After {documentationIndex.DefaultProject.Documents.Count}.");
+            else
+            {
+                int documentCountAfter = DocumentationIndex.DefaultProject.DocumentCount + DocumentationIndex.Projects.Sum(s => s.DocumentCount);
+                _Logger.LogInformation($"Refreshing documentation index. Before {DocumentationIndex.DefaultProject.Documents.Count}; After {documentationIndex.DefaultProject.Documents.Count}.");
+            }
 
             DocumentationIndex = documentationIndex;
 

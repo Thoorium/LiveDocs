@@ -14,6 +14,7 @@ namespace LiveDocs.WebApp.Services
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path) ?? "";
         public List<IDocumentationDocument> DefaultDocuments { get; set; } = new List<IDocumentationDocument>();
         public List<IDocumentationDocument> Documents { get; set; } = new List<IDocumentationDocument>();
+        public int DocumentCount => Documents.Count + SubProjects.Sum(s => s.DocumentCount);
         public List<IDocumentationProject> SubProjects { get; set; } = new List<IDocumentationProject>();
         public IDocumentationDocument LandingPage { get; set; }
 
@@ -57,6 +58,26 @@ namespace LiveDocs.WebApp.Services
                 return null;
 
             return await ((IDocumentationProject)this).GetDocumentFor(new[] { _LiveDocsOptions.LandingPageDocument }, "");
+        }
+
+        public async Task<string> GetFirstAvailableDocumentPath()
+        {
+            return await GetFirstAvailableDocumentPath(Documents.ToArray(), KeyPath);
+        }
+
+        private async Task<string> GetFirstAvailableDocumentPath(IDocumentationDocument[] currentDocuments, string basePath)
+        {
+            var document = currentDocuments.FirstOrDefault(f => f.DocumentType != DocumentationDocumentType.Folder && f.DocumentType != DocumentationDocumentType.Project);
+
+            if (document != null)
+                return basePath == "/" ? $"/{document.Key}" : $"{basePath}/{document.Key}";
+
+            foreach (var item in currentDocuments.Where(w => w.DocumentType == DocumentationDocumentType.Folder))
+            {
+                return await GetFirstAvailableDocumentPath(item.SubDocuments, basePath == "/" ? $"/{item.Key}" : $"{basePath}/{item.Key}");
+            }
+
+            return null;
         }
     }
 }
