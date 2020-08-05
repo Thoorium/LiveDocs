@@ -185,7 +185,7 @@
                 {
                     document = currentProject.Documents.FirstOrDefault();
                     if (document != null)
-                        _NavManager.NavigateTo(document.Key);
+                        _NavManager.NavigateTo($"{currentProject.KeyPath}/{document.Key}");
                     else
                     {
                         await SetDocumentTitle("No document found");
