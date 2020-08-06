@@ -4,7 +4,7 @@
 @if(expanded)
 {
     <ul class="pl-4">
-        @foreach (var item in Item.SubDocuments)
+        @foreach (var item in subDocuments)
         {
             <DocumentationSidebarItem Item="item" Path="@($"{Path}")"></DocumentationSidebarItem>
         }
@@ -19,6 +19,34 @@
     public string Path { get; set; }
 
     private bool expanded = false;
+
+    private LiveDocs.Shared.Services.IDocumentationDocument previousItem = null;
+
+    private List<LiveDocs.Shared.Services.IDocumentationDocument> subDocuments = new List<LiveDocs.Shared.Services.IDocumentationDocument>();
+
+
+    protected override Task OnParametersSetAsync()
+    {
+        if (previousItem == Item)
+            return base.OnParametersSetAsync();
+
+        previousItem = Item;
+
+        var docs = Item.SubDocuments
+            .Where(w => w.DocumentType != Services.DocumentationDocumentType.Project
+              && w.DocumentType != Services.DocumentationDocumentType.Folder)
+            .GroupBy(g => g.Key)
+            .Select(s => s.First()).ToList();
+
+        var folders = Item.SubDocuments
+            .Where(w => w.DocumentType == Services.DocumentationDocumentType.Folder);
+
+        subDocuments.AddRange(docs);
+        subDocuments.AddRange(folders);
+        subDocuments = subDocuments.OrderBy(o => o.Name).ToList();
+
+        return base.OnParametersSetAsync();
+    }
 
     private void Expand()
     {
