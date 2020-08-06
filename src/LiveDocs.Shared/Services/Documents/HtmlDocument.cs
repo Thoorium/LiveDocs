@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -13,11 +12,10 @@ namespace LiveDocs.Shared.Services.Documents
         public string Path { get; set; }
         public DateTime LastUpdate { get; set; }
         public DocumentationDocumentType DocumentType => DocumentationDocumentType.Html;
-
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
         public string FileName => System.IO.Path.GetFileName(Path);
-
         public IDocumentationDocument[] SubDocuments { get; set; } = null;
+        public int SubDocumentsCount => (SubDocuments?.Count(c => c.DocumentType != DocumentationDocumentType.Project && c.DocumentType != DocumentationDocumentType.Project) ?? 0) + SubDocuments?.Sum(s => s.SubDocumentsCount) ?? 0;
 
         // TODO: Replace with content cache when it's done.
         string content = null;

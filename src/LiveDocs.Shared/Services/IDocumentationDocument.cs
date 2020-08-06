@@ -11,8 +11,8 @@ namespace LiveDocs.Shared.Services
         string Path { get; set; }
         DateTime LastUpdate { get; set; }
         DocumentationDocumentType DocumentType { get; }
-
         IDocumentationDocument[] SubDocuments { get; set; }
+        int SubDocumentsCount { get; }
 
         Task<string> ToHtml(IDocumentationProject documentationProject, string baseUri = "");
 
