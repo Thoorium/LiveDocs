@@ -32,6 +32,8 @@
 
         previousItem = Item;
 
+        subDocuments.Clear();
+
         var docs = Item.SubDocuments
             .Where(w => w.DocumentType != Services.DocumentationDocumentType.Project
               && w.DocumentType != Services.DocumentationDocumentType.Folder)
