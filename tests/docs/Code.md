@@ -15,3 +15,19 @@ public string ConcatParts(string part1, string part2, string part3, string part4
     return "Something something using params instead.";
 }
 ```
+
+```powershell
+Powershell.Command()
+```
+
+```bash
+bash command
+```
+
+```sh
+shell command
+```
+
+```cmd
+cmd command
+```
