@@ -12,11 +12,10 @@ namespace LiveDocs.Shared.Services.Documents
         public string Path { get; set; }
         public DateTime LastUpdate { get; set; }
         public DocumentationDocumentType DocumentType => DocumentationDocumentType.Markdown;
-
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
         public string FileName => System.IO.Path.GetFileName(Path);
-
         public IDocumentationDocument[] SubDocuments { get; set; } = null;
+        public int SubDocumentsCount => (SubDocuments?.Count(c => c.DocumentType != DocumentationDocumentType.Project && c.DocumentType != DocumentationDocumentType.Project) ?? 0) + SubDocuments?.Sum(s => s.SubDocumentsCount) ?? 0;
 
         public Markdig.Syntax.MarkdownDocument Markdown => Markdig.Markdown.Parse(System.IO.File.ReadAllText(Path), _MarkdownPipeline);
 

@@ -14,7 +14,7 @@ namespace LiveDocs.WebApp.Services
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path) ?? "";
         public List<IDocumentationDocument> DefaultDocuments { get; set; } = new List<IDocumentationDocument>();
         public List<IDocumentationDocument> Documents { get; set; } = new List<IDocumentationDocument>();
-        public int DocumentCount => Documents.Count + SubProjects.Sum(s => s.DocumentCount);
+        public int DocumentCount => Documents.Count(c => c.DocumentType != DocumentationDocumentType.Folder && c.DocumentType != DocumentationDocumentType.Project) + SubProjects.Sum(s => s.DocumentCount) + Documents.Sum(s => s.SubDocumentsCount);
         public List<IDocumentationProject> SubProjects { get; set; } = new List<IDocumentationProject>();
         public IDocumentationDocument LandingPage { get; set; }
 
