@@ -8,33 +8,26 @@ body {
 
 #blazor-error-ui {
   display: none;
-  bottom: 0;
-  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
-  left: 0;
+  box-shadow: -1px 2px rgba(0, 0, 0, 0.2);
   padding: 0.1rem 1rem;
-  position: fixed;
   width: 100%;
-  z-index: 1000;
   height: 2rem;
   text-align: center;
-  background-color: rgba(255, 255, 255, 0.7); }
+  background-color: rgba(23, 162, 184, 0.1); }
 
 #blazor-error-ui .dismiss {
+  display: none;
   cursor: pointer;
   position: absolute;
   right: 0.75rem; }
 
 #components-reconnect-modal {
-  bottom: 0;
-  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
-  left: 0;
+  box-shadow: -1px 2px rgba(0, 0, 0, 0.2);
   padding: 0.1rem 1rem;
-  position: fixed;
   width: 100%;
-  z-index: 1000;
   height: 2rem;
   text-align: center;
-  background-color: rgba(255, 255, 255, 0.7); }
+  background-color: rgba(23, 162, 184, 0.1); }
 
 #components-reconnect-modal.components-reconnect-hide {
   display: none; }
@@ -60,6 +53,8 @@ body {
 .components-reconnect-refused > .refused {
   display: block; }
 
-@media (prefers-color-scheme: dark) {
-  #components-reconnect-modal, #blazor-error-ui {
-    background-color: rgba(25, 29, 33, 0.7); } }
+.components-reconnect-rejected > div {
+  display: none; }
+
+.components-reconnect-rejected > .rejected {
+  display: block; }
