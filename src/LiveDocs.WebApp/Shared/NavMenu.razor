@@ -11,7 +11,7 @@
                 @if (_DocumentationService.DocumentationIndex.Projects.Count > 0)
                 {
                     <LiveDocs.Shared.Components.NavLinkDropdownItem Text="Documentation" BaseRoute="/">
-                        @foreach (var item in _DocumentationService.DocumentationIndex.Projects)
+                        @foreach (var item in _DocumentationService.DocumentationIndex.Projects.OrderBy(o => o.Name.ToLower()))
                         {
                             <NavLink class="dropdown-item" href="@(item.Key + "/")">@item.Name</NavLink>
                         }

@@ -31,7 +31,7 @@
                 && w.Key != Project.LandingPage?.Key
                 && w.DocumentType != Services.DocumentationDocumentType.Project)
             .GroupBy(g => g.Key)
-            .Select(s => s.First()).ToList();
+            .Select(s => s.First()).OrderBy(o => o.Name.ToLower()).ToList();
 
         return base.OnParametersSetAsync();
     }

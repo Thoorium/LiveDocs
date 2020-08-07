@@ -38,14 +38,14 @@
             .Where(w => w.DocumentType != Services.DocumentationDocumentType.Project
               && w.DocumentType != Services.DocumentationDocumentType.Folder)
             .GroupBy(g => g.Key)
-            .Select(s => s.First()).ToList();
+            .Select(s => s.First()).OrderBy(o => o.Name.ToLower()).ToList();
 
         var folders = Item.SubDocuments
             .Where(w => w.DocumentType == Services.DocumentationDocumentType.Folder);
 
         subDocuments.AddRange(docs);
         subDocuments.AddRange(folders);
-        subDocuments = subDocuments.OrderBy(o => o.Name).ToList();
+        subDocuments = subDocuments.OrderBy(o => o.Name.ToLower()).ToList();
 
         return base.OnParametersSetAsync();
     }
