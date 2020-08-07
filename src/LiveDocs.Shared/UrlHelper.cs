@@ -49,6 +49,16 @@ namespace LiveDocs.Shared
             return urlId;
         }
 
+        public static string GetQueryString(string url)
+        {
+            var queryStringRegex = Regex.Match(url, "\\?(.*?)($|#|\\?)");
+            string queryString = "";
+
+            if (queryStringRegex.Success)
+                queryString = queryStringRegex.Groups[1].Value;
+            return queryString;
+        }
+
         public static string RemoveUrlId(string url)
         {
             return url.Substring(0, url.IndexOf("#") >= 0 ? url.IndexOf("#") : url.Length);

@@ -9,9 +9,20 @@
   - [Header 10.3](very-long-document#header-10.3)
 - Nested
   - [Nested](nested/nested)
-  - [Images](nested/images)
+  - [Images](nested/imAges)
 - Another project
   - [Document 1](test-project/document1)
+- Another document
+  - [Default](different)
+  - [Markdown](different?file=Markdown)
+  - [Html](different?file=Html)
+  - [Html,Markdown](different?file=Html&file=Markdown)
+  - [Html#empty](different?file=Html#empty)
+  - [Html,Markdown#empty](different?file=Html&file=Markdown#empty)
+- Home page
+  - [Home](/)
+  - [Home]( )
+  - [Home](%20)
 - By name
   - [Multi document pdf](Multi%20document.pdf.html)
   - [Some document](Special%20Folder%20123/Another-folder/Some%20Document.pdf.md.html)
