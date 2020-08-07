@@ -194,6 +194,9 @@ textarea.http-response-data[readonly] {
   animation: phAnimation .8s linear infinite;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0) 46%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0) 54%) 50% 50%; }
 
+.language-bash::before, .language-sh::before, .language-powershell::before {
+  color: var(--cyan); }
+
 @media (max-width: 991.98px) {
   .offcanvas-collapse {
     position: fixed;

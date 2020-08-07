@@ -241,6 +241,10 @@ textarea.http-response-data[readonly] {
     background: linear-gradient(90deg,hsla(0,0%,100%,0) 46%,hsla(0,0%,100%,.35) 50%,hsla(0,0%,100%,0) 54%) 50% 50%
 }
 
+.language-bash::before, .language-sh::before, .language-powershell::before {
+    color: var(--cyan);
+}
+
 @media (max-width: 991.98px) {
     .offcanvas-collapse {
         position: fixed;
@@ -269,7 +273,7 @@ textarea.http-response-data[readonly] {
     }
 
     .sidebar.tree {
-        display:none;
+        display: none;
     }
 }
 
