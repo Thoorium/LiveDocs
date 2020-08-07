@@ -5,6 +5,7 @@ using Markdig.Syntax;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace LiveDocs.Shared
 {
@@ -15,8 +16,6 @@ namespace LiveDocs.Shared
             using StringWriter stringWriter = new StringWriter();
             HtmlRenderer htmlRenderer = new HtmlRenderer(stringWriter);
 
-            htmlRenderer.ObjectRenderers.AddIfNotAlready(new HtmlTableRenderer());
-
             if (!string.IsNullOrWhiteSpace(urlBase))
             {
                 // If the url is a file, we want to remove the query string.
@@ -25,7 +24,14 @@ namespace LiveDocs.Shared
                 else htmlRenderer.BaseUrl = new Uri(UrlHelper.RemoveUrlQueryStrings(urlBase), UriKind.Absolute);
             }
 
-            htmlRenderer.LinkRewriter = (originalUrl) => RewriteUrl(originalUrl, htmlRenderer.BaseUrl, documentationProject);
+
+            htmlRenderer.ObjectRenderers.AddIfNotAlready(new HtmlTableRenderer());
+
+            var linkRender = new LinkInlineRenderer
+            {
+                LinkRewriter = (originalUrl) => RewriteUrl(originalUrl, htmlRenderer.BaseUrl, documentationProject)
+            };
+            htmlRenderer.ObjectRenderers.ReplaceOrAdd<Markdig.Renderers.Html.Inlines.LinkInlineRenderer>(linkRender);
 
             htmlRenderer.Render(markdownDocument);
             await stringWriter.FlushAsync();
@@ -33,16 +39,21 @@ namespace LiveDocs.Shared
             return stringWriter.ToString();
         }
 
-        private static string RewriteUrl(string originalUrl, Uri urlBase, IDocumentationProject documentationProject)
+        private static LinkInlineRenderer.LinkInlineRewrite RewriteUrl(string originalUrl, Uri urlBase, IDocumentationProject documentationProject)
         {
+            originalUrl = HttpUtility.UrlDecode(originalUrl);
+            if (originalUrl.StartsWith("#") || string.IsNullOrWhiteSpace(originalUrl) || originalUrl == "/")
+                return new LinkInlineRenderer.LinkInlineRewrite { NewLink = originalUrl };
+
             // Get the host url to clear the original url.
             var hostUrl = urlBase.AbsoluteUri.Replace(urlBase.AbsolutePath, "");
 
             // Keep a copy of the url id, if there's one.
             var urlId = UrlHelper.GetUrlId(originalUrl);
+            var urlQueryString = UrlHelper.GetQueryString(originalUrl);
 
             // Extract the url parts.
-            var urlParts = UrlHelper.RemoveUrlId(originalUrl).Replace(hostUrl + documentationProject.KeyPath, "").Replace("%20", " ").Split("/");
+            var urlParts = UrlHelper.RemoveUrlId(originalUrl).Replace(hostUrl + documentationProject.KeyPath, "").Replace($"#{urlId}", "").Replace($"?{urlQueryString}", "").Split("/");
 
             // Normalize all the elements up to the file name to enable search by key.
             for (int i = 0; i < urlParts.Length - 1; i++)
@@ -53,20 +64,26 @@ namespace LiveDocs.Shared
             // Try to find a corresponding document by the document file name.
             var document = documentationProject.GetDocumentByFileName(urlParts)?.Result;
 
-            // No matching document found, return the original url.
             if (document == null)
-                return originalUrl;
+                document = documentationProject.GetDocumentFor(urlParts)?.Result;
+
+            // No matching document found, return the original url to open in a new url since this might be an external document.
+            if (document == null)
+                return new LinkInlineRenderer.LinkInlineRewrite { NewLink = originalUrl, Target = "_blank" };
 
             // Replace the file name with the matching document key.
             urlParts[^1] = document.Key;
 
             // Merge back the url parts into an url.
-            var finalUrl = documentationProject.KeyPath + string.Join("/", urlParts);
+            var finalUrl = documentationProject.KeyPath + (documentationProject.KeyPath == "/" ? "" : "/") + string.Join("/", urlParts);
+
+            if(!string.IsNullOrWhiteSpace(urlQueryString))
+                finalUrl += $"?{urlQueryString}";
 
             // Put back the id if there was one.
             if (!string.IsNullOrWhiteSpace(urlId))
                 finalUrl += $"#{urlId}";
-            return finalUrl;
+            return new LinkInlineRenderer.LinkInlineRewrite { NewLink = finalUrl };
         }
     }
 }
