@@ -28,6 +28,9 @@
   - [Some document](Special%20Folder%20123/Another-folder/Some%20Document.pdf.md.html)
   - [Some document header](Special%20Folder%20123/Another-folder/Some%20Document.pdf.md.html#my-other-id)
   - [Another document header](Special%20Folder%20123/Another-folder/Some%20Document.pdf.md.html#another-id)
+- External
+  - [AspNet Docs](https://docs.microsoft.com/en-ca/aspnet/core/)
+  - [Blazor components](https://docs.microsoft.com/en-ca/aspnet/core/blazor/#components)
 
 ## First title
 
