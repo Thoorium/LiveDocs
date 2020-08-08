@@ -97,7 +97,7 @@ namespace LiveDocs.WebApp.Services
             if (cancellationToken.IsCancellationRequested || contentHits == null)
                 return documents;
 
-            var hits = nameHits.Concat(contentHits).OrderByDescending(o => o.Score);
+            var hits = nameHits.Concat(contentHits).OrderByDescending(o => o.Score).Take(8);
 
             foreach (var hit in hits)
             {
@@ -131,7 +131,7 @@ namespace LiveDocs.WebApp.Services
                 if (cancellationToken.IsCancellationRequested)
                     return null;
 
-                spanQueries.Add(new SpanMultiTermQueryWrapper<FuzzyQuery>(new FuzzyQuery(new Term(field, cleanTerm))));
+                spanQueries.Add(new SpanMultiTermQueryWrapper<FuzzyQuery>(new FuzzyQuery(new Term(field, cleanTerm), maxEdits: 1)));
             }
 
             SpanNearQuery query = new SpanNearQuery(spanQueries.ToArray(), 0, true);
