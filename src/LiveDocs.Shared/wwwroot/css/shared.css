@@ -33,6 +33,9 @@ li.dropdown:hover > div.dropdown-menu {
 .dropdown-item.active:hover, .dropdown-item:active:hover {
   background-color: #212529; }
 
+form.dropdown input:focus + div.dropdown-menu:not(:empty), form.dropdown:hover div.dropdown-menu:not(:empty), div.dropdown-menu:hover {
+  display: block; }
+
 div.sidebar {
   min-width: 17.5rem;
   max-width: 17.5rem; }
@@ -238,7 +241,7 @@ textarea.http-response-data[readonly] {
     color: #adadad; }
   .form-control {
     background-color: #191d21; }
-  .navbar-nav .dropdown-menu {
+  .dropdown-menu {
     border: 1px solid rgba(0, 0, 0, 0.15);
     background-color: #343a40 !important; }
   ul.documentation-sidebar a, li.nav-item.nested, ul.document-tree li {

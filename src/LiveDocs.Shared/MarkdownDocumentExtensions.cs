@@ -81,7 +81,7 @@ namespace LiveDocs.Shared
             urlParts[^1] = document.Key;
 
             // Merge back the url parts into an url.
-            var finalUrl = documentationProject.KeyPath + (documentationProject.KeyPath == "/" ? "" : "/") + string.Join("/", urlParts);
+            var finalUrl = documentationProject.KeyPath + string.Join("/", urlParts);
 
             if(!string.IsNullOrWhiteSpace(urlQueryString))
                 finalUrl += $"?{urlQueryString}";

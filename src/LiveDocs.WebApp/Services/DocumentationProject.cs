@@ -9,7 +9,7 @@ namespace LiveDocs.WebApp.Services
     public class DocumentationProject : IDocumentationProject
     {
         public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
-        public string KeyPath => _KeyPath == null ? "" : _KeyPath + "/" + Key;
+        public string KeyPath => ((_KeyPath ?? "") + "/" + Key).Trim('/');
         public string Path { get; set; }
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path) ?? "";
         public List<IDocumentationDocument> DefaultDocuments { get; set; } = new List<IDocumentationDocument>();
@@ -70,11 +70,11 @@ namespace LiveDocs.WebApp.Services
             var document = currentDocuments.FirstOrDefault(f => f.DocumentType != DocumentationDocumentType.Folder && f.DocumentType != DocumentationDocumentType.Project);
 
             if (document != null)
-                return basePath == "/" ? $"/{document.Key}" : $"{basePath}/{document.Key}";
+                return $"{basePath}/{document.Key}";
 
             foreach (var item in currentDocuments.Where(w => w.DocumentType == DocumentationDocumentType.Folder))
             {
-                return await GetFirstAvailableDocumentPath(item.SubDocuments, basePath == "/" ? $"/{item.Key}" : $"{basePath}/{item.Key}");
+                return await GetFirstAvailableDocumentPath(item.SubDocuments, $"{basePath}/{item.Key}");
             }
 
             return null;

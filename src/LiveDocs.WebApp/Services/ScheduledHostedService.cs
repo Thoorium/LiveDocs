@@ -51,6 +51,7 @@ namespace LiveDocs.WebApp.Services
                 var documentationIndex = await index.IndexFiles();
 
                 await index.RefreshDocumentationIndex(documentationIndex);
+                await index.RefreshSearchIndex(documentationIndex);
             }
         }
 

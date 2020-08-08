@@ -1,5 +1,7 @@
 ﻿@inject Microsoft.Extensions.Options.IOptions<LiveDocs.WebApp.Options.LiveDocsOptions> _LiveDocsOptions
 @inject IDocumentationService _DocumentationService
+@using LiveDocs.Shared.Services.Search
+@using System.Threading.Tasks
     <div class="fixed-top navbar-dark bg-dark mx-auto">
         <nav class="navbar navbar-expand-lg justify-content-center mx-auto">
             <a class="navbar-brand mr-auto mr-lg-0" href="">@_LiveDocsOptions.Value.ApplicationName</a>
@@ -38,8 +40,21 @@
             <div class="navbar-collapse offcanvas-collapse @NavMenuCssClass" style="max-width:75rem;">
                 <ul class="navbar-nav mr-auto">
                 </ul>
-                <form class="form-inline my-2 my-lg-0" style="display:none;">
-                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" />
+                <form class="form-inline my-2 my-lg-0 dropdown">
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @bind="@SearchQuery" @bind:event="oninput" />
+                    <div class="dropdown-menu " aria-labelledby="dropdown" style="width:99%">
+                        @foreach (var item in documents)
+                        {
+                            int lastIndex = item.KeyPath.LastIndexOf("/");
+                            <NavLink class="dropdown-item" href="@(item.KeyPath)">
+                                @if(lastIndex > -1)
+                                {
+                                    <span class="text-muted mr-1">@(item.KeyPath.Substring(0, lastIndex))</span>
+                                }
+                                @item.Document.Name
+                            </NavLink>
+                        }
+                    </div>
                 </form>
             </div>
         </nav>
@@ -52,5 +67,53 @@
     void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    string searchQuery;
+    bool isSearching;
+    System.Threading.CancellationTokenSource currentSearchCts;
+    ISearchResult[] documents = new ISearchResult[0];
+    bool noResults;
+
+    string SearchQuery
+    {
+        get => searchQuery;
+        set
+        {
+            searchQuery = value;
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                _ = SearchDebounced(searchQuery);
+            } else documents = new ISearchResult[0];
+        }
+    }
+
+    async Task SearchDebounced(string query)
+    {
+        try
+        {
+            // Cancel any existing pending search, and begin a new one
+            noResults = false;
+            currentSearchCts?.Cancel();
+            currentSearchCts = new System.Threading.CancellationTokenSource();
+            var cancellationToken = currentSearchCts.Token;
+
+            await Task.Delay(500);
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                var results = await _DocumentationService.SearchIndex.Search(query, cancellationToken);
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    documents = results.ToArray();
+                    noResults = documents.Length == 0;
+                    currentSearchCts = null;
+                }
+            }
+
+            StateHasChanged();
+        } catch (OperationCanceledException) { } catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.StackTrace);
+        }
     }
 }

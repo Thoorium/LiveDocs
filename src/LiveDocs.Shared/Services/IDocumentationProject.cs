@@ -60,7 +60,7 @@ namespace LiveDocs.Shared.Services
                 if (document != null)
                     return Task.FromResult(document);
 
-                return Task.FromResult(documents.FirstOrDefault());
+                return Task.FromResult(documents.FirstOrDefault(f => f.Key == finalKey));
             }
 
             document = documents.FirstOrDefault(f => f.DocumentType == DocumentationHelper.GetDocumentationDocumentTypeFromString(documentType) && f.Key == finalKey);
