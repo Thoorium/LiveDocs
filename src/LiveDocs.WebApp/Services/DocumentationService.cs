@@ -37,7 +37,7 @@ namespace LiveDocs.WebApp.Services
 
             IDocumentationIndex documentationIndex = new DocumentationIndex();
 
-            IDocumentationProject documentationProject = new DocumentationProject(_Options, "");
+            IDocumentationProject documentationProject = new DocumentationProject(_Options, null);
             BuildDocumentationSubTree(directoryInfo, directoryInfo, documentationProject);
 
             foreach (var project in documentationProject.SubProjects)

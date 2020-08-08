@@ -9,7 +9,7 @@ namespace LiveDocs.WebApp.Services
     public class DocumentationProject : IDocumentationProject
     {
         public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
-        public string KeyPath => ((_KeyPath ?? "") + "/" + Key).Trim('/');
+        public string KeyPath => _KeyPath == null ? "" : (_KeyPath + "/" + Key).Trim('/');
         public string Path { get; set; }
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path) ?? "";
         public List<IDocumentationDocument> DefaultDocuments { get; set; } = new List<IDocumentationDocument>();
@@ -41,6 +41,9 @@ namespace LiveDocs.WebApp.Services
         public async Task<IDocumentationDocument[]> GetDocumentationDefaultDocuments(string documentType = "")
         {
             List<IDocumentationDocument> documentationDefaultDocuments = new List<IDocumentationDocument>();
+
+            if (_LiveDocsOptions.DefaultDocuments == null)
+                return documentationDefaultDocuments.ToArray();
 
             foreach (var item in _LiveDocsOptions.DefaultDocuments)
             {
