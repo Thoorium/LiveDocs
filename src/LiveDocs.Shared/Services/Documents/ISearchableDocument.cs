@@ -4,7 +4,7 @@ namespace LiveDocs.Shared.Services.Documents
 {
     public interface ISearchableDocument
     {
-        string Name { get; }
+        public string Name { get; }
         public Task<string> GetContent();
     }
 }

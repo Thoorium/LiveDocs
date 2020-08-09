@@ -65,18 +65,23 @@ namespace LiveDocs.WebApp.Services
 
                 ISearchableDocument searchableDocument = (ISearchableDocument)document;
                 string content = await searchableDocument.GetContent();
-                if (content.Length > 30000)
-                    content = content.Substring(0, 30000);
-
                 List<string> tempPaths = new List<string>(paths);
                 tempPaths.Add(document.Key);
-                Document doc = new Document
+                do
                 {
-                    new TextField("name", searchableDocument.Name, Field.Store.YES),
-                    new TextField("content", content, Field.Store.YES),
-                    new StringField("keypath", string.Join("/", tempPaths), Field.Store.YES)
-                };
-                writer.AddDocument(doc);
+                    string contentSlice = "";
+                    int sliceLength = content.Length > 32000 ? 32000 : content.Length;
+                    contentSlice = content.Substring(0, sliceLength);
+                    content = content.Remove(0, sliceLength);
+                    Document doc = new Document
+                    {
+                        new TextField("name", searchableDocument.Name, Field.Store.YES),
+                        new TextField("content", contentSlice, Field.Store.YES),
+                        new StringField("keypath", string.Join("/", tempPaths), Field.Store.YES)
+                    };
+                    writer.AddDocument(doc);
+
+                } while (content.Length > 0);
             }
         }
 
