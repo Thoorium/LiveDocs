@@ -1,12 +1,13 @@
 ﻿using Markdig;
 using Markdig.Syntax;
+using Markdig.Syntax.Inlines;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace LiveDocs.Shared.Services.Documents
 {
-    public class MarkdownDocument : IDocumentationDocument
+    public class MarkdownDocument : IDocumentationDocument, ISearchableDocument
     {
         public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
         public string Path { get; set; }
@@ -40,6 +41,9 @@ namespace LiveDocs.Shared.Services.Documents
             return Task.FromResult(Name);
         }
 
-
+        public Task<string> GetContent()
+        {
+            return Task.FromResult(string.Join(" ", Markdown.Descendants<LiteralInline>().Select(s => s.ToString())));
+        }
     }
 }

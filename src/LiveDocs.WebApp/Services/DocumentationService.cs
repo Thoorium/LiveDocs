@@ -1,6 +1,7 @@
 ﻿using LiveDocs.Shared;
 using LiveDocs.Shared.Services;
 using LiveDocs.Shared.Services.Documents;
+using LiveDocs.Shared.Services.Search;
 using LiveDocs.WebApp.Options;
 using Markdig;
 using Microsoft.AspNetCore.Hosting;
@@ -20,6 +21,7 @@ namespace LiveDocs.WebApp.Services
         private readonly MarkdownPipeline _MarkdownPipeline;
 
         public IDocumentationIndex DocumentationIndex { get; set; }
+        public ISearchIndex SearchIndex { get; set; }
 
         public DocumentationService(ILogger<DocumentationService> logger, IOptions<LiveDocsOptions> options, IWebHostEnvironment hostingEnvironment, MarkdownPipeline markdownPipeline)
         {
@@ -128,10 +130,10 @@ namespace LiveDocs.WebApp.Services
             return subTreeDocumentType;
         }
 
-        public Task<ISearchIndex> RefreshSearchIndex(IDocumentationIndex documentationIndex)
+        public async Task RefreshSearchIndex(IDocumentationIndex documentationIndex)
         {
-            //throw new NotImplementedException();
-            return default;
+            SearchIndex = new LuceneSearchIndex(documentationIndex);
+            await SearchIndex.BuildIndex();
         }
 
         public async Task RefreshDocumentationIndex(IDocumentationIndex documentationIndex)

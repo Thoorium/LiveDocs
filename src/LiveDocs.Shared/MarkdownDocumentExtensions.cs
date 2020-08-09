@@ -42,8 +42,14 @@ namespace LiveDocs.Shared
         private static LinkInlineRenderer.LinkInlineRewrite RewriteUrl(string originalUrl, Uri urlBase, IDocumentationProject documentationProject)
         {
             originalUrl = HttpUtility.UrlDecode(originalUrl);
+
+            // Inner page navigation or home navigation.
             if (originalUrl.StartsWith("#") || string.IsNullOrWhiteSpace(originalUrl) || originalUrl == "/")
                 return new LinkInlineRenderer.LinkInlineRewrite { NewLink = originalUrl };
+
+            // If the url is a full one and the domain is different, open in a new tab.
+            if (Uri.TryCreate(originalUrl, UriKind.Absolute, out Uri originalUri) && !originalUri.Host.Equals(urlBase.Host, StringComparison.InvariantCultureIgnoreCase))
+                return new LinkInlineRenderer.LinkInlineRewrite { NewLink = originalUrl, Target = "_blank" };
 
             // Get the host url to clear the original url.
             var hostUrl = urlBase.AbsoluteUri.Replace(urlBase.AbsolutePath, "");
@@ -75,7 +81,7 @@ namespace LiveDocs.Shared
             urlParts[^1] = document.Key;
 
             // Merge back the url parts into an url.
-            var finalUrl = documentationProject.KeyPath + (documentationProject.KeyPath == "/" ? "" : "/") + string.Join("/", urlParts);
+            var finalUrl = documentationProject.KeyPath + string.Join("/", urlParts);
 
             if(!string.IsNullOrWhiteSpace(urlQueryString))
                 finalUrl += $"?{urlQueryString}";
