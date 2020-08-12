@@ -2,15 +2,15 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using LiveDocs.Shared.Options;
 using LiveDocs.Shared.Services;
-using LiveDocs.WebApp.Options;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace LiveDocs.WebApp.Controllers
+namespace LiveDocs.Server.Controllers
 {
     public class FileController : Controller
     {

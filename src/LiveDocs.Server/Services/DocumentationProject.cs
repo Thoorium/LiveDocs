@@ -2,24 +2,24 @@
 using System.Linq;
 using System.Threading.Tasks;
 using LiveDocs.Shared.Services;
-using LiveDocs.WebApp.Options;
 
-namespace LiveDocs.WebApp.Services
+namespace LiveDocs.Server.Services
 {
     public class DocumentationProject : IDocumentationProject
     {
+        private readonly string[] _DefaultDocuments;
         private readonly string _KeyPath;
-        private readonly LiveDocsOptions _LiveDocsOptions;
+        private readonly string _LandingPageDocument;
         private string keyPath = null;
-
         /// <summary>
         /// Create a documentation project.
         /// </summary>
         /// <param name="liveDocsOptions"></param>
         /// <param name="keyPath">Previous KeyPath to the project. If null, the current KeyPath will be empty.</param>
-        public DocumentationProject(LiveDocsOptions liveDocsOptions, string keyPath)
+        public DocumentationProject(string[] defaultDocuments, string landingPageDocument, string keyPath)
         {
-            _LiveDocsOptions = liveDocsOptions;
+            _DefaultDocuments = defaultDocuments;
+            _LandingPageDocument = landingPageDocument;
             _KeyPath = keyPath;
         }
 
@@ -54,10 +54,10 @@ namespace LiveDocs.WebApp.Services
         {
             List<IDocumentationDocument> documentationDefaultDocuments = new List<IDocumentationDocument>();
 
-            if (_LiveDocsOptions.DefaultDocuments == null)
+            if (_DefaultDocuments == null)
                 return documentationDefaultDocuments.ToArray();
 
-            foreach (var item in _LiveDocsOptions.DefaultDocuments)
+            foreach (var item in _DefaultDocuments)
             {
                 var document = await ((IDocumentationProject)this).GetDocumentFor(new[] { item }, documentType);
                 if (document != null)
@@ -69,10 +69,10 @@ namespace LiveDocs.WebApp.Services
 
         public async Task<IDocumentationDocument> GetDocumentationLandingPageDocument()
         {
-            if (string.IsNullOrWhiteSpace(_LiveDocsOptions.LandingPageDocument))
+            if (string.IsNullOrWhiteSpace(_LandingPageDocument))
                 return null;
 
-            return await ((IDocumentationProject)this).GetDocumentFor(new[] { _LiveDocsOptions.LandingPageDocument }, "");
+            return await ((IDocumentationProject)this).GetDocumentFor(new[] { _LandingPageDocument }, "");
         }
 
         public async Task<string> GetFirstAvailableDocumentPath()

@@ -1,0 +1,33 @@
+﻿<div id="blazor-error-ui">
+    <environment include="Staging,Production">
+        An error has occurred. This application may no longer respond until reloaded.
+    </environment>
+    <environment include="Development">
+        An unhandled exception has occurred. See browser dev tools for details.
+    </environment>
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+    
+<div id="components-reconnect-modal" class="my-reconnect-modal components-reconnect-hide">
+    <div class="show">
+        <p>
+            Connection to the server has been lost. Navigation is limited. Reconnecting...
+        </p>
+    </div>
+    <div class="failed">
+        <p>
+            Reconnection to the server has failed. Navigation is limited. Please reload the application.
+        </p>
+    </div>
+    <div class="rejected">
+        <p>
+            Reconnection to the server has failed. Navigation is limited. Please reload the application.
+        </p>
+    </div>
+    <div class="refused">
+        <p>
+            Reconnection to the server has failed. Navigation is limited. Please reload the application.
+        </p>
+    </div>
+</div>

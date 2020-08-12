@@ -1,30 +1,29 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
+using LiveDocs.Server.Services.Remote;
 using LiveDocs.Shared;
+using LiveDocs.Shared.Options;
 using LiveDocs.Shared.Services;
-using LiveDocs.Shared.Services.Documents;
 using LiveDocs.Shared.Services.Search;
-using LiveDocs.WebApp.Options;
-using Markdig;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace LiveDocs.WebApp.Services
+namespace LiveDocs.Server.Services
 {
     public class DocumentationService : IDocumentationService
     {
         private readonly IWebHostEnvironment _HostingEnvironment;
         private readonly ILogger<DocumentationService> _Logger;
-        private readonly MarkdownPipeline _MarkdownPipeline;
         private readonly LiveDocsOptions _Options;
-        public DocumentationService(ILogger<DocumentationService> logger, IOptions<LiveDocsOptions> options, IWebHostEnvironment hostingEnvironment, MarkdownPipeline markdownPipeline)
+        public DocumentationService(ILogger<DocumentationService> logger, IOptions<LiveDocsOptions> options, IWebHostEnvironment hostingEnvironment)
         {
             _Logger = logger;
             _Options = options.Value;
             _HostingEnvironment = hostingEnvironment;
-            _MarkdownPipeline = markdownPipeline;
         }
 
         public IDocumentationIndex DocumentationIndex { get; set; }
@@ -35,7 +34,7 @@ namespace LiveDocs.WebApp.Services
 
             IDocumentationIndex documentationIndex = new DocumentationIndex();
 
-            IDocumentationProject documentationProject = new DocumentationProject(_Options, null);
+            IDocumentationProject documentationProject = new DocumentationProject(_Options.DefaultDocuments, _Options.LandingPageDocument, null);
             BuildDocumentationSubTree(directoryInfo, directoryInfo, documentationProject);
 
             foreach (var project in documentationProject.SubProjects)
@@ -43,7 +42,7 @@ namespace LiveDocs.WebApp.Services
                 documentationIndex.Projects.Add(project);
             }
 
-            documentationIndex.DefaultProject = new DocumentationProject(_Options, "");
+            documentationIndex.DefaultProject = new DocumentationProject(_Options.DefaultDocuments, _Options.LandingPageDocument, "");
             documentationIndex.DefaultProject.Documents.AddRange(documentationProject.Documents.OrderBy(o => o.Name));
 
             return Task.FromResult(documentationIndex);
@@ -68,12 +67,26 @@ namespace LiveDocs.WebApp.Services
             {
                 await SetProjectDefaultDocuments(project);
             }
+
+            var documentationDirectoryInfo = _Options.GetDocumentationFolderAsAbsolute(_HostingEnvironment.ContentRootPath);
+            var j = JsonSerializer.Serialize(new RemoteDocumentationIndex(documentationIndex, documentationDirectoryInfo.FullName), new JsonSerializerOptions
+            {
+                IgnoreNullValues = true
+            });
+            var navDocumentPath = Path.Combine(documentationDirectoryInfo.FullName, "nav.json");
+            await File.WriteAllTextAsync(navDocumentPath, j);
+
+            documentationIndex.DefaultProject.Documents.Add(new GenericDocumentationDocument
+            {
+                Path = navDocumentPath,
+                LastUpdate = DateTime.Now
+            });
+
+            var doc2 = JsonSerializer.Deserialize<RemoteDocumentationIndex>(File.ReadAllText(navDocumentPath));
         }
 
         public async Task RefreshSearchIndex(IDocumentationIndex documentationIndex)
         {
-            SearchIndex = new LuceneSearchIndex(documentationIndex);
-            await SearchIndex.BuildIndex();
         }
 
         private DocumentationDocumentType BuildDocumentationSubTree(DirectoryInfo directoryInfo, DirectoryInfo topDirectoryInfo, IDocumentationProject project)
@@ -88,32 +101,11 @@ namespace LiveDocs.WebApp.Services
                 switch (docType)
                 {
                     case DocumentationDocumentType.Markdown:
-                        project.Documents.Add(new MarkdownDocument(_MarkdownPipeline)
-                        {
-                            Path = file.FullName,
-                            LastUpdate = file.LastWriteTimeUtc
-                        });
-                        break;
-
                     case DocumentationDocumentType.Pdf:
-                        project.Documents.Add(new PdfDocument
-                        {
-                            Path = file.FullName,
-                            LastUpdate = file.LastWriteTimeUtc
-                        });
-                        break;
-
                     case DocumentationDocumentType.Html:
-                        project.Documents.Add(new HtmlDocument
-                        {
-                            Path = file.FullName,
-                            LastUpdate = file.LastWriteTimeUtc
-                        });
-                        break;
-
                     case DocumentationDocumentType.Word:
                     case DocumentationDocumentType.Folder:
-                        project.Documents.Add(new GenericDocumentationDocument
+                        project.Documents.Add(new DocumentationDocument
                         {
                             Path = file.FullName,
                             DocumentType = docType,
@@ -135,7 +127,7 @@ namespace LiveDocs.WebApp.Services
 
             foreach (var directory in directoryInfo.EnumerateDirectories())
             {
-                IDocumentationProject subProject = new DocumentationProject(_Options, project.KeyPath);
+                IDocumentationProject subProject = new DocumentationProject(_Options.DefaultDocuments, _Options.LandingPageDocument, project.KeyPath);
                 var subDocumentType = BuildDocumentationSubTree(directory, topDirectoryInfo, subProject);
 
                 if (subDocumentType == DocumentationDocumentType.Project)
@@ -143,7 +135,7 @@ namespace LiveDocs.WebApp.Services
                     project.SubProjects.Add(subProject);
                 } else
                 {
-                    var documentationDirectory = new GenericDocumentationDocument
+                    var documentationDirectory = new DocumentationDocument
                     {
                         DocumentType = subDocumentType,
                         Path = directory.FullName,

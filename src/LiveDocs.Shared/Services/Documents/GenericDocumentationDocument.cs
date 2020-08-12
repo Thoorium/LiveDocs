@@ -1,19 +1,18 @@
-﻿using LiveDocs.Shared.Services;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LiveDocs.WebApp.Services
+namespace LiveDocs.Shared.Services
 {
-    public class DocumentationDocument : IDocumentationDocument
+    public class GenericDocumentationDocument : IDocumentationDocument
     {
-        public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
-        public string Path { get; set; }
-        public DateTime LastUpdate { get; set; }
         public DocumentationDocumentType DocumentType { get; set; }
-        public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
         public string FileName => System.IO.Path.GetFileName(Path);
+        public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
+        public DateTime LastUpdate { get; set; }
+        public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
+        public string Path { get; set; }
         public IDocumentationDocument[] SubDocuments { get; set; } = null;
         public int SubDocumentsCount => (SubDocuments?.Count(c => c.DocumentType != DocumentationDocumentType.Project && c.DocumentType != DocumentationDocumentType.Project) ?? 0) + SubDocuments?.Sum(s => s.SubDocumentsCount) ?? 0;
 
