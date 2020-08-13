@@ -17,16 +17,26 @@ namespace LiveDocs.Shared.Services.Remote
         }
 
         public override string Content => content;
-        public async Task Cache()
+
+        public async Task<string> GetTitle()
+        {
+            var cacheResult = await TryCache();
+            if (!cacheResult)
+                return "";
+
+            return await base.GetTitle();
+        }
+
+        public async Task<bool> TryCache()
         {
             if (content != null)
-                return;
+                return true;
 
             while (readingCache)
                 await Task.Delay(5);
 
             if (content != null)
-                return;
+                return true;
 
             readingCache = true;
 
@@ -37,22 +47,24 @@ namespace LiveDocs.Shared.Services.Remote
                     var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
                     content = await httpClient.GetStringAsync(Path);
                 }
+            } catch
+            {
+                return false;
             } finally
             {
                 readingCache = false;
             }
+            return true;
         }
 
-        public async Task<string> GetTitle()
+        public async Task<(bool, string)> TryToHtml(IDocumentationProject documentationProject, string baseUri)
         {
-            await Cache();
-            return await base.GetTitle();
-        }
+            var cacheResult = await TryCache();
+            string htmlString = "";
+            if (cacheResult)
+                htmlString = await ToHtml(documentationProject, baseUri);
 
-        public async Task<string> ToHtml(IDocumentationProject documentationProject, string baseUri = "")
-        {
-            await Cache();
-            return await base.ToHtml(documentationProject, baseUri);
+            return (cacheResult, htmlString);
         }
     }
 }

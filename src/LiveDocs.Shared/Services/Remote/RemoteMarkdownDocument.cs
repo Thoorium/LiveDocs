@@ -18,19 +18,19 @@ namespace LiveDocs.Shared.Services.Remote
         }
 
         public override Markdig.Syntax.MarkdownDocument Markdown => markdown;
-        public async Task Cache()
+
+        public async Task<bool> TryCache()
         {
             if (markdown != null)
-                return;
+                return true;
 
             while (readingCache)
                 await Task.Delay(5);
 
             if (markdown != null)
-                return;
+                return true;
 
             readingCache = true;
-
             try
             {
                 using (var scope = _Services.CreateScope())
@@ -39,22 +39,25 @@ namespace LiveDocs.Shared.Services.Remote
                     var markdownPipeline = scope.ServiceProvider.GetRequiredService<MarkdownPipeline>();
                     markdown = Markdig.Markdown.Parse(await httpClient.GetStringAsync(Path), markdownPipeline);
                 }
+            } catch
+            {
+                return false;
             } finally
             {
                 readingCache = false;
             }
+
+            return true;
         }
 
-        public async Task<string> GetTitle(HttpClient httpClient)
+        public async Task<(bool, string)> TryToHtml(IDocumentationProject documentationProject, string baseUri)
         {
-            await Cache();
-            return await base.GetTitle();
-        }
+            var cacheResult = await TryCache();
+            string htmlString = "";
+            if(cacheResult)
+                htmlString = await ToHtml(documentationProject, baseUri);
 
-        public async Task<string> ToHtml(HttpClient httpClient, IDocumentationProject documentationProject, string baseUri = "")
-        {
-            await Cache();
-            return await ToHtml(documentationProject, baseUri);
+            return (cacheResult, htmlString);
         }
     }
 }

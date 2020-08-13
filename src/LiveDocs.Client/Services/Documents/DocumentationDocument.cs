@@ -18,17 +18,22 @@ namespace LiveDocs.Client.Services.Documents
         public IDocumentationDocument[] SubDocuments { get; set; } = null;
         public int SubDocumentsCount => (SubDocuments?.Count(c => c.DocumentType != DocumentationDocumentType.Project && c.DocumentType != DocumentationDocumentType.Project) ?? 0) + SubDocuments?.Sum(s => s.SubDocumentsCount) ?? 0;
 
-        public Task Cache()
-        {
-            return Task.CompletedTask;
-        }
-
         public Task<string> GetTitle(HttpClient httpClient)
         {
             return Task.FromResult("");
         }
 
-        public async Task<string> ToHtml(IDocumentationProject documentationProject, string baseUri = "")
+        public Task<string> ToHtml(IDocumentationProject documentationProject, string baseUri = "")
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> TryCache()
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<(bool, string)> TryToHtml(IDocumentationProject documentationProject, string baseUri)
         {
             throw new NotImplementedException();
         }

@@ -3,18 +3,23 @@
 @inject Microsoft.JSInterop.IJSRuntime _JSRuntime
 @inject NavigationManager _NavManager
 @inject HttpClient _HttpClient
+@inject IConfiguration _Configuration
 
 <div class="content d-flex mx-auto pb-4">
 
     @if (!landingPage && currentProject != null && !noDocument)
     {
-        <LiveDocs.Shared.Components.DocumentationSidebar Project="currentProject"></LiveDocs.Shared.Components.DocumentationSidebar>
+        <LiveDocs.Shared.Components.DocumentationSidebar Project="currentProject" />
     }
 
     <div class="content px-4 align-self-stretch flex-lg-fill overflow-hidden">
-        @if (notFound)
+        @if (offline)
         {
-            <LiveDocs.Shared.Components.DocumentNotFound documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())"></LiveDocs.Shared.Components.DocumentNotFound>
+            <LiveDocs.Shared.Components.Offline documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())" />
+        }
+        else if (notFound)
+        {
+            <LiveDocs.Shared.Components.DocumentNotFound documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())" />
         } else if (noDocument) {
             <LiveDocs.Shared.Components.NoDocumentFound />
         } else if (string.IsNullOrWhiteSpace(renderContent))
@@ -57,7 +62,7 @@
     </div>
     @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !noDocument)
     {
-        <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument"></LiveDocs.Shared.Components.DocumentTree>
+        <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument" />
     }
 </div>
 
@@ -110,6 +115,9 @@
     // No document has been found for the current project.
     private bool noDocument = false;
 
+    // The client is disconnected from the server or has no network connection
+    private bool offline = false;
+
     // Is the current page the landing page.
     private bool landingPage = false;
 
@@ -124,7 +132,7 @@
 
     private async Task SetDocumentTitle(string title)
     {
-        //_AppState.Title = $"{title} | {_Options.Value.ApplicationName}";
+        await _JSRuntime.InvokeVoidAsync("setDocumentTitle", $"{title} | {_Configuration["ApplicationName"]}");
     }
 
     protected async override Task OnInitializedAsync()
@@ -211,7 +219,15 @@
             documentType = document.DocumentType.ToString();
             documentationDocument = document;
 
-            await documentationDocument.Cache();
+            var cacheSuccess = await documentationDocument.TryCache();
+            if(!cacheSuccess)
+            {
+                offline = true;
+                renderContent = "";
+                StateHasChanged();
+                return;
+            }
+
             renderContent = await documentationDocument.ToHtml(currentProject, _NavManager.Uri);
 
             // Look for extra documents
@@ -242,6 +258,7 @@
         loadNewContent = true;
         notFound = false;
         noDocument = false;
+        offline = false;
         landingPage = false;
         return base.OnParametersSetAsync();
     }

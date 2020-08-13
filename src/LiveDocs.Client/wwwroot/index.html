@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>LiveDocs</title>
+    <title>Loading</title>
     <base href="/" />
     <link rel="stylesheet" href="_content/LiveDocs.Shared/css/bootstrap/bootstrap.css" />
     <link rel="stylesheet" href="_content/LiveDocs.Shared/css/bootstrap/docs.css" />
@@ -40,6 +40,10 @@
 
             return true;
         }
+
+        window.setDocumentTitle = (title) => {
+            document.title = title;
+        };
     </script>
 </body>
 

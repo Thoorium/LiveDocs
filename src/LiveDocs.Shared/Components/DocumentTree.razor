@@ -47,7 +47,9 @@
         {
             if(Document is LiveDocs.Shared.Services.Remote.IRemoteDocumentationDocument remoteDocument)
             {
-                await remoteDocument.Cache();
+                var success = await remoteDocument.TryCache();
+                if(!success)
+                    return;
             }
 
             foreach (Markdig.Syntax.HeadingBlock header in markdownDocument.Markdown.Where(w => w is Markdig.Syntax.HeadingBlock))
