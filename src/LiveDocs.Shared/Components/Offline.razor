@@ -1,8 +1,17 @@
 ﻿<div class="bd-callout bd-callout-danger">
     <p>Could not open document <code>@documentName</code>. Unable to connect to the server. Please verify your network connection.</p>
+    <p><a type="button" class="btn btn-outline-danger btn-sm mr-1 active" @onclick="TryReload">Retry</a></p>
 </div>
 
 @code {
     [Parameter]
     public string documentName { get; set; }
+
+    [Parameter]
+    public EventCallback<EventArgs> OnTryReload { get; set; }
+
+    void TryReload()
+    {
+        OnTryReload.InvokeAsync(new EventArgs());
+    }
 }

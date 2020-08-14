@@ -15,7 +15,7 @@
     <div class="content px-4 align-self-stretch flex-lg-fill overflow-hidden">
         @if (offline)
         {
-            <LiveDocs.Shared.Components.Offline documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())" />
+            <LiveDocs.Shared.Components.Offline OnTryReload="OnTryReload" documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())" />
         }
         else if (notFound)
         {
@@ -60,7 +60,7 @@
             @((MarkupString)renderContent)
         }
     </div>
-    @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !noDocument)
+    @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !noDocument && !offline)
     {
         <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument" />
     }
@@ -133,6 +133,13 @@
     private async Task SetDocumentTitle(string title)
     {
         await _JSRuntime.InvokeVoidAsync("setDocumentTitle", $"{title} | {_Configuration["ApplicationName"]}");
+    }
+
+    private async Task OnTryReload()
+    {
+        offline = false;
+        loadNewContent = true;
+        StateHasChanged();
     }
 
     protected async override Task OnInitializedAsync()
