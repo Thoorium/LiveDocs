@@ -44,7 +44,7 @@
                 <ul class="navbar-nav mr-auto">
                 </ul>
                 <form class="form-inline my-2 my-lg-0 dropdown">
-                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @bind="@SearchQuery" @bind:event="oninput" />
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @bind="@SearchQuery" @bind:event="oninput" @onfocus="OnFocus" />
                     <div class="dropdown-menu " aria-labelledby="dropdown" style="width:99%">
                         @foreach (var item in documents)
                         {
@@ -124,5 +124,10 @@
         {
             Console.Error.WriteLine(ex.StackTrace);
         }
+    }
+
+    async Task OnFocus()
+    {
+        await _DocumentationService.RefreshSearchIndex(_DocumentationService.DocumentationIndex);
     }
 }

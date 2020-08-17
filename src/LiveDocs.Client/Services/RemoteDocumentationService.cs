@@ -13,6 +13,7 @@ namespace LiveDocs.Client.Services
     public class RemoteDocumentationService : IDocumentationService
     {
         private readonly IServiceProvider _Services;
+
         public RemoteDocumentationService(IServiceProvider services)
         {
             _Services = services;
@@ -20,6 +21,7 @@ namespace LiveDocs.Client.Services
 
         public IDocumentationIndex DocumentationIndex { get; set; }
         public ISearchIndex SearchIndex { get; set; }
+
         public async Task<IDocumentationIndex> IndexFiles()
         {
             using (var scope = _Services.CreateScope())
@@ -36,9 +38,19 @@ namespace LiveDocs.Client.Services
             return Task.CompletedTask;
         }
 
-        public Task RefreshSearchIndex(IDocumentationIndex documentationIndex)
+        public async Task RefreshSearchIndex(IDocumentationIndex documentationIndex)
         {
-            throw new NotImplementedException();
+            if (SearchIndex != null)
+                return;
+
+            using (var scope = _Services.CreateScope())
+            {
+                var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
+                var index = await httpClient.GetFromJsonAsync<BasicSearchIndex>("search.json");
+                var searchPipeline = scope.ServiceProvider.GetRequiredService<SearchPipeline>();
+                index.Setup(searchPipeline, documentationIndex);
+                SearchIndex = index;
+            }
         }
     }
 }

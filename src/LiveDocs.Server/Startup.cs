@@ -1,14 +1,12 @@
+using LiveDocs.Server.Services;
+using LiveDocs.Shared.Options;
+using LiveDocs.Shared.Services;
+using LiveDocs.Shared.Services.Search;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Linq;
-using LiveDocs.Shared.Options;
-using LiveDocs.Shared.Services;
-using LiveDocs.Server.Services;
 
 namespace LiveDocs.Server
 {
@@ -20,20 +18,6 @@ namespace LiveDocs.Server
         }
 
         public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.Configure<LiveDocsOptions>(Configuration.GetSection("LiveDocs"));
-
-            services.AddSingleton<IDocumentationService, DocumentationService>();
-
-            services.AddHostedService<ScheduledHostedService>();
-
-            services.AddControllersWithViews();
-            services.AddRazorPages();
-        }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -61,6 +45,23 @@ namespace LiveDocs.Server
                 endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
             });
+        }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.Configure<LiveDocsOptions>(Configuration.GetSection("LiveDocs"));
+
+            SearchPipeline searchPipeline = new SearchPipelineBuilder().Tokenize().Normalize().RemoveStopWords().Stem().Build();
+            services.AddSingleton(searchPipeline);
+
+            services.AddSingleton<IDocumentationService, DocumentationService>();
+
+            services.AddHostedService<ScheduledHostedService>();
+
+            services.AddControllersWithViews();
+            services.AddRazorPages();
         }
     }
 }

@@ -7,7 +7,9 @@ using LiveDocs.Server.Services.Remote;
 using LiveDocs.Shared;
 using LiveDocs.Shared.Options;
 using LiveDocs.Shared.Services;
+using LiveDocs.Shared.Services.Documents;
 using LiveDocs.Shared.Services.Search;
+using Markdig;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -19,15 +21,18 @@ namespace LiveDocs.Server.Services
         private readonly IWebHostEnvironment _HostingEnvironment;
         private readonly ILogger<DocumentationService> _Logger;
         private readonly LiveDocsOptions _Options;
-        public DocumentationService(ILogger<DocumentationService> logger, IOptions<LiveDocsOptions> options, IWebHostEnvironment hostingEnvironment)
+        private readonly SearchPipeline _SearchPipeline;
+        public DocumentationService(ILogger<DocumentationService> logger, IOptions<LiveDocsOptions> options, IWebHostEnvironment hostingEnvironment, SearchPipeline searchPipeline)
         {
             _Logger = logger;
             _Options = options.Value;
             _HostingEnvironment = hostingEnvironment;
+            _SearchPipeline = searchPipeline;
         }
 
         public IDocumentationIndex DocumentationIndex { get; set; }
         public ISearchIndex SearchIndex { get; set; }
+
         public Task<IDocumentationIndex> IndexFiles()
         {
             DirectoryInfo directoryInfo = _Options.GetDocumentationFolderAsAbsolute(_HostingEnvironment.ContentRootPath);
@@ -69,24 +74,38 @@ namespace LiveDocs.Server.Services
             }
 
             var documentationDirectoryInfo = _Options.GetDocumentationFolderAsAbsolute(_HostingEnvironment.ContentRootPath);
-            var j = JsonSerializer.Serialize(new RemoteDocumentationIndex(documentationIndex, documentationDirectoryInfo.FullName), new JsonSerializerOptions
+            var json = JsonSerializer.Serialize(new RemoteDocumentationIndex(documentationIndex, documentationDirectoryInfo.FullName), new JsonSerializerOptions
             {
                 IgnoreNullValues = true
             });
             var navDocumentPath = Path.Combine(documentationDirectoryInfo.FullName, "nav.json");
-            await File.WriteAllTextAsync(navDocumentPath, j);
+            await File.WriteAllTextAsync(navDocumentPath, json);
 
             documentationIndex.DefaultProject.Documents.Add(new GenericDocumentationDocument
             {
                 Path = navDocumentPath,
                 LastUpdate = DateTime.Now
             });
-
-            var doc2 = JsonSerializer.Deserialize<RemoteDocumentationIndex>(File.ReadAllText(navDocumentPath));
         }
 
         public async Task RefreshSearchIndex(IDocumentationIndex documentationIndex)
         {
+            var documentationDirectoryInfo = _Options.GetDocumentationFolderAsAbsolute(_HostingEnvironment.ContentRootPath);
+            SearchIndex = new BasicSearchIndex(_SearchPipeline, documentationIndex);
+            await SearchIndex.BuildIndex();
+
+            var json = JsonSerializer.Serialize((BasicSearchIndex)SearchIndex, new JsonSerializerOptions
+            {
+                IgnoreNullValues = true
+            });
+            var searchDocumentPath = Path.Combine(documentationDirectoryInfo.FullName, "search.json");
+            await File.WriteAllTextAsync(searchDocumentPath, json);
+
+            documentationIndex.DefaultProject.Documents.Add(new GenericDocumentationDocument
+            {
+                Path = searchDocumentPath,
+                LastUpdate = DateTime.Now
+            });
         }
 
         private DocumentationDocumentType BuildDocumentationSubTree(DirectoryInfo directoryInfo, DirectoryInfo topDirectoryInfo, IDocumentationProject project)
@@ -101,6 +120,14 @@ namespace LiveDocs.Server.Services
                 switch (docType)
                 {
                     case DocumentationDocumentType.Markdown:
+                        // The markdown pipeline isn't needed for the content extraction.
+                        project.Documents.Add(new MarkdownDocument(null)
+                        {
+                            Path = file.FullName,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
+
                     case DocumentationDocumentType.Pdf:
                     case DocumentationDocumentType.Html:
                     case DocumentationDocumentType.Word:
@@ -152,6 +179,7 @@ namespace LiveDocs.Server.Services
 
             return subTreeDocumentType;
         }
+
         private async Task SetProjectDefaultDocuments(IDocumentationProject documentationProject)
         {
             documentationProject.DefaultDocuments.Clear();

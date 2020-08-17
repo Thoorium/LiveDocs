@@ -1,11 +1,12 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using LiveDocs.Client.Services;
+using LiveDocs.Shared.Services;
+using LiveDocs.Shared.Services.Search;
+using Markdig;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using LiveDocs.Shared.Services;
-using LiveDocs.Client.Services;
-using Markdig;
 
 namespace LiveDocs.Client
 {
@@ -20,6 +21,10 @@ namespace LiveDocs.Client
 
             MarkdownPipeline markdownPipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseBootstrap().Build();
             builder.Services.AddSingleton(markdownPipeline);
+
+            SearchPipeline searchPipeline = new SearchPipelineBuilder().Tokenize().Normalize().RemoveStopWords().Stem().Build();
+            builder.Services.AddSingleton(searchPipeline);
+
             builder.Services.AddSingleton<IDocumentationService, RemoteDocumentationService>();
 
             await builder.Build().RunAsync();
