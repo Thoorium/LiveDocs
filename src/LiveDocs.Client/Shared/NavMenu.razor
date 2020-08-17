@@ -43,9 +43,9 @@
             <div class="navbar-collapse offcanvas-collapse @NavMenuCssClass" style="max-width:75rem;">
                 <ul class="navbar-nav mr-auto">
                 </ul>
-                <form class="form-inline my-2 my-lg-0 dropdown">
+                <div class="search-form form-inline my-2 my-lg-0 dropdown">
                     <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @bind="@SearchQuery" @bind:event="oninput" @onfocus="OnFocus" />
-                    <div class="dropdown-menu " aria-labelledby="dropdown" style="width:99%">
+                    <div class="dropdown-menu " aria-labelledby="dropdown" style="width:99%;margin-top:0px">
                         @foreach (var item in documents)
                         {
                             int lastIndex = item.KeyPath.LastIndexOf("/");
@@ -58,7 +58,7 @@
                             </NavLink>
                         }
                     </div>
-                </form>
+                </div>
             </div>
         </nav>
     </div>
