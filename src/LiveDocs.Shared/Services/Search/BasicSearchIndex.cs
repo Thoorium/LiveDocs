@@ -60,7 +60,8 @@ namespace LiveDocs.Shared.Services.Search
 
                 var matches = lexicalIds.Intersect(element.LexicalIndexes).ToArray();
 
-                if (matches.Length == 0)
+                // Inclusive search
+                if (lexicalIds.Any(a => !matches.Contains(a)))
                     continue;
 
                 await _DocumentationIndex.GetProjectFor(element.Path.Split("/"), out var project, out var documentPath);
