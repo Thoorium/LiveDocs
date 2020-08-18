@@ -57,6 +57,10 @@
                     </p>
                 </div>
             }
+            @if (!landingPage && _Configuration.GetValue<bool>("ShowDownloadOriginal"))
+            {
+                <div class="doc-tools"><a class="download-link float-right" href="@documentationDocument.Path" target="_blank" rel="noopener noreferrer" download>Download original</a></div>
+            }
             @((MarkupString)renderContent)
         }
     </div>
