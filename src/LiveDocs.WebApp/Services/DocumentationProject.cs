@@ -1,25 +1,16 @@
-﻿using LiveDocs.Shared.Services;
-using LiveDocs.WebApp.Options;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LiveDocs.Shared.Services;
+using LiveDocs.WebApp.Options;
 
 namespace LiveDocs.WebApp.Services
 {
     public class DocumentationProject : IDocumentationProject
     {
-        public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
-        public string KeyPath => _KeyPath == null ? "" : (_KeyPath + "/" + Key).Trim('/');
-        public string Path { get; set; }
-        public string Name => System.IO.Path.GetFileNameWithoutExtension(Path) ?? "";
-        public List<IDocumentationDocument> DefaultDocuments { get; set; } = new List<IDocumentationDocument>();
-        public List<IDocumentationDocument> Documents { get; set; } = new List<IDocumentationDocument>();
-        public int DocumentCount => Documents.Count(c => c.DocumentType != DocumentationDocumentType.Folder && c.DocumentType != DocumentationDocumentType.Project) + SubProjects.Sum(s => s.DocumentCount) + Documents.Sum(s => s.SubDocumentsCount);
-        public List<IDocumentationProject> SubProjects { get; set; } = new List<IDocumentationProject>();
-        public IDocumentationDocument LandingPage { get; set; }
-
-        private readonly LiveDocsOptions _LiveDocsOptions;
         private readonly string _KeyPath;
+        private readonly LiveDocsOptions _LiveDocsOptions;
+        private string keyPath = null;
 
         /// <summary>
         /// Create a documentation project.
@@ -32,6 +23,27 @@ namespace LiveDocs.WebApp.Services
             _KeyPath = keyPath;
         }
 
+        public List<IDocumentationDocument> DefaultDocuments { get; set; } = new List<IDocumentationDocument>();
+        public int DocumentCount => Documents.Count(c => c.DocumentType != DocumentationDocumentType.Folder && c.DocumentType != DocumentationDocumentType.Project) + SubProjects.Sum(s => s.DocumentCount) + Documents.Sum(s => s.SubDocumentsCount);
+        public List<IDocumentationDocument> Documents { get; set; } = new List<IDocumentationDocument>();
+        public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
+
+        public string KeyPath
+        {
+            get
+            {
+                return keyPath ?? (_KeyPath == null ? "" : (_KeyPath + "/" + Key).Trim('/'));
+            }
+            set
+            {
+                keyPath = value;
+            }
+        }
+
+        public IDocumentationDocument LandingPage { get; set; }
+        public string Name => System.IO.Path.GetFileNameWithoutExtension(Path) ?? "";
+        public string Path { get; set; }
+        public List<IDocumentationProject> SubProjects { get; set; } = new List<IDocumentationProject>();
         public async Task<IDocumentationDocument> GetDocumentationDefaultDocument(string documentType = "")
         {
             var defaultDocuments = await GetDocumentationDefaultDocuments(documentType);

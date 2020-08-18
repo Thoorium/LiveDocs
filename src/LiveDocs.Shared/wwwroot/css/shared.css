@@ -33,7 +33,7 @@ li.dropdown:hover > div.dropdown-menu {
 .dropdown-item.active:hover, .dropdown-item:active:hover {
   background-color: #212529; }
 
-form.dropdown input:focus + div.dropdown-menu:not(:empty), form.dropdown:hover div.dropdown-menu:not(:empty), div.dropdown-menu:hover {
+.search-form.dropdown input:focus + div.dropdown-menu:not(:empty), .search-form.dropdown:hover div.dropdown-menu:not(:empty), div.dropdown-menu:hover {
   display: block; }
 
 div.sidebar {
@@ -196,6 +196,13 @@ textarea.http-response-data[readonly] {
   -webkit-animation: phAnimation .8s linear infinite;
   animation: phAnimation .8s linear infinite;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0) 46%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0) 54%) 50% 50%; }
+
+div.doc-tools {
+  display: block;
+  height: 12px; }
+
+div.doc-tools a.download-link {
+  font-size: 12px; }
 
 .language-bash::before, .language-sh::before, .language-powershell::before {
   color: var(--cyan); }

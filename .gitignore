@@ -231,3 +231,7 @@ Thumbs.db
 
 # Sqlite databases
 *.db
+
+# LiveDocs Test
+nav.json
+search.json

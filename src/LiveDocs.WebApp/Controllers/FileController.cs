@@ -1,24 +1,23 @@
-﻿using LiveDocs.Shared.Services;
+﻿using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using LiveDocs.Shared.Services;
 using LiveDocs.WebApp.Options;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace LiveDocs.WebApp.Controllers
 {
     public class FileController : Controller
     {
-        private readonly IWebHostEnvironment _HostEnvironment;
-        private readonly LiveDocsOptions _Options;
         private readonly IDocumentationService _DocumentationService;
+        private readonly IWebHostEnvironment _HostEnvironment;
         private readonly ILogger<FileController> _Logger;
-
+        private readonly LiveDocsOptions _Options;
         public FileController(ILogger<FileController> logger, IWebHostEnvironment hostEnvironment, IOptions<LiveDocsOptions> options, IDocumentationService documentationService)
         {
             _Logger = logger;
@@ -39,7 +38,7 @@ namespace LiveDocs.WebApp.Controllers
         {
             var paths = new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).ToArray();
             string fullFilename = string.Join("/", paths) + "." + ext;
-            var isDefaultProject = _DocumentationService.DocumentationIndex.GetProjectFor(paths, out IDocumentationProject currentProject, out string[] documentPath);
+            var isDefaultProject = await _DocumentationService.DocumentationIndex.GetProjectFor(paths, out IDocumentationProject currentProject, out string[] documentPath);
             IDocumentationDocument document = await currentProject.GetDocumentFor(documentPath, ext);
 
             string path;

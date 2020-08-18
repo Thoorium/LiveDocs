@@ -28,10 +28,14 @@
     private List<string> headerTexts = new List<string>();
     private List<int> headerLevels = new List<int>();
 
-    protected override Task OnParametersSetAsync()
+    protected async override Task OnParametersSetAsync()
     {
         if (previousDocument == Document)
-            return base.OnParametersSetAsync();
+        {
+            await base.OnParametersSetAsync();
+            return;
+        }
+            
 
         previousDocument = Document;
 
@@ -41,6 +45,13 @@
 
         if (Document is LiveDocs.Shared.Services.Documents.MarkdownDocument markdownDocument)
         {
+            if(Document is LiveDocs.Shared.Services.Remote.IRemoteDocumentationDocument remoteDocument)
+            {
+                var success = await remoteDocument.TryCache();
+                if(!success)
+                    return;
+            }
+
             foreach (Markdig.Syntax.HeadingBlock header in markdownDocument.Markdown.Where(w => w is Markdig.Syntax.HeadingBlock))
             {
                 string headerText = ExtractLiterals(header.Inline);
@@ -56,7 +67,7 @@
                 headerLevels.Add(header.Level);
             }
         }
-        return base.OnParametersSetAsync();
+        await base.OnParametersSetAsync();
     }
 
     private string ExtractLiterals(Markdig.Syntax.Inlines.ContainerInline parentInline, string text = "")

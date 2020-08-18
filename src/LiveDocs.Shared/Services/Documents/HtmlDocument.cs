@@ -8,35 +8,41 @@ namespace LiveDocs.Shared.Services.Documents
 {
     public class HtmlDocument : IDocumentationDocument
     {
-        public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
-        public string Path { get; set; }
-        public DateTime LastUpdate { get; set; }
-        public DocumentationDocumentType DocumentType => DocumentationDocumentType.Html;
-        public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
-        public string FileName => System.IO.Path.GetFileName(Path);
-        public IDocumentationDocument[] SubDocuments { get; set; } = null;
-        public int SubDocumentsCount => (SubDocuments?.Count(c => c.DocumentType != DocumentationDocumentType.Project && c.DocumentType != DocumentationDocumentType.Project) ?? 0) + SubDocuments?.Sum(s => s.SubDocumentsCount) ?? 0;
-
+        private static Regex MatchHeaderOneRegex = new Regex("<[hH]1.*>(.*?)<\\/[hH]1>");
         // TODO: Replace with content cache when it's done.
-        string content = null;
+        private string content = null;
 
-        public async Task<string> ToHtml(IDocumentationProject documentationProject, string baseUri = "")
+        public virtual string Content
         {
-            if(content == null)
-                content = await File.ReadAllTextAsync(Path);
-            return content;
+            get
+            {
+                if (content == null)
+                    content = File.ReadAllText(Path);
+                return content;
+            }
         }
 
-        private static Regex MatchHeaderOneRegex = new Regex("<[hH]1.*>(.*?)<\\/[hH]1>");
-
+        public DocumentationDocumentType DocumentType => DocumentationDocumentType.Html;
+        public string FileName => System.IO.Path.GetFileName(Path);
+        public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
+        public DateTime LastUpdate { get; set; }
+        public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
+        public string Path { get; set; }
+        public IDocumentationDocument[] SubDocuments { get; set; } = null;
+        public int SubDocumentsCount => (SubDocuments?.Count(c => c.DocumentType != DocumentationDocumentType.Project && c.DocumentType != DocumentationDocumentType.Project) ?? 0) + SubDocuments?.Sum(s => s.SubDocumentsCount) ?? 0;
         public Task<string> GetTitle()
         {
-            var match = MatchHeaderOneRegex.Match(content);
+            var match = MatchHeaderOneRegex.Match(Content);
 
             if (match.Success)
                 return Task.FromResult(match.Groups[1].Value);
 
             return Task.FromResult(Name);
+        }
+
+        public Task<string> ToHtml(IDocumentationProject documentationProject, string baseUri = "")
+        {
+            return Task.FromResult(Content);
         }
     }
 }

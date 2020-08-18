@@ -1,11 +1,11 @@
-﻿using LiveDocs.Shared.Services;
-using Markdig.Extensions.Tables;
-using Markdig.Renderers;
-using Markdig.Syntax;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Web;
+using LiveDocs.Shared.Services;
+using Markdig.Extensions.Tables;
+using Markdig.Renderers;
+using Markdig.Syntax;
 
 namespace LiveDocs.Shared
 {
@@ -23,7 +23,6 @@ namespace LiveDocs.Shared
                     htmlRenderer.BaseUrl = new Uri(urlBase, UriKind.Absolute);
                 else htmlRenderer.BaseUrl = new Uri(UrlHelper.RemoveUrlQueryStrings(urlBase), UriKind.Absolute);
             }
-
 
             htmlRenderer.ObjectRenderers.AddIfNotAlready(new HtmlTableRenderer());
 
@@ -81,9 +80,9 @@ namespace LiveDocs.Shared
             urlParts[^1] = document.Key;
 
             // Merge back the url parts into an url.
-            var finalUrl = documentationProject.KeyPath + string.Join("/", urlParts);
+            var finalUrl = $"/{documentationProject.KeyPath}/{string.Join("/", urlParts)}".Replace("//", "/");
 
-            if(!string.IsNullOrWhiteSpace(urlQueryString))
+            if (!string.IsNullOrWhiteSpace(urlQueryString))
                 finalUrl += $"?{urlQueryString}";
 
             // Put back the id if there was one.

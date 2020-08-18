@@ -1,4 +1,7 @@
-﻿using LiveDocs.Shared;
+﻿using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using LiveDocs.Shared;
 using LiveDocs.Shared.Services;
 using LiveDocs.Shared.Services.Documents;
 using LiveDocs.Shared.Services.Search;
@@ -7,22 +10,15 @@ using Markdig;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LiveDocs.WebApp.Services
 {
     public class DocumentationService : IDocumentationService
     {
-        private readonly ILogger<DocumentationService> _Logger;
-        private readonly LiveDocsOptions _Options;
         private readonly IWebHostEnvironment _HostingEnvironment;
+        private readonly ILogger<DocumentationService> _Logger;
         private readonly MarkdownPipeline _MarkdownPipeline;
-
-        public IDocumentationIndex DocumentationIndex { get; set; }
-        public ISearchIndex SearchIndex { get; set; }
-
+        private readonly LiveDocsOptions _Options;
         public DocumentationService(ILogger<DocumentationService> logger, IOptions<LiveDocsOptions> options, IWebHostEnvironment hostingEnvironment, MarkdownPipeline markdownPipeline)
         {
             _Logger = logger;
@@ -31,6 +27,8 @@ namespace LiveDocs.WebApp.Services
             _MarkdownPipeline = markdownPipeline;
         }
 
+        public IDocumentationIndex DocumentationIndex { get; set; }
+        public ISearchIndex SearchIndex { get; set; }
         public Task<IDocumentationIndex> IndexFiles()
         {
             DirectoryInfo directoryInfo = _Options.GetDocumentationFolderAsAbsolute(_HostingEnvironment.ContentRootPath);
@@ -49,91 +47,6 @@ namespace LiveDocs.WebApp.Services
             documentationIndex.DefaultProject.Documents.AddRange(documentationProject.Documents.OrderBy(o => o.Name));
 
             return Task.FromResult(documentationIndex);
-        }
-
-        private DocumentationDocumentType BuildDocumentationSubTree(DirectoryInfo directoryInfo, DirectoryInfo topDirectoryInfo, IDocumentationProject project)
-        {
-            DocumentationDocumentType subTreeDocumentType = DocumentationDocumentType.Folder;
-            project.Path = directoryInfo.FullName;
-
-            foreach (var file in directoryInfo.EnumerateFiles())
-            {
-                var docType = DocumentationHelper.GetDocumentationDocumentTypeFromExtension(Path.GetExtension(file.FullName));
-
-                switch (docType)
-                {
-                    case DocumentationDocumentType.Markdown:
-                        project.Documents.Add(new MarkdownDocument(_MarkdownPipeline)
-                        {
-                            Path = file.FullName,
-                            LastUpdate = file.LastWriteTimeUtc
-                        });
-                        break;
-                    case DocumentationDocumentType.Pdf:
-                        project.Documents.Add(new PdfDocument
-                        {
-                            Path = file.FullName,
-                            LastUpdate = file.LastWriteTimeUtc
-                        });
-                        break;
-                    case DocumentationDocumentType.Html:
-                        project.Documents.Add(new HtmlDocument
-                        {
-                            Path = file.FullName,
-                            LastUpdate = file.LastWriteTimeUtc
-                        });
-                        break;
-                    case DocumentationDocumentType.Word:
-                    case DocumentationDocumentType.Folder:
-                        project.Documents.Add(new DocumentationDocument
-                        {
-                            Path = file.FullName,
-                            DocumentType = docType,
-                            LastUpdate = file.LastWriteTimeUtc
-                        });
-                        break;
-                    case DocumentationDocumentType.Project:
-                        subTreeDocumentType = DocumentationDocumentType.Project;
-                        break;
-                    case DocumentationDocumentType.Unknown:
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            foreach (var directory in directoryInfo.EnumerateDirectories())
-            {
-                IDocumentationProject subProject = new DocumentationProject(_Options, project.KeyPath);
-                var subDocumentType = BuildDocumentationSubTree(directory, topDirectoryInfo, subProject);
-
-                if (subDocumentType == DocumentationDocumentType.Project)
-                {
-                    project.SubProjects.Add(subProject);
-                } else
-                {
-                    var documentationDirectory = new DocumentationDocument
-                    {
-                        DocumentType = subDocumentType,
-                        Path = directory.FullName,
-                        LastUpdate = directory.LastWriteTimeUtc
-                    };
-
-                    if (subProject.Documents.Any())
-                    {
-                        documentationDirectory.SubDocuments = subProject.Documents.OrderBy(o => o.Name).ToArray();
-                        project.Documents.Add(documentationDirectory);
-                    }
-                }             
-            }
-
-            return subTreeDocumentType;
-        }
-
-        public async Task RefreshSearchIndex(IDocumentationIndex documentationIndex)
-        {
-            SearchIndex = new LuceneSearchIndex(documentationIndex);
-            await SearchIndex.BuildIndex();
         }
 
         public async Task RefreshDocumentationIndex(IDocumentationIndex documentationIndex)
@@ -157,6 +70,96 @@ namespace LiveDocs.WebApp.Services
             }
         }
 
+        public async Task RefreshSearchIndex(IDocumentationIndex documentationIndex)
+        {
+            SearchIndex = new LuceneSearchIndex(documentationIndex);
+            await SearchIndex.BuildIndex();
+        }
+
+        private DocumentationDocumentType BuildDocumentationSubTree(DirectoryInfo directoryInfo, DirectoryInfo topDirectoryInfo, IDocumentationProject project)
+        {
+            DocumentationDocumentType subTreeDocumentType = DocumentationDocumentType.Folder;
+            project.Path = directoryInfo.FullName;
+
+            foreach (var file in directoryInfo.EnumerateFiles())
+            {
+                var docType = DocumentationHelper.GetDocumentationDocumentTypeFromExtension(Path.GetExtension(file.FullName));
+
+                switch (docType)
+                {
+                    case DocumentationDocumentType.Markdown:
+                        project.Documents.Add(new MarkdownDocument(_MarkdownPipeline)
+                        {
+                            Path = file.FullName,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
+
+                    case DocumentationDocumentType.Pdf:
+                        project.Documents.Add(new PdfDocument
+                        {
+                            Path = file.FullName,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
+
+                    case DocumentationDocumentType.Html:
+                        project.Documents.Add(new HtmlDocument
+                        {
+                            Path = file.FullName,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
+
+                    case DocumentationDocumentType.Word:
+                    case DocumentationDocumentType.Folder:
+                        project.Documents.Add(new GenericDocumentationDocument
+                        {
+                            Path = file.FullName,
+                            DocumentType = docType,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
+
+                    case DocumentationDocumentType.Project:
+                        subTreeDocumentType = DocumentationDocumentType.Project;
+                        break;
+
+                    case DocumentationDocumentType.Unknown:
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            foreach (var directory in directoryInfo.EnumerateDirectories())
+            {
+                IDocumentationProject subProject = new DocumentationProject(_Options, project.KeyPath);
+                var subDocumentType = BuildDocumentationSubTree(directory, topDirectoryInfo, subProject);
+
+                if (subDocumentType == DocumentationDocumentType.Project)
+                {
+                    project.SubProjects.Add(subProject);
+                } else
+                {
+                    var documentationDirectory = new GenericDocumentationDocument
+                    {
+                        DocumentType = subDocumentType,
+                        Path = directory.FullName,
+                        LastUpdate = directory.LastWriteTimeUtc
+                    };
+
+                    if (subProject.Documents.Any())
+                    {
+                        documentationDirectory.SubDocuments = subProject.Documents.OrderBy(o => o.Name).ToArray();
+                        project.Documents.Add(documentationDirectory);
+                    }
+                }
+            }
+
+            return subTreeDocumentType;
+        }
         private async Task SetProjectDefaultDocuments(IDocumentationProject documentationProject)
         {
             documentationProject.DefaultDocuments.Clear();
@@ -168,7 +171,5 @@ namespace LiveDocs.WebApp.Services
                 await SetProjectDefaultDocuments(subProject);
             }
         }
-
-               
     }
 }

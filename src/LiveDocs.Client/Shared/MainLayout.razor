@@ -1,0 +1,19 @@
+﻿@inherits LayoutComponentBase
+@inject IDocumentationService _DocumentationService
+<NavMenu />
+<ErrorMessageDisplay />
+
+<div class="main mt-4">
+    @Body
+</div>
+
+@code {
+    protected async override Task OnInitializedAsync()
+    {
+        if (_DocumentationService.DocumentationIndex == null)
+        {
+            var index = await _DocumentationService.IndexFiles();
+            await _DocumentationService.RefreshDocumentationIndex(index);
+        }
+    }
+}

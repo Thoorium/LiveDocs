@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Loading</title>
+    <base href="/" />
+    <link rel="stylesheet" href="_content/LiveDocs.Shared/css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" href="_content/LiveDocs.Shared/css/bootstrap/docs.css" />
+    <link href="_content/LiveDocs.Shared/css/shared.css" rel="stylesheet" />
+    <link href="css/app.css" rel="stylesheet" />
+    <link href="manifest.json" rel="manifest" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+</head>
+
+<body>
+    <app>
+        <div class="loading-document-wrapper mx-auto mt-4">
+            <div class="loading-document mx-auto">
+                <img src="_content/LiveDocs.Shared/img/content.svg" onerror="this.onerror=null; this.src='_content/LiveDocs.Shared/img/content.png'">
+            </div>
+        </div>
+    </app>
+
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <script>
+        window.scrollToElementId = (elementId) => {
+            var element = document.getElementById(elementId);
+            if (!element) {
+                return false;
+            }
+            element.scrollIntoView();
+
+            // If the element is not at the end of the page, offset the scroll for the height of the nav bar.
+            if ((window.innerHeight + window.scrollY + 1) < document.body.offsetHeight) {
+                window.scrollBy(0, -100);
+            }
+
+            return true;
+        }
+
+        window.setDocumentTitle = (title) => {
+            document.title = title;
+        };
+    </script>
+</body>
+
+</html>
