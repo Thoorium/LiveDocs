@@ -3,9 +3,10 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using LiveDocs.Client.Services.Documents;
-using LiveDocs.Server.Services.Remote;
 using LiveDocs.Shared.Services;
+using LiveDocs.Shared.Services.Remote;
 using LiveDocs.Shared.Services.Search;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LiveDocs.Client.Services
@@ -27,8 +28,13 @@ namespace LiveDocs.Client.Services
             using (var scope = _Services.CreateScope())
             {
                 var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
-                var index = await httpClient.GetFromJsonAsync<RemoteDocumentationIndex>("nav.json");
-                return index.ToDocumentationIndex<DocumentationIndex, DocumentationProject, DocumentationDocument>(_Services);
+                var remoteConfiguration = await httpClient.GetFromJsonAsync<RemoteConfiguration>("app.json");
+
+                var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                configuration["ApplicationName"] = remoteConfiguration.ApplicationName;
+                configuration["ShowDownloadOriginal"] = remoteConfiguration.ShowDownloadOriginal.ToString();
+
+                return remoteConfiguration.Documentation.ToDocumentationIndex<DocumentationIndex, DocumentationProject, DocumentationDocument>(_Services);
             }
         }
 

@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using LiveDocs.Shared;
-using LiveDocs.Shared.Services;
-using LiveDocs.Shared.Services.Remote;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LiveDocs.Server.Services.Remote
+namespace LiveDocs.Shared.Services.Remote
 {
     public class RemoteDocumentationIndex
     {
