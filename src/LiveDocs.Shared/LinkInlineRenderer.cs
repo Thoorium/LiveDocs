@@ -32,7 +32,13 @@ namespace LiveDocs.Shared
 
             if (renderer.EnableHtmlForInline)
             {
-                renderer.Write(link.IsImage ? "<img src=\"" : "<a href=\"");
+                if(link.IsImage)
+                {
+                    if(link.Url.EndsWith(".mp4"))
+                        renderer.Write("<video autoplay muted loop src=\"");
+                    else renderer.Write("<img src=\"");
+                } else renderer.Write("<a href=\"");
+
                 renderer.WriteEscapeUrl(linkRewriteResult?.NewLink ?? link.Url);
                 renderer.Write("\"");
                 renderer.WriteAttributes(link);

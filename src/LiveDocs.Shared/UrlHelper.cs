@@ -68,5 +68,15 @@ namespace LiveDocs.Shared
         {
             return url.Substring(0, url.IndexOf("?") >= 0 ? url.IndexOf("?") : url.Length);
         }
+
+        /// <summary>
+        /// Rewrite a text string to be a valid browsable url.
+        /// </summary>
+        /// <param name="stringUrl"></param>
+        /// <returns></returns>
+        public static string Urilize(string text)
+        {
+            return Markdig.Helpers.LinkHelper.Urilize(text, true)?.Replace(".", "-");
+        }
     }
 }
