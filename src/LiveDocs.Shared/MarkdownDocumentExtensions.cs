@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using LiveDocs.Shared.Services;
@@ -56,10 +57,10 @@ namespace LiveDocs.Shared
                 return new LinkInlineRenderer.LinkInlineRewrite { NewLink = originalUrl };
 
             // If the url is a full one and the domain is different, open in a new tab.
-            if (Uri.TryCreate(originalUrl, UriKind.Absolute, out Uri originalUri) && !originalUri.Host.Equals(urlBase.Host, StringComparison.InvariantCultureIgnoreCase))
+            if (Uri.TryCreate(originalUrl, UriKind.Absolute, out Uri originalUri) && !string.IsNullOrWhiteSpace(originalUri.Host) && !originalUri.Host.Equals(urlBase.Host, StringComparison.InvariantCultureIgnoreCase))
                 return new LinkInlineRenderer.LinkInlineRewrite { NewLink = originalUrl, Target = "_blank" };
 
-            if (originalUrl.StartsWith("..") && Uri.TryCreate(sourceUrl, UriKind.Absolute, out Uri sourceUri))
+            if (Uri.TryCreate(sourceUrl, UriKind.Absolute, out Uri sourceUri))
                 originalUri = new Uri(sourceUri, originalUrl);
 
             // Get the host url to clear the original url.
@@ -69,8 +70,16 @@ namespace LiveDocs.Shared
             var urlId = UrlHelper.GetUrlId(originalUrl);
             var urlQueryString = UrlHelper.GetQueryString(originalUrl);
 
-            // Extract the url parts.
-            var urlParts = UrlHelper.RemoveUrlId(originalUri?.AbsolutePath ?? originalUrl).Replace(hostUrl + documentationProject.KeyPath, "").Replace($"#{urlId}", "").Replace($"?{urlQueryString}", "").Split("/");
+            // Extract the url parts. Skip the first entry as it is always null.
+            var urlParts = UrlHelper.RemoveUrlId(HttpUtility.UrlDecode(originalUri?.AbsolutePath) ?? originalUrl).Replace(hostUrl + documentationProject.KeyPath, "")
+                .Replace($"#{urlId}", "") //Remove the ID part
+                .Replace($"?{urlQueryString}", "") // Remove the query string part
+                .Split("/") // Split into parts
+                .Skip(1) // Remove the first entry, it is always null
+                .ToArray(); 
+
+            if (urlParts.FirstOrDefault()?.Equals(documentationProject.Key, StringComparison.InvariantCultureIgnoreCase) ?? false)
+                urlParts[0] = null;
 
             // Normalize all the elements up to the file name to enable search by key.
             for (int i = 0; i < urlParts.Length - 1; i++)
