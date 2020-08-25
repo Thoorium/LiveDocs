@@ -10,6 +10,9 @@
 - Nested
   - [Nested](../nested)
   - [Images](../images)
+- Special
+  - [Special Document Name](Special.Document&Name%.md)
+  - [Nested](../nested.md)
 
 ## First title
 

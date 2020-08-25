@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using LiveDocs.Shared;
 using LiveDocs.Shared.Services;
 using LiveDocs.Shared.Services.Remote;
 
@@ -11,7 +12,7 @@ namespace LiveDocs.Client.Services.Documents
     {
         public DocumentationDocumentType DocumentType { get; set; }
         public string FileName => System.IO.Path.GetFileName(Path);
-        public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
+        public string Key => UrlHelper.Urilize(Name);
         public DateTime LastUpdate { get; set; }
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
         public string Path { get; set; }

@@ -3,11 +3,11 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using LiveDocs.Server.Services.Remote;
 using LiveDocs.Shared;
 using LiveDocs.Shared.Options;
 using LiveDocs.Shared.Services;
 using LiveDocs.Shared.Services.Documents;
+using LiveDocs.Shared.Services.Remote;
 using LiveDocs.Shared.Services.Search;
 using Markdig;
 using Microsoft.AspNetCore.Hosting;
@@ -74,11 +74,17 @@ namespace LiveDocs.Server.Services
             }
 
             var documentationDirectoryInfo = _Options.GetDocumentationFolderAsAbsolute(_HostingEnvironment.ContentRootPath);
-            var json = JsonSerializer.Serialize(new RemoteDocumentationIndex(documentationIndex, documentationDirectoryInfo.FullName), new JsonSerializerOptions
+            RemoteConfiguration remoteConfiguration = new RemoteConfiguration
+            {
+                ApplicationName = _Options.ApplicationName,
+                ShowDownloadOriginal = _Options.ShowDownloadOriginal,
+                Documentation = new RemoteDocumentationIndex(documentationIndex, documentationDirectoryInfo.FullName)
+            };
+            var json = JsonSerializer.Serialize(remoteConfiguration, new JsonSerializerOptions
             {
                 IgnoreNullValues = true
             });
-            var navDocumentPath = Path.Combine(documentationDirectoryInfo.FullName, "nav.json");
+            var navDocumentPath = Path.Combine(documentationDirectoryInfo.FullName, "app.json");
             await File.WriteAllTextAsync(navDocumentPath, json);
 
             documentationIndex.DefaultProject.Documents.Add(new GenericDocumentationDocument

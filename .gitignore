@@ -233,5 +233,5 @@ Thumbs.db
 *.db
 
 # LiveDocs Test
-nav.json
+app.json
 search.json

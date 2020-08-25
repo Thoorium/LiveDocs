@@ -17,7 +17,7 @@ namespace LiveDocs.Shared.Services.Documents
 
         public DocumentationDocumentType DocumentType => DocumentationDocumentType.Markdown;
         public string FileName => System.IO.Path.GetFileName(Path);
-        public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
+        public string Key => UrlHelper.Urilize(Name);
         public DateTime LastUpdate { get; set; }
         public virtual Markdig.Syntax.MarkdownDocument Markdown => Markdig.Markdown.Parse(System.IO.File.ReadAllText(Path), MarkdownPipeline);
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);

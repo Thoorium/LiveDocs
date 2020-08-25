@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LiveDocs.Shared;
 using LiveDocs.Shared.Services;
 
 namespace LiveDocs.Client.Services
@@ -15,7 +16,7 @@ namespace LiveDocs.Client.Services
         public List<IDocumentationDocument> DefaultDocuments { get; set; }
         public int DocumentCount => Documents.Count(c => c.DocumentType != DocumentationDocumentType.Folder && c.DocumentType != DocumentationDocumentType.Project) + SubProjects.Sum(s => s.DocumentCount) + Documents.Sum(s => s.SubDocumentsCount);
         public List<IDocumentationDocument> Documents { get; set; } = new List<IDocumentationDocument>();
-        public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
+        public string Key => UrlHelper.Urilize(Name);
         public string KeyPath { get; set; }
         public IDocumentationDocument LandingPage { get; set; }
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path) ?? "";

@@ -6,7 +6,7 @@ namespace LiveDocs.Shared.Services.Documents
 {
     public class PdfDocument : IDocumentationDocument
     {
-        public string Key => Markdig.Helpers.LinkHelper.Urilize(Name, allowOnlyAscii: true);
+        public string Key => UrlHelper.Urilize(Name);
         public string Path { get; set; }
         public DateTime LastUpdate { get; set; }
         public DocumentationDocumentType DocumentType => DocumentationDocumentType.Pdf;
