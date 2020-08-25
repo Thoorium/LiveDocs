@@ -76,7 +76,7 @@ namespace LiveDocs.Shared
         /// <returns></returns>
         public static string Urilize(string text)
         {
-            return Markdig.Helpers.LinkHelper.Urilize(text, true)?.Replace(".", "-");
+            return Markdig.Helpers.LinkHelper.Urilize(text, true)?.Replace(".", "");
         }
     }
 }

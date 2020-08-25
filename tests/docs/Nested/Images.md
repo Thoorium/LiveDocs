@@ -4,7 +4,7 @@
 
 This is a svg.
 
-![svg alt text](../undraw_blooming.svg "svg title text"){width=250 height=120}
+![svg alt text](../Images.svg "svg title text"){width=250 height=120}
 
 ## PNG
 
