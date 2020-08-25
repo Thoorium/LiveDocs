@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using LiveDocs.Shared.Services;
@@ -69,8 +70,16 @@ namespace LiveDocs.Shared
             var urlId = UrlHelper.GetUrlId(originalUrl);
             var urlQueryString = UrlHelper.GetQueryString(originalUrl);
 
-            // Extract the url parts.
-            var urlParts = UrlHelper.RemoveUrlId(HttpUtility.UrlDecode(originalUri?.AbsolutePath) ?? originalUrl).Replace(hostUrl + documentationProject.KeyPath, "").Replace($"#{urlId}", "").Replace($"?{urlQueryString}", "").Split("/");
+            // Extract the url parts. Skip the first entry as it is always null.
+            var urlParts = UrlHelper.RemoveUrlId(HttpUtility.UrlDecode(originalUri?.AbsolutePath) ?? originalUrl).Replace(hostUrl + documentationProject.KeyPath, "")
+                .Replace($"#{urlId}", "") //Remove the ID part
+                .Replace($"?{urlQueryString}", "") // Remove the query string part
+                .Split("/") // Split into parts
+                .Skip(1) // Remove the first entry, it is always null
+                .ToArray(); 
+
+            if (urlParts.FirstOrDefault()?.Equals(documentationProject.Key, StringComparison.InvariantCultureIgnoreCase) ?? false)
+                urlParts[0] = null;
 
             // Normalize all the elements up to the file name to enable search by key.
             for (int i = 0; i < urlParts.Length - 1; i++)
