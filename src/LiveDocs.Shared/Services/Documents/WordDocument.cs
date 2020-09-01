@@ -6,7 +6,7 @@ using Mammoth;
 
 namespace LiveDocs.Shared.Services.Documents
 {
-    public class WordDocument : IDocumentationDocument
+    public class WordDocument : IDocumentationDocument, ISearchableDocument
     {
         public virtual byte[] Data => File.ReadAllBytes(Path);
         public DocumentationDocumentType DocumentType => DocumentationDocumentType.Markdown;
@@ -18,6 +18,13 @@ namespace LiveDocs.Shared.Services.Documents
         public IDocumentationDocument[] SubDocuments { get; set; } = null;
         public int SubDocumentsCount => (SubDocuments?.Count(c => c.DocumentType != DocumentationDocumentType.Project && c.DocumentType != DocumentationDocumentType.Project) ?? 0) + SubDocuments?.Sum(s => s.SubDocumentsCount) ?? 0;
         protected virtual DocumentConverter wordConverter => new DocumentConverter();
+
+        public Task<string> GetContent()
+        {
+            using MemoryStream stream = new MemoryStream(Data);
+            stream.Seek(0, SeekOrigin.Begin);
+            return Task.FromResult(wordConverter.ExtractRawText(stream).Value);
+        }
 
         public Task<string> ToHtml(IDocumentationProject documentationProject, string baseUri = "")
         {

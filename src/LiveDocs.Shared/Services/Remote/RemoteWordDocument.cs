@@ -28,7 +28,7 @@ namespace LiveDocs.Shared.Services.Remote
                     return new Dictionary<string, string> {
                         { "src", src },
                         //{ "alt", image.AltText },
-                        { "class", "img-fluid" }
+                        { "class", "d-block img-fluid" }
                     };
                 }
             });
