@@ -153,6 +153,11 @@ namespace LiveDocs.Shared.Services.Remote
                     };
 
                 case DocumentationDocumentType.Word:
+                    return new RemoteWordDocument(serviceProvider)
+                    {
+                        Path = remoteDocumentationDocument.Path,
+                        LastUpdate = remoteDocumentationDocument.LastUpdate
+                    };
                 case DocumentationDocumentType.Folder:
                 default:
                     return new GenericDocumentationDocument
