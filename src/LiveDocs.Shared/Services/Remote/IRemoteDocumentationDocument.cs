@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using LiveDocs.Shared.Services.Documents;
 
 namespace LiveDocs.Shared.Services.Remote
 {
@@ -6,5 +8,7 @@ namespace LiveDocs.Shared.Services.Remote
     {
         Task<bool> TryCache();
         Task<(bool, string)> TryToHtml(IDocumentationProject documentationProject, string baseUri);
+
+        Task<List<DocumentTreeItem>> GetDocumentTree();
     }
 }

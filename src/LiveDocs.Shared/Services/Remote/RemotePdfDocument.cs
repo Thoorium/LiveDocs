@@ -1,10 +1,16 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using LiveDocs.Shared.Services.Documents;
 
 namespace LiveDocs.Shared.Services.Remote
 {
     public class RemotePdfDocument : PdfDocument, IRemoteDocumentationDocument
     {
+        public Task<List<DocumentTreeItem>> GetDocumentTree()
+        {
+            throw new System.NotImplementedException();
+        }
+
         public Task<bool> TryCache()
         {
             return Task.FromResult(true);

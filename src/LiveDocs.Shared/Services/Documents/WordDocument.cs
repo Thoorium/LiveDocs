@@ -1,14 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Mammoth;
+using Thoorium.WordLib;
 
 namespace LiveDocs.Shared.Services.Documents
 {
     public class WordDocument : IDocumentationDocument, ISearchableDocument
     {
-        public virtual byte[] Data => File.ReadAllBytes(Path);
+        public virtual Thoorium.WordLib.WordDocument Document => Thoorium.WordLib.WordDocument.Load(Path);
         public DocumentationDocumentType DocumentType => DocumentationDocumentType.Markdown;
         public string FileName => System.IO.Path.GetFileName(Path);
         public string Key => UrlHelper.Urilize(Name);
@@ -17,20 +18,29 @@ namespace LiveDocs.Shared.Services.Documents
         public string Path { get; set; }
         public IDocumentationDocument[] SubDocuments { get; set; } = null;
         public int SubDocumentsCount => (SubDocuments?.Count(c => c.DocumentType != DocumentationDocumentType.Project && c.DocumentType != DocumentationDocumentType.Project) ?? 0) + SubDocuments?.Sum(s => s.SubDocumentsCount) ?? 0;
-        protected virtual DocumentConverter wordConverter => new DocumentConverter();
 
-        public Task<string> GetContent()
+        public async Task<string> GetContent()
         {
-            using MemoryStream stream = new MemoryStream(Data);
-            stream.Seek(0, SeekOrigin.Begin);
-            return Task.FromResult(wordConverter.ExtractRawText(stream).Value);
+            return await GetContent(Document.Elements);
         }
 
         public Task<string> ToHtml(IDocumentationProject documentationProject, string baseUri = "")
         {
-            using MemoryStream stream = new MemoryStream(Data);
-            stream.Seek(0, SeekOrigin.Begin);
-            return Task.FromResult(wordConverter.ConvertToHtml(stream).Value);
+            WordPipeline wordPipeline = new WordPipelineBuilder().UseBootstrap().Build();
+            return WordConverter.ConvertToHtml(Document, wordPipeline);
+        }
+
+        private async Task<string> GetContent(IEnumerable<IWordElement> wordElements)
+        {
+            string content = "";
+            foreach (var wordElement in wordElements)
+            {
+                if (wordElement.InnerElements?.Count > 0)
+                    content += await GetContent(wordElement.InnerElements);
+                content += $" {wordElement.Value}";
+            }
+
+            return content;
         }
     }
 }

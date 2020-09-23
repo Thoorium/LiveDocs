@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using LiveDocs.Shared.Services.Documents;
@@ -17,6 +18,11 @@ namespace LiveDocs.Shared.Services.Remote
         }
 
         public override string Content => content;
+
+        public Task<List<DocumentTreeItem>> GetDocumentTree()
+        {
+            throw new NotImplementedException();
+        }
 
         public async Task<string> GetTitle()
         {
