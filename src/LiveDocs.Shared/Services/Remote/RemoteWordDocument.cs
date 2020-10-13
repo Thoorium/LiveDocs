@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using LiveDocs.Shared.Services.Documents;
 using Microsoft.Extensions.DependencyInjection;
+using Thoorium.WordLib.Elements;
 
 namespace LiveDocs.Shared.Services.Remote
 {
@@ -23,6 +24,27 @@ namespace LiveDocs.Shared.Services.Remote
 
         public async Task<List<DocumentTreeItem>> GetDocumentTree()
         {
+            if (documentTree.Count > 0)
+                return documentTree;
+
+            var cacheResult = await TryCache();
+            if (!cacheResult)
+                return documentTree;
+
+            foreach (var element in Document.Elements)
+            {
+                if (element is HeadingElement headingElement)
+                {
+                    var linkFound = headingElement.HtmlAttributes.TryGetValue("id", out string link);
+                    documentTree.Add(new DocumentTreeItem
+                    {
+                        HeaderText = headingElement.Value,
+                        HeaderLevel = headingElement.Level,
+                        HeaderLink = linkFound ? link : ""
+                    });
+                }
+            }
+
             return documentTree;
         }
 

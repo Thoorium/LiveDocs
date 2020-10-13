@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Thoorium.WordLib;
@@ -9,6 +8,7 @@ namespace LiveDocs.Shared.Services.Documents
 {
     public class WordDocument : IDocumentationDocument, ISearchableDocument
     {
+        private List<string> existingHeaderIds = new List<string>();
         public virtual Thoorium.WordLib.WordDocument Document => Thoorium.WordLib.WordDocument.Load(Path);
         public DocumentationDocumentType DocumentType => DocumentationDocumentType.Markdown;
         public string FileName => System.IO.Path.GetFileName(Path);
@@ -26,8 +26,22 @@ namespace LiveDocs.Shared.Services.Documents
 
         public Task<string> ToHtml(IDocumentationProject documentationProject, string baseUri = "")
         {
-            WordPipeline wordPipeline = new WordPipelineBuilder().UseBootstrap().Build();
+            existingHeaderIds.Clear();
+
+            WordPipeline wordPipeline = new WordPipelineBuilder()
+                .UseAutoHeaderId(GenerateHeaderId, (generatedId) => { existingHeaderIds.Add(generatedId); })
+                .UseLinkRewrite((originalUrl) => RewriteUrl(originalUrl, baseUri, documentationProject))
+                .UseBootstrap().Build();
             return WordConverter.ConvertToHtml(Document, wordPipeline);
+        }
+
+        private string GenerateHeaderId(string id, string text)
+        {
+            string uniqueHeaderLink = UrlHelper.Urilize(text);
+            int numPad = 1;
+            while (existingHeaderIds.Contains(uniqueHeaderLink))
+                uniqueHeaderLink += $"-{numPad++}";
+            return uniqueHeaderLink;
         }
 
         private async Task<string> GetContent(IEnumerable<IWordElement> wordElements)
@@ -41,6 +55,12 @@ namespace LiveDocs.Shared.Services.Documents
             }
 
             return content;
+        }
+
+        private Thoorium.WordLib.Filters.LinkRewriteResult RewriteUrl(string originalUrl, string sourceUrl, IDocumentationProject documentationProject)
+        {
+            var result = UrlHelper.RewriteUrl(originalUrl, sourceUrl, documentationProject);
+            return new Thoorium.WordLib.Filters.LinkRewriteResult(result.NewUri) { Rel = result.Rel, Target = result.Target };
         }
     }
 }

@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0.100-preview.7-alpine AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:5.0.100-rc.1-alpine3.12 AS build-env
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
@@ -13,7 +13,7 @@ COPY . ./
 RUN dotnet publish src/LiveDocs.Server/*.csproj -c Release -o out
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0.0-preview.7-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:5.0.0-rc.1-alpine3.12
 WORKDIR /app
 COPY --from=build-env /app/out .
 ENTRYPOINT ["dotnet", "LiveDocs.Server.dll"]

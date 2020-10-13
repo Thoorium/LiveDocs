@@ -12,9 +12,10 @@ namespace LiveDocs.Shared.Services.Remote
     public class RemoteMarkdownDocument : MarkdownDocument, IRemoteDocumentationDocument
     {
         private readonly IServiceProvider _Services;
+        private readonly List<DocumentTreeItem> documentTree = new List<DocumentTreeItem>();
         private Markdig.Syntax.MarkdownDocument markdown;
         private bool readingCache = false;
-        private List<DocumentTreeItem> documentTree = new List<DocumentTreeItem>();
+
         public RemoteMarkdownDocument(IServiceProvider serviceProvider) : base(serviceProvider.GetRequiredService<MarkdownPipeline>())
         {
             _Services = serviceProvider;
@@ -30,7 +31,7 @@ namespace LiveDocs.Shared.Services.Remote
             foreach (Markdig.Syntax.HeadingBlock header in Markdown.Where(w => w is Markdig.Syntax.HeadingBlock))
             {
                 string headerText = ExtractLiterals(header.Inline);
-                string headerLink = Markdig.Helpers.LinkHelper.Urilize(headerText, allowOnlyAscii: true);
+                string headerLink = UrlHelper.Urilize(headerText);
 
                 string uniqueHeaderLink = headerLink;
                 int numPad = 1;
@@ -46,26 +47,6 @@ namespace LiveDocs.Shared.Services.Remote
             }
 
             return Task.FromResult(documentTree);
-        }
-
-        private string ExtractLiterals(Markdig.Syntax.Inlines.ContainerInline parentInline, string text = "")
-        {
-            foreach (var inline in parentInline)
-            {
-                text += inline switch
-                {
-                    Markdig.Syntax.Inlines.LiteralInline literal =>
-                        literal.ToString(),
-                    Markdig.Syntax.Inlines.CodeInline code =>
-                        code.Content,
-                    Markdig.Syntax.Inlines.HtmlInline htmlInline =>
-                       "", // The text between html tags is a literal.
-                    Markdig.Syntax.Inlines.ContainerInline container =>
-                        ExtractLiterals(container),
-                    _ => inline.ToString()
-                };
-            }
-            return text;
         }
 
         public async Task<bool> TryCache()
@@ -103,10 +84,30 @@ namespace LiveDocs.Shared.Services.Remote
         {
             var cacheResult = await TryCache();
             string htmlString = "";
-            if(cacheResult)
+            if (cacheResult)
                 htmlString = await ToHtml(documentationProject, baseUri);
 
             return (cacheResult, htmlString);
+        }
+
+        private string ExtractLiterals(Markdig.Syntax.Inlines.ContainerInline parentInline, string text = "")
+        {
+            foreach (var inline in parentInline)
+            {
+                text += inline switch
+                {
+                    Markdig.Syntax.Inlines.LiteralInline literal =>
+                        literal.ToString(),
+                    Markdig.Syntax.Inlines.CodeInline code =>
+                        code.Content,
+                    Markdig.Syntax.Inlines.HtmlInline htmlInline =>
+                       "", // The text between html tags is a literal.
+                    Markdig.Syntax.Inlines.ContainerInline container =>
+                        ExtractLiterals(container),
+                    _ => inline.ToString()
+                };
+            }
+            return text;
         }
     }
 }
