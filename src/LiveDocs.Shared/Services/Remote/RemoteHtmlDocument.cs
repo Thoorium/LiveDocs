@@ -12,6 +12,7 @@ namespace LiveDocs.Shared.Services.Remote
         private readonly IServiceProvider _Services;
         private string content;
         private bool readingCache = false;
+
         public RemoteHtmlDocument(IServiceProvider serviceProvider)
         {
             _Services = serviceProvider;
@@ -51,7 +52,10 @@ namespace LiveDocs.Shared.Services.Remote
                 using (var scope = _Services.CreateScope())
                 {
                     var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
-                    content = await httpClient.GetStringAsync(Path);
+                    // TODO: Uncomment the following line for 5.0 GA.
+                    // content = await httpClient.GetStringAsync(Path);
+                    var x = await httpClient.GetAsync(Path);
+                    content = await x.Content.ReadAsStringAsync();
                 }
             } catch
             {

@@ -67,7 +67,11 @@ namespace LiveDocs.Shared.Services.Remote
                 {
                     var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
                     var markdownPipeline = scope.ServiceProvider.GetRequiredService<MarkdownPipeline>();
-                    markdown = Markdig.Markdown.Parse(await httpClient.GetStringAsync(Path), markdownPipeline);
+                    // TODO: Uncomment the following line for 5.0 GA.
+                    //markdown = Markdig.Markdown.Parse(await httpClient.GetStringAsync(Path), markdownPipeline);
+                    var x = await httpClient.GetAsync(Path);
+                    string content = await x.Content.ReadAsStringAsync();
+                    markdown = Markdig.Markdown.Parse(content, markdownPipeline);
                 }
             } catch
             {
