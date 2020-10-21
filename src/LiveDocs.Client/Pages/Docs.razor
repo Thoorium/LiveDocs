@@ -54,6 +54,10 @@
                         {
                             <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Pdf ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "Pdf"))">Pdf</NavLink>
                         }
+                        @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Word))
+                        {
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Word ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "Word"))">Word</NavLink>
+                        }
                     </p>
                 </div>
             }
@@ -266,6 +270,9 @@
 
     protected override Task OnParametersSetAsync()
     {
+        // This enables the loading screen in-between documents but only for the first time, potentially due to the document cache.
+        // For big documents, not having a loading screen is an issue as there is a "render" lag.
+        renderContent = "";
         loadNewContent = true;
         notFound = false;
         noDocument = false;
@@ -277,7 +284,7 @@
     void HandleLocationChanged(object sender, LocationChangedEventArgs e)
     {
         // If the event is throw by a # parameter being appended, we want to scroll to it.
-        // Also compare the current url with the previous one to allow inter-document navigation with a id.
+        // Also compare the current url with the previous one to allow inter-document navigation with an id.
         string urlId = UrlHelper.GetUrlId(e.Location);
         string cleanUrl = _NavManager.ToBaseRelativePath(e.Location).Replace($"#{urlId}", "");
         if (!string.IsNullOrWhiteSpace(urlId) && relativePath == cleanUrl)

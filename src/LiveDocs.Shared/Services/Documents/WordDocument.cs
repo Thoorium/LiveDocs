@@ -31,7 +31,9 @@ namespace LiveDocs.Shared.Services.Documents
             WordPipeline wordPipeline = new WordPipelineBuilder()
                 .UseAutoHeaderId(GenerateHeaderId, (generatedId) => { existingHeaderIds.Add(generatedId); })
                 .UseLinkRewrite((originalUrl) => RewriteUrl(originalUrl, baseUri, documentationProject))
-                .UseBootstrap().Build();
+                .UseBootstrap()
+                .UseBase64Image()
+                .Build();
             return WordConverter.ConvertToHtml(Document, wordPipeline);
         }
 
