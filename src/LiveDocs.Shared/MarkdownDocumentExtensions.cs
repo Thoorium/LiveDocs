@@ -29,7 +29,7 @@ namespace LiveDocs.Shared
 
             var linkRender = new LinkInlineRenderer
             {
-                LinkRewriter = (originalUrl) => RewriteUrl(originalUrl, htmlRenderer.BaseUrl, urlBase, documentationProject)
+                LinkRewriter = (originalUrl) => RewriteUrl(originalUrl, urlBase, documentationProject)
             };
             htmlRenderer.ObjectRenderers.ReplaceOrAdd<Markdig.Renderers.Html.Inlines.LinkInlineRenderer>(linkRender);
 
@@ -43,76 +43,13 @@ namespace LiveDocs.Shared
         /// Rewrite the url to match an existing document or identify an external uri.
         /// </summary>
         /// <param name="originalUrl">The original url on the link.</param>
-        /// <param name="urlBase">Domain base of the caller.</param>
         /// <param name="sourceUrl">Full url of the caller.</param>
         /// <param name="documentationProject">List of documents in the current project to match with.</param>
         /// <returns></returns>
-        private static LinkInlineRenderer.LinkInlineRewrite RewriteUrl(string originalUrl, Uri urlBase, string sourceUrl, IDocumentationProject documentationProject)
+        private static LinkInlineRenderer.LinkInlineRewrite RewriteUrl(string originalUrl, string sourceUrl, IDocumentationProject documentationProject)
         {
-            originalUrl = HttpUtility.UrlDecode(originalUrl);
-            sourceUrl = HttpUtility.UrlDecode(sourceUrl);
-
-            // Inner page navigation or home navigation.
-            if (originalUrl.StartsWith("#") || string.IsNullOrWhiteSpace(originalUrl) || originalUrl == "/")
-                return new LinkInlineRenderer.LinkInlineRewrite { NewLink = originalUrl };
-
-            // If the url is a full one and the domain is different, open in a new tab.
-            if (Uri.TryCreate(originalUrl, UriKind.Absolute, out Uri originalUri) && !string.IsNullOrWhiteSpace(originalUri.Host) && !originalUri.Host.Equals(urlBase.Host, StringComparison.InvariantCultureIgnoreCase))
-                return new LinkInlineRenderer.LinkInlineRewrite { NewLink = originalUrl, Target = "_blank" };
-
-            if (Uri.TryCreate(sourceUrl, UriKind.Absolute, out Uri sourceUri))
-                originalUri = new Uri(sourceUri, originalUrl);
-
-            // Get the host url to clear the original url.
-            var hostUrl = urlBase.AbsoluteUri.Replace(urlBase.AbsolutePath, "");
-
-            // Keep a copy of the url id, if there's one.
-            var urlId = UrlHelper.GetUrlId(originalUrl);
-            var urlQueryString = UrlHelper.GetQueryString(originalUrl);
-
-            // Extract the url parts. Skip the first entry as it is always null.
-            var urlParts = UrlHelper.RemoveUrlId(HttpUtility.UrlDecode(originalUri?.AbsolutePath) ?? originalUrl).Replace(hostUrl + documentationProject.KeyPath, "")
-                .Replace($"#{urlId}", "") //Remove the ID part
-                .Replace($"?{urlQueryString}", "") // Remove the query string part
-                .Split("/") // Split into parts
-                .Skip(1) // Remove the first entry, it is always null
-                .ToArray(); 
-
-            if (urlParts.FirstOrDefault()?.Equals(documentationProject.Key, StringComparison.InvariantCultureIgnoreCase) ?? false)
-                urlParts[0] = null;
-
-            // Normalize all the elements up to the file name to enable search by key.
-            for (int i = 0; i < urlParts.Length - 1; i++)
-            {
-                urlParts[i] = UrlHelper.Urilize(urlParts[i]);
-            }
-
-            // Try to find a corresponding document by the document file name.
-            var document = documentationProject.GetDocumentByFileName(urlParts)?.Result;
-
-            if (document == null)
-                document = documentationProject.GetDocumentFor(urlParts)?.Result;
-
-            // No matching document found, return the original url to open in a new url since this might be an external document.
-            if (document == null)
-                return new LinkInlineRenderer.LinkInlineRewrite { NewLink = originalUrl, Target = "_blank" };
-
-            // Replace the file name with the matching document key.
-            urlParts[^1] = document.Key;
-
-            // Merge back the url parts into an url.
-            var finalUrl = $"/{string.Join("/", urlParts)}".Replace("//", "/");
-
-            if (!string.IsNullOrWhiteSpace(documentationProject.KeyPath))
-                finalUrl = $"/{documentationProject.KeyPath}{finalUrl}";
-
-            if (!string.IsNullOrWhiteSpace(urlQueryString))
-                finalUrl += $"?{urlQueryString}";
-
-            // Put back the id if there was one.
-            if (!string.IsNullOrWhiteSpace(urlId))
-                finalUrl += $"#{urlId}";
-            return new LinkInlineRenderer.LinkInlineRewrite { NewLink = finalUrl };
+            var result = UrlHelper.RewriteUrl(originalUrl, sourceUrl, documentationProject);
+            return new LinkInlineRenderer.LinkInlineRewrite { NewLink = result.NewUri, Target = result.Target };
         }
     }
 }

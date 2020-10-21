@@ -4,58 +4,68 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using LiveDocs.Shared.Services.Documents;
 using Microsoft.Extensions.DependencyInjection;
+using Thoorium.WordLib.Elements;
 
 namespace LiveDocs.Shared.Services.Remote
 {
-    public class RemoteHtmlDocument : HtmlDocument, IRemoteDocumentationDocument
+    public class RemoteWordDocument : WordDocument, IRemoteDocumentationDocument
     {
         private readonly IServiceProvider _Services;
-        private string content;
-        private bool readingCache = false;
+        private Thoorium.WordLib.WordDocument document;
+        private List<DocumentTreeItem> documentTree = new List<DocumentTreeItem>();
+        private bool readingCache;
 
-        public RemoteHtmlDocument(IServiceProvider serviceProvider)
+        public RemoteWordDocument(IServiceProvider serviceProvider)
         {
             _Services = serviceProvider;
         }
 
-        public override string Content => content;
+        public override Thoorium.WordLib.WordDocument Document => document;
 
-        public Task<List<DocumentTreeItem>> GetDocumentTree()
+        public async Task<List<DocumentTreeItem>> GetDocumentTree()
         {
-            throw new NotImplementedException();
-        }
+            if (documentTree.Count > 0)
+                return documentTree;
 
-        public async Task<string> GetTitle()
-        {
             var cacheResult = await TryCache();
             if (!cacheResult)
-                return "";
+                return documentTree;
 
-            return await base.GetTitle();
+            foreach (var element in Document.Elements)
+            {
+                if (element is HeadingElement headingElement)
+                {
+                    var linkFound = headingElement.HtmlAttributes.TryGetValue("id", out string link);
+                    documentTree.Add(new DocumentTreeItem
+                    {
+                        HeaderText = headingElement.Value,
+                        HeaderLevel = headingElement.Level,
+                        HeaderLink = linkFound ? link : ""
+                    });
+                }
+            }
+
+            return documentTree;
         }
 
         public async Task<bool> TryCache()
         {
-            if (content != null)
+            if (Document != null)
                 return true;
 
             while (readingCache)
                 await Task.Delay(5);
 
-            if (content != null)
+            if (Document != null)
                 return true;
 
             readingCache = true;
-
             try
             {
                 using (var scope = _Services.CreateScope())
                 {
                     var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
-                    // TODO: Uncomment the following line for 5.0 GA.
-                    // content = await httpClient.GetStringAsync(Path);
-                    var x = await httpClient.GetAsync(Path);
-                    content = await x.Content.ReadAsStringAsync();
+                    document = await Thoorium.WordLib.WordDocument.LoadAsync(await httpClient.GetStreamAsync(Path));
                 }
             } catch
             {
@@ -64,6 +74,7 @@ namespace LiveDocs.Shared.Services.Remote
             {
                 readingCache = false;
             }
+
             return true;
         }
 

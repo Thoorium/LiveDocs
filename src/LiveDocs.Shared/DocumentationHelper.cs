@@ -17,7 +17,7 @@ namespace LiveDocs.Shared
                 "html" => DocumentationDocumentType.Html,
                 "md" => DocumentationDocumentType.Markdown,
                 "pdf" => DocumentationDocumentType.Pdf,
-                "doc" => DocumentationDocumentType.Word,
+                //"doc" => DocumentationDocumentType.Word,
                 "docx" => DocumentationDocumentType.Word,
                 "ldproject" => DocumentationDocumentType.Project,
                 "ldversion" => DocumentationDocumentType.Version,

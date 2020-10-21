@@ -9,7 +9,6 @@ using LiveDocs.Shared.Services;
 using LiveDocs.Shared.Services.Documents;
 using LiveDocs.Shared.Services.Remote;
 using LiveDocs.Shared.Services.Search;
-using Markdig;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -134,9 +133,15 @@ namespace LiveDocs.Server.Services
                         });
                         break;
 
+                    case DocumentationDocumentType.Word:
+                        project.Documents.Add(new WordDocument
+                        {
+                            Path = file.FullName,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
                     case DocumentationDocumentType.Pdf:
                     case DocumentationDocumentType.Html:
-                    case DocumentationDocumentType.Word:
                     case DocumentationDocumentType.Folder:
                         project.Documents.Add(new DocumentationDocument
                         {

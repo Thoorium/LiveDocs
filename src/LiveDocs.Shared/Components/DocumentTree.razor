@@ -1,6 +1,6 @@
 ﻿@inject LiveDocs.Shared.Services.IDocumentationService _DocumentationService
 
-@if (headerTexts.Count != 0)
+@if (documentTree.Count != 0)
 {
     <div class="sidebar tree">
         <ul class="nav flex-column document-tree text-secondary">
@@ -9,9 +9,9 @@
                 @("Loading")
             } else
             {
-                @for (int i = 0; i < headerTexts.Count; i++)
+                @for (int i = 0; i < documentTree.Count; i++)
                 {
-                    <DocumentTreeItem Text="@headerTexts[i]" Url="@headerLinks[i]" Level="@headerLevels[i]"></DocumentTreeItem>
+                    <DocumentTreeItem Text="@documentTree[i].HeaderText" Url="@documentTree[i].HeaderLink" Level="@documentTree[i].HeaderLevel"></DocumentTreeItem>
                 }
             }
         </ul>
@@ -23,10 +23,7 @@
     public LiveDocs.Shared.Services.IDocumentationDocument Document { get; set; }
 
     private LiveDocs.Shared.Services.IDocumentationDocument previousDocument = null;
-
-    private List<string> headerLinks = new List<string>();
-    private List<string> headerTexts = new List<string>();
-    private List<int> headerLevels = new List<int>();
+    private List<LiveDocs.Shared.Services.Documents.DocumentTreeItem> documentTree = new List<Services.Documents.DocumentTreeItem>();
 
     protected async override Task OnParametersSetAsync()
     {
@@ -38,55 +35,16 @@
             
 
         previousDocument = Document;
+        documentTree.Clear();
 
-        headerTexts.Clear();
-        headerLinks.Clear();
-        headerLevels.Clear();
-
-        if (Document is LiveDocs.Shared.Services.Documents.MarkdownDocument markdownDocument)
+        if(Document is LiveDocs.Shared.Services.Remote.IRemoteDocumentationDocument remoteDocument)
         {
-            if(Document is LiveDocs.Shared.Services.Remote.IRemoteDocumentationDocument remoteDocument)
-            {
-                var success = await remoteDocument.TryCache();
-                if(!success)
-                    return;
-            }
+            var success = await remoteDocument.TryCache();
+            if(!success)
+                return;
 
-            foreach (Markdig.Syntax.HeadingBlock header in markdownDocument.Markdown.Where(w => w is Markdig.Syntax.HeadingBlock))
-            {
-                string headerText = ExtractLiterals(header.Inline);
-                string headerLink = Markdig.Helpers.LinkHelper.Urilize(headerText, allowOnlyAscii: true);
-
-                string uniqueHeaderLink = headerLink;
-                int numPad = 1;
-                while (headerLinks.Contains(uniqueHeaderLink))
-                    uniqueHeaderLink += $"-{numPad++}";
-
-                headerTexts.Add(headerText);
-                headerLinks.Add(uniqueHeaderLink);
-                headerLevels.Add(header.Level);
-            }
+            documentTree.AddRange(await remoteDocument.GetDocumentTree());
         }
         await base.OnParametersSetAsync();
-    }
-
-    private string ExtractLiterals(Markdig.Syntax.Inlines.ContainerInline parentInline, string text = "")
-    {
-        foreach (var inline in parentInline)
-        {
-            text += inline switch
-            {
-                Markdig.Syntax.Inlines.LiteralInline literal =>
-                    literal.ToString(),
-                Markdig.Syntax.Inlines.CodeInline code =>
-                    code.Content,
-                 Markdig.Syntax.Inlines.HtmlInline htmlInline =>
-				    "", // The text between html tags is a literal.
-                Markdig.Syntax.Inlines.ContainerInline container =>
-                    ExtractLiterals(container),               
-                _ => inline.ToString()
-            };
-        }
-        return text;
     }
 }

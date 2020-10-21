@@ -17,7 +17,7 @@ nav.navbar {
 }
 
 li.dropdown:hover > div.dropdown-menu {
-    display:block;
+    display: block;
 }
 
 .navbar-nav .dropdown-menu {
@@ -246,8 +246,8 @@ textarea.http-response-data[readonly] {
 }
 
 div.doc-tools {
-    display:block;
-    height:12px;
+    display: block;
+    height: 12px;
 }
 
 div.doc-tools a.download-link {
@@ -256,6 +256,10 @@ div.doc-tools a.download-link {
 
 .language-bash::before, .language-sh::before, .language-powershell::before {
     color: var(--cyan);
+}
+
+img.wd-graphic {
+    max-height: 2.5rem;
 }
 
 @media (max-width: 991.98px) {
