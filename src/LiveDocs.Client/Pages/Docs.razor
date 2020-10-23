@@ -67,7 +67,7 @@
             }
             @if (documentationDocument.DocumentType == DocumentationDocumentType.Drawio)
             {
-                <LiveDocs.Shared.Components.DrawioDiagram>@((MarkupString)renderContent)</LiveDocs.Shared.Components.DrawioDiagram>
+                <LiveDocs.Shared.Components.DrawioDiagram DocumentName="@documentationDocument.Name">@((MarkupString)renderContent)</LiveDocs.Shared.Components.DrawioDiagram>
             } else
             {
                 @((MarkupString)renderContent)

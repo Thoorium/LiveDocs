@@ -35,9 +35,9 @@
             var xmlDoc = mxUtils.parseXml(xml);
             var codec = new mxCodec(xmlDoc);
             codec.decode(codec.document.documentElement, graph.getModel());
-        });
 
-    graph.maxFitScale = 1;
-    graph.fit();
-    graph.center(true, false);
+            graph.maxFitScale = 1;
+            graph.fit();
+            graph.center(true, false);
+        });
 }

@@ -2,13 +2,16 @@
 @inject IJSRuntime _JSRuntime
 @implements IAsyncDisposable
 
-<h3>DrawioDiagram</h3>
+<h1>@DocumentName</h1>
 
 @ChildContent
 
 @code {
     [Parameter]
     public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string DocumentName { get; set; }
 
     //[Parameter]
     //public string DocumentXml { get; set; }
