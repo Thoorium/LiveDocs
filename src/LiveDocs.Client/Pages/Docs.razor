@@ -65,7 +65,13 @@
             {
                 <div class="doc-tools"><a class="download-link float-right" href="@documentationDocument.Path" target="_blank" rel="noopener noreferrer" download>Download original</a></div>
             }
-            @((MarkupString)renderContent)
+            @if (documentationDocument.DocumentType == DocumentationDocumentType.Drawio)
+            {
+                <LiveDocs.Shared.Components.DrawioDiagram>@((MarkupString)renderContent)</LiveDocs.Shared.Components.DrawioDiagram>
+            } else
+            {
+                @((MarkupString)renderContent)
+            }
         }
     </div>
     @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !noDocument && !offline)

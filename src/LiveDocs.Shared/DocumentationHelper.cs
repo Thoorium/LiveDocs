@@ -19,6 +19,7 @@ namespace LiveDocs.Shared
                 "pdf" => DocumentationDocumentType.Pdf,
                 //"doc" => DocumentationDocumentType.Word,
                 "docx" => DocumentationDocumentType.Word,
+                "drawio" => DocumentationDocumentType.Drawio,
                 "ldproject" => DocumentationDocumentType.Project,
                 "ldversion" => DocumentationDocumentType.Version,
                 _ => DocumentationDocumentType.Unknown
@@ -33,6 +34,7 @@ namespace LiveDocs.Shared
                 "html" => DocumentationDocumentType.Html,
                 "pdf" => DocumentationDocumentType.Pdf,
                 "word" => DocumentationDocumentType.Word,
+                "drawio" => DocumentationDocumentType.Drawio,
                 _ => DocumentationDocumentType.Unknown
             };
         }

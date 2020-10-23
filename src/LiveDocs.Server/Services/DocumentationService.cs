@@ -21,6 +21,7 @@ namespace LiveDocs.Server.Services
         private readonly ILogger<DocumentationService> _Logger;
         private readonly LiveDocsOptions _Options;
         private readonly SearchPipeline _SearchPipeline;
+
         public DocumentationService(ILogger<DocumentationService> logger, IOptions<LiveDocsOptions> options, IWebHostEnvironment hostingEnvironment, SearchPipeline searchPipeline)
         {
             _Logger = logger;
@@ -140,9 +141,11 @@ namespace LiveDocs.Server.Services
                             LastUpdate = file.LastWriteTimeUtc
                         });
                         break;
+
                     case DocumentationDocumentType.Pdf:
                     case DocumentationDocumentType.Html:
                     case DocumentationDocumentType.Folder:
+                    case DocumentationDocumentType.Drawio:
                         project.Documents.Add(new DocumentationDocument
                         {
                             Path = file.FullName,

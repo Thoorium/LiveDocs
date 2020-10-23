@@ -158,6 +158,14 @@ namespace LiveDocs.Shared.Services.Remote
                         Path = remoteDocumentationDocument.Path,
                         LastUpdate = remoteDocumentationDocument.LastUpdate
                     };
+
+                case DocumentationDocumentType.Drawio:
+                    return new RemoteDrawioDocument
+                    {
+                        Path = remoteDocumentationDocument.Path,
+                        LastUpdate = remoteDocumentationDocument.LastUpdate
+                    };
+
                 case DocumentationDocumentType.Folder:
                 default:
                     return new GenericDocumentationDocument

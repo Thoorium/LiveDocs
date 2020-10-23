@@ -6,6 +6,7 @@
         Pdf,
         Word,
         Html,
+        Drawio,
         Folder,
         Project,
         Version,
