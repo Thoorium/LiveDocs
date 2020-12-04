@@ -39,11 +39,10 @@ namespace LiveDocs.Server.Controllers
         {
             var paths = new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).ToArray();
 
-            // For multiple dots documents, merge those dots back to the extension.
-            while (paths[^1].Contains("."))
+            if (paths[^1].EndsWith(".drawio", System.StringComparison.InvariantCultureIgnoreCase) && string.Equals(ext, "svg", System.StringComparison.InvariantCultureIgnoreCase))
             {
-                ext = Path.GetExtension(paths[^1])[1..] + "." + ext;
-                paths[^1] = Path.GetFileNameWithoutExtension(paths[^1]);
+                paths[^1] = paths[^1].Substring(0, paths[^1].LastIndexOf('.'));
+                ext = "drawio.svg";
             }
 
             string fullFilename = string.Join("/", paths) + "." + ext;
