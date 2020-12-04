@@ -125,7 +125,7 @@ namespace LiveDocs.Shared.Services.Remote
                 doc.SubDocuments = CopyDocuments<TDocumentationDocument>(remoteDocumentationDocument.SubDocuments, serviceProvider).ToArray();
                 return doc;
             }
-            var docType = DocumentationHelper.GetDocumentationDocumentTypeFromExtension(Path.GetExtension(remoteDocumentationDocument.Path));
+            var docType = DocumentationHelper.GetDocumentationDocumentTypeFromName(remoteDocumentationDocument.Path);
 
             switch (docType)
             {
@@ -161,6 +161,13 @@ namespace LiveDocs.Shared.Services.Remote
 
                 case DocumentationDocumentType.Drawio:
                     return new RemoteDrawioDocument
+                    {
+                        Path = remoteDocumentationDocument.Path,
+                        LastUpdate = remoteDocumentationDocument.LastUpdate
+                    };
+
+                case DocumentationDocumentType.DrawioSvg:
+                    return new RemoteDrawioSvgDocument
                     {
                         Path = remoteDocumentationDocument.Path,
                         LastUpdate = remoteDocumentationDocument.LastUpdate

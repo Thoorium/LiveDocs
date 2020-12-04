@@ -7,6 +7,7 @@
         Word,
         Html,
         Drawio,
+        DrawioSvg,
         Folder,
         Project,
         Version,

@@ -1,4 +1,5 @@
-﻿using LiveDocs.Shared.Services;
+﻿using System.IO;
+using LiveDocs.Shared.Services;
 
 namespace LiveDocs.Shared
 {
@@ -20,10 +21,19 @@ namespace LiveDocs.Shared
                 //"doc" => DocumentationDocumentType.Word,
                 "docx" => DocumentationDocumentType.Word,
                 "drawio" => DocumentationDocumentType.Drawio,
+                "drawio.svg" => DocumentationDocumentType.DrawioSvg,
                 "ldproject" => DocumentationDocumentType.Project,
                 "ldversion" => DocumentationDocumentType.Version,
                 _ => DocumentationDocumentType.Unknown
             };
+        }
+
+        public static DocumentationDocumentType GetDocumentationDocumentTypeFromName(string name)
+        {
+            if (name?.EndsWith(".drawio.svg", System.StringComparison.InvariantCultureIgnoreCase) == true)
+                return DocumentationDocumentType.DrawioSvg;
+
+            return GetDocumentationDocumentTypeFromExtension(Path.GetExtension(name));
         }
 
         public static DocumentationDocumentType GetDocumentationDocumentTypeFromString(string documentationType)
@@ -35,8 +45,18 @@ namespace LiveDocs.Shared
                 "pdf" => DocumentationDocumentType.Pdf,
                 "word" => DocumentationDocumentType.Word,
                 "drawio" => DocumentationDocumentType.Drawio,
+                "drawiosvg" => DocumentationDocumentType.DrawioSvg,
+                "drawio.svg" => DocumentationDocumentType.DrawioSvg,
                 _ => DocumentationDocumentType.Unknown
             };
+        }
+
+        public static string GetDocumentNameWithoutExtension(string fullname)
+        {
+            if (fullname?.EndsWith(".drawio.svg", System.StringComparison.InvariantCultureIgnoreCase) == true)
+                return Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(fullname));
+
+            return Path.GetFileNameWithoutExtension(fullname);
         }
     }
 }

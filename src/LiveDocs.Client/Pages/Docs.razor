@@ -58,6 +58,14 @@
                         {
                             <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Word ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "Word"))">Word</NavLink>
                         }
+                        @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Drawio))
+                        {
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Drawio ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "Drawio"))">Drawio</NavLink>
+                        }
+                        @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.DrawioSvg))
+                        {
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.DrawioSvg ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "DrawioSvg"))">DrawioSvg</NavLink>
+                        }
                     </p>
                 </div>
             }
