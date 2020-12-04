@@ -58,6 +58,14 @@
                         {
                             <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Word ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "Word"))">Word</NavLink>
                         }
+                        @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.Drawio))
+                        {
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.Drawio ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "Drawio"))">Drawio</NavLink>
+                        }
+                        @if (extraDocuments.Any(a => a.DocumentType == DocumentationDocumentType.DrawioSvg))
+                        {
+                            <NavLink type="button" class="@($"btn btn-outline-info btn-sm mr-1 {(documentationDocument.DocumentType == DocumentationDocumentType.DrawioSvg ? "active" : "")}")" href="@(UrlHelper.AddOrUpdateQueryString(relativePath,"file", "DrawioSvg"))">DrawioSvg</NavLink>
+                        }
                     </p>
                 </div>
             }
@@ -65,7 +73,13 @@
             {
                 <div class="doc-tools"><a class="download-link float-right" href="@documentationDocument.Path" target="_blank" rel="noopener noreferrer" download>Download original</a></div>
             }
-            @((MarkupString)renderContent)
+            @if (documentationDocument.DocumentType == DocumentationDocumentType.Drawio)
+            {
+                <LiveDocs.Shared.Components.DrawioDiagram DocumentName="@documentationDocument.Name">@((MarkupString)renderContent)</LiveDocs.Shared.Components.DrawioDiagram>
+            } else
+            {
+                @((MarkupString)renderContent)
+            }
         }
     </div>
     @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !noDocument && !offline)
@@ -197,8 +211,7 @@
         // Document type is not specified and the specified type had no document, let's find the default document instead.
         if (document == null)
         {
-            if (document == null)
-                previousDocumentType = documentType;
+            previousDocumentType = documentType;
 
             if (documentPath.Length == 0)
                 document = (IRemoteDocumentationDocument) await currentProject.GetDocumentationDefaultDocument();

@@ -13,7 +13,7 @@ namespace LiveDocs.Server.Services
         public string FileName => System.IO.Path.GetFileName(Path);
         public string Key => UrlHelper.Urilize(Name);
         public DateTime LastUpdate { get; set; }
-        public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
+        public string Name => DocumentationHelper.GetDocumentNameWithoutExtension(Path);
         public string Path { get; set; }
         public IDocumentationDocument[] SubDocuments { get; set; } = null;
         public int SubDocumentsCount => (SubDocuments?.Count(c => c.DocumentType != DocumentationDocumentType.Project && c.DocumentType != DocumentationDocumentType.Project) ?? 0) + SubDocuments?.Sum(s => s.SubDocumentsCount) ?? 0;

@@ -18,6 +18,7 @@ namespace LiveDocs.Server.Controllers
         private readonly IWebHostEnvironment _HostEnvironment;
         private readonly ILogger<FileController> _Logger;
         private readonly LiveDocsOptions _Options;
+
         public FileController(ILogger<FileController> logger, IWebHostEnvironment hostEnvironment, IOptions<LiveDocsOptions> options, IDocumentationService documentationService)
         {
             _Logger = logger;
@@ -37,6 +38,13 @@ namespace LiveDocs.Server.Controllers
         public async Task<IActionResult> DownloadFile(string path1, string path2, string path3, string path4, string path5, string path6, string path7, string path8, string ext)
         {
             var paths = new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).ToArray();
+
+            if (paths[^1].EndsWith(".drawio", System.StringComparison.InvariantCultureIgnoreCase) && string.Equals(ext, "svg", System.StringComparison.InvariantCultureIgnoreCase))
+            {
+                paths[^1] = paths[^1].Substring(0, paths[^1].LastIndexOf('.'));
+                ext = "drawio.svg";
+            }
+
             string fullFilename = string.Join("/", paths) + "." + ext;
             var isDefaultProject = await _DocumentationService.DocumentationIndex.GetProjectFor(paths, out IDocumentationProject currentProject, out string[] documentPath);
             IDocumentationDocument document = await currentProject.GetDocumentFor(documentPath, ext);

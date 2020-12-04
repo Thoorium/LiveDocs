@@ -1,0 +1,46 @@
+﻿@using Microsoft.JSInterop
+@inject IJSRuntime _JSRuntime
+@implements IAsyncDisposable
+
+<h1>@DocumentName</h1>
+
+@ChildContent
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string DocumentName { get; set; }
+
+    //[Parameter]
+    //public string DocumentXml { get; set; }
+    
+    // Based on https://www.meziantou.net/javascript-isolation-in-blazor-components.htm
+    // Load the module and keep a reference to it
+    // You need to use .AsTask() to convert the ValueTask to Task as it may be awaited multiple times
+    private Task<IJSObjectReference> _module;
+    private Task<IJSObjectReference> Module => _module ??= _JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/LiveDocs.Shared/js/drawio/export.js").AsTask();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            await base.OnAfterRenderAsync(firstRender);
+            return;
+        }
+
+        var module = await Module;
+        await module.InvokeVoidAsync("initialize", "mxgraph");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module != null)
+        {
+            var module = await _module;
+            await module.DisposeAsync();
+        }
+    }
+
+}
