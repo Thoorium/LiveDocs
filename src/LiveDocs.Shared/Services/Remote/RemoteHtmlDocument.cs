@@ -52,10 +52,7 @@ namespace LiveDocs.Shared.Services.Remote
                 using (var scope = _Services.CreateScope())
                 {
                     var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
-                    // TODO: Uncomment the following line for 5.0 GA.
-                    // content = await httpClient.GetStringAsync(Path);
-                    var x = await httpClient.GetAsync(Path);
-                    content = await x.Content.ReadAsStringAsync();
+                    content = await httpClient.GetStringAsync(Path);
                 }
             } catch
             {

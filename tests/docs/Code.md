@@ -31,3 +31,5 @@ shell command
 ```cmd
 cmd command
 ```
+
+Some text with inlined code `function BetterConcatParts`.
