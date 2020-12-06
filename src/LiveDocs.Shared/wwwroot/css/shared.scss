@@ -292,6 +292,10 @@ img.wd-graphic {
     .sidebar.tree {
         display: none;
     }
+
+    input[type="search"] {
+        width: 100vw !important;
+    }
 }
 
 @media (min-width: 991.99px) {

@@ -9,7 +9,10 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <ul class="navbar-nav mr-auto">
+            
+
+            <div class="navbar-collapse offcanvas-collapse @NavMenuCssClass" style="max-width:85rem;">
+                <ul class="navbar-nav mr-auto">
                 @if (_DocumentationService.DocumentationIndex != null)
                 {
                     @if (_DocumentationService.DocumentationIndex.Projects.Count > 0)
@@ -17,7 +20,7 @@
                         <LiveDocs.Shared.Components.NavLinkDropdownItem Text="Documentation" BaseRoute="/">
                             @foreach (var item in _DocumentationService.DocumentationIndex.Projects.OrderBy(o => o.Name.ToLower()))
                             {
-                                <NavLink class="dropdown-item" href="@(item.Key + "/")">@item.Name</NavLink>
+                                <NavLink class="dropdown-item" href="@(item.Key + "/")" @onclick="CloseNavMenu">@item.Name</NavLink>
                             }
                         </LiveDocs.Shared.Components.NavLinkDropdownItem>
                     } else if (_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.Count > 0 && _DocumentationService.DocumentationIndex.DefaultProject.LandingPage != null)
@@ -39,10 +42,6 @@
                     }
                 }
             </ul>
-
-            <div class="navbar-collapse offcanvas-collapse @NavMenuCssClass" style="max-width:75rem;">
-                <ul class="navbar-nav mr-auto">
-                </ul>
                 <div class="search-form form-inline my-2 my-lg-0 dropdown">
                     <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @bind="@SearchQuery" @bind:event="oninput" @onfocus="OnFocus" />
                     <div class="dropdown-menu " aria-labelledby="dropdown" style="width:99%;margin-top:0px">
@@ -71,6 +70,11 @@
     {
         while (_DocumentationService.DocumentationIndex == null)
             await Task.Delay(5);
+    }
+
+    void CloseNavMenu()
+    {
+        collapseNavMenu = false;
     }
 
     void ToggleNavMenu()

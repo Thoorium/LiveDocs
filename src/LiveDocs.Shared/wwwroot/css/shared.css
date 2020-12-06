@@ -233,7 +233,9 @@ img.wd-graphic {
   ul.navbar-nav {
     margin-right: 1rem !important; }
   .sidebar.tree {
-    display: none; } }
+    display: none; }
+  input[type="search"] {
+    width: 100vw !important; } }
 
 @media (min-width: 991.99px) {
   input[type="search"]:focus, input[type="search"]:not(:placeholder-shown) {
