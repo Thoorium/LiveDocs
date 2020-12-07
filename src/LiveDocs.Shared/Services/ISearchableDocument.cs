@@ -6,6 +6,6 @@ namespace LiveDocs.Shared.Services
     {
         public string Name { get; }
 
-        public Task<string> GetContent();
+        public Task<string> GetSearchableContent();
     }
 }

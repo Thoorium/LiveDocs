@@ -108,7 +108,7 @@ namespace LiveDocs.Shared.Services.Search
                 }
 
                 ISearchableDocument searchableDocument = (ISearchableDocument)document;
-                string content = await searchableDocument.GetContent();
+                string content = await searchableDocument.GetSearchableContent();
                 var tokens = await _SearchPipeline.Analyse(new string[] { document.Name, content });
                 List<string> tempPaths = new List<string>(paths);
                 tempPaths.Add(document.Key);

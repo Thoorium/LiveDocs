@@ -262,6 +262,14 @@ img.wd-graphic {
     max-height: 2.5rem;
 }
 
+.sidebar-button.documents {
+    display: none;
+}
+
+.sidebar-toggles {
+    display: none;
+}
+
 @media (max-width: 991.98px) {
     .offcanvas-collapse {
         position: fixed;
@@ -280,6 +288,10 @@ img.wd-graphic {
     }
 
     .offcanvas-collapse.open {
+        display: flex;
+        flex-direction: column-reverse;
+        justify-content: flex-end;
+        align-items: normal;
         visibility: visible;
         -webkit-transform: translateX(-100%);
         transform: translateX(-100%);
@@ -289,12 +301,71 @@ img.wd-graphic {
         margin-right: 1rem !important;
     }
 
-    .sidebar.tree {
+    .sidebar.documents, .sidebar.tree {
         display: none;
+        transition: display .3s ease-in-out, -webkit-transform .3s ease-in-out;
+        transition: transform .3s ease-in-out, visibility .3s ease-in-out;
+        transition: transform .3s ease-in-out, visibility .3s ease-in-out, -webkit-transform .3s ease-in-out;
+    }
+
+    .sidebar.documents, div.content, .sidebar.tree {
+        margin-top: 2rem;
+    }
+
+    .sidebar.documents.open, .sidebar.tree.open {
+        display: block;
+    }
+
+    div.content.documents-open {
+        overflow: visible !important;
+        width: 100vw;
+    }
+
+    div.content.document-tree-open {
+        overflow: visible !important;
+        width: 100vw;
+        margin-left: -17rem;
+    }
+
+    .sidebar-toggles {
+        position: fixed;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        background: #fff;
+        margin-top: -2rem;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .sidebar-toggles .btn {
+        width: 45vw;
+    }
+
+    .sidebar-toggles .btn:active, .sidebar-toggles .btn:hover {
+        background: none;
+    }
+
+    .sidebar-toggles .btn.active {
+        background-color: #17a2b8;
+    }
+
+    .sidebar-toggles .btn:first-of-type {
+        margin-right: .5vw;
+    }
+
+    .sidebar-toggles .btn:last-of-type {
+        margin-left: .5vw;
     }
 
     input[type="search"] {
         width: 100vw !important;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .sidebar-toggles {
+            background-color: #191d21;
+        }
     }
 }
 

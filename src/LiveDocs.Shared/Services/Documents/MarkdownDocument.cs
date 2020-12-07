@@ -26,7 +26,7 @@ namespace LiveDocs.Shared.Services.Documents
         public IDocumentationDocument[] SubDocuments { get; set; } = null;
         public int SubDocumentsCount => (SubDocuments?.Count(c => c.DocumentType != DocumentationDocumentType.Project && c.DocumentType != DocumentationDocumentType.Project) ?? 0) + SubDocuments?.Sum(s => s.SubDocumentsCount) ?? 0;
 
-        public Task<string> GetContent()
+        public Task<string> GetSearchableContent()
         {
             var text = string.Join(" ", Markdown.Descendants<LiteralInline>().Select(s => s.ToString()));
             var codeInline = string.Join(" ", Markdown.Descendants<CodeInline>().Select(s => s.Content));

@@ -2,7 +2,7 @@
 
 @if (documentTree.Count != 0)
 {
-    <div class="sidebar tree">
+    <div class="sidebar tree @displayToggleCssClass">
         <ul class="nav flex-column document-tree text-secondary">
             @if (Document == null)
             {
@@ -11,7 +11,7 @@
             {
                 @for (int i = 0; i < documentTree.Count; i++)
                 {
-                    <DocumentTreeItem Text="@documentTree[i].HeaderText" Url="@documentTree[i].HeaderLink" Level="@documentTree[i].HeaderLevel"></DocumentTreeItem>
+                    <DocumentTreeItem Text="@documentTree[i].HeaderText" Url="@documentTree[i].HeaderLink" Level="@documentTree[i].HeaderLevel" DisplayToggle="DisplayToggle"></DocumentTreeItem>
                 }
             }
         </ul>
@@ -21,6 +21,11 @@
 @code {
     [Parameter]
     public LiveDocs.Shared.Services.IDocumentationDocument Document { get; set; }
+
+    [Parameter]
+    public bool DisplayToggle { get; set; }
+
+    string displayToggleCssClass => DisplayToggle ? "open" : "";
 
     private LiveDocs.Shared.Services.IDocumentationDocument previousDocument = null;
     private List<LiveDocs.Shared.Services.Documents.DocumentTreeItem> documentTree = new List<Services.Documents.DocumentTreeItem>();

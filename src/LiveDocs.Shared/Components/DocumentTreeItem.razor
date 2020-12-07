@@ -3,12 +3,12 @@
 @if (Level <= 1)
 {
     <li class="nav-item px-3">
-        <a href="@(AddOrUpdateUrlId(_NavManager.ToBaseRelativePath(_NavManager.Uri), Url))">@Text</a>
+        <a href="@(AddOrUpdateUrlId(_NavManager.ToBaseRelativePath(_NavManager.Uri), Url))" @onclick="ToggleOff">@Text</a>
     </li>
 } else
 {
     <ul class="ml-3 pl-0">
-        <DocumentTreeItem Text="@Text" Url="@Url" Level="@(--Level)"></DocumentTreeItem>
+        <DocumentTreeItem Text="@Text" Url="@Url" Level="@(--Level)" DisplayToggle="DisplayToggle"></DocumentTreeItem>
     </ul>
 }
 
@@ -22,9 +22,18 @@
     [Parameter]
     public int Level { get; set; }
 
+    [Parameter]
+    public bool DisplayToggle { get; set; }
+
     private string AddOrUpdateUrlId(string url, string id)
     {
         string path = UrlHelper.RemoveUrlId(url);
         return $"{path}#{id}";
+    }
+
+    private void ToggleOff()
+    {
+        DisplayToggle = false;
+        StateHasChanged();
     }
 }
