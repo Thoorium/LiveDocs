@@ -39,10 +39,11 @@ namespace LiveDocs.Shared.Services.Documents
 
         private string GenerateHeaderId(string id, string text)
         {
-            string uniqueHeaderLink = UrlHelper.Urilize(text);
+            string baseHeaderLink = UrlHelper.Urilize(text);
+            string uniqueHeaderLink = baseHeaderLink;
             int numPad = 1;
             while (existingHeaderIds.Contains(uniqueHeaderLink))
-                uniqueHeaderLink += $"-{numPad++}";
+                uniqueHeaderLink = $"{baseHeaderLink}-{numPad++}";
             return uniqueHeaderLink;
         }
 
