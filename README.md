@@ -7,6 +7,8 @@ Transform your static documentation into a structured website.
 - Markdown `.md`
 - Html `.html`
 - Pdf `.pdf`
+- Word `.docx`
+- Drawio `.drawio (Partial) | .drawio.svg`
 
 ## Getting started
 

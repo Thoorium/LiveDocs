@@ -50,34 +50,55 @@ namespace LiveDocs.Shared.Services.Search
         public async Task<IList<ISearchResult>> Search(string term, CancellationToken cancellationToken)
         {
             var tokens = await _SearchPipeline.Analyse(new string[] { term });
-            int[] lexicalIds = tokens.Select(s => Array.IndexOf(Lexical, s)).ToArray();
+            List<List<SearchMatch>> tokenMatches = new List<List<SearchMatch>>();
+            foreach (var token in tokens)
+            {
+                var fuzzyMatch = FuzzyIndexesOf(Lexical, token);
+                tokenMatches.Add(fuzzyMatch);
+            }
+            var matchGroup = tokenMatches.CartesianProduct();
+
+            // For debug purposes.
+            // TODO: Remove.
+            //Console.WriteLine(string.Join(',', tokens));
+            //int[] lexicalIds1 = tokens.Select(s => Array.IndexOf(Lexical, s)).ToArray();
+            //Console.WriteLine("Direct: " + string.Join(',', lexicalIds1.Select(s => s.ToString())));
+            //foreach (var match in matchGroup)
+            //{
+            //    Console.WriteLine("Fuzzy : " + string.Join(',', match.Select(s => s.Index)));
+            //}
+
             IList<BasicSearchResult> results = new List<BasicSearchResult>();
 
-            foreach (var element in Documents)
+            foreach (var match in matchGroup.OrderBy(o => o.Sum(su => su.Distance)))
             {
-                if (cancellationToken.IsCancellationRequested)
-                    return null;
-
-                var matches = lexicalIds.Intersect(element.LexicalIndexes).ToArray();
-
-                // Inclusive search
-                if (lexicalIds.Any(a => !matches.Contains(a)))
-                    continue;
-
-                await _DocumentationIndex.GetProjectFor(element.Path.Split("/"), out var project, out var documentPath);
-
-                var document = await project.GetDocumentFor(documentPath);
-                if (document != null && !results.Any(a => a.KeyPath == element.Path))
+                foreach (var element in Documents)
                 {
-                    results.Add(new BasicSearchResult
+                    var lexicalIds = match.Select(s => s.Index);
+                    if (cancellationToken.IsCancellationRequested)
+                        return null;
+
+                    var matches = lexicalIds.Intersect(element.LexicalIndexes).ToArray();
+
+                    // Inclusive search
+                    if (lexicalIds.Any(a => !matches.Contains(a)))
+                        continue;
+
+                    await _DocumentationIndex.GetProjectFor(element.Path.Split("/"), out var project, out var documentPath);
+
+                    var document = await project.GetDocumentFor(documentPath);
+                    if (document != null && !results.Any(a => a.KeyPath == element.Path))
                     {
-                        KeyPath = element.Path,
-                        Document = document,
-                        HitCount = matches.Length
-                    });
+                        results.Add(new BasicSearchResult
+                        {
+                            KeyPath = element.Path,
+                            Document = document,
+                            HitCount = matches.Length
+                        });
+                    }
                 }
             }
-
+            // TODO: Limit search result count?
             return results.OrderByDescending(o => o.HitCount).Select(s => (ISearchResult)s).ToList();
         }
 
@@ -101,8 +122,10 @@ namespace LiveDocs.Shared.Services.Search
             {
                 if (document.DocumentType == DocumentationDocumentType.Folder && document.SubDocumentsCount > 0)
                 {
-                    List<string> tempFolderPaths = new List<string>(paths);
-                    tempFolderPaths.Add(document.Key);
+                    List<string> tempFolderPaths = new List<string>(paths)
+                    {
+                        document.Key
+                    };
                     await AddDocuments(lexical, elements, document.SubDocuments.ToList(), tempFolderPaths);
                     continue;
                 }
@@ -110,8 +133,10 @@ namespace LiveDocs.Shared.Services.Search
                 ISearchableDocument searchableDocument = (ISearchableDocument)document;
                 string content = await searchableDocument.GetSearchableContent();
                 var tokens = await _SearchPipeline.Analyse(new string[] { document.Name, content });
-                List<string> tempPaths = new List<string>(paths);
-                tempPaths.Add(document.Key);
+                List<string> tempPaths = new List<string>(paths)
+                {
+                    document.Key
+                };
                 var documentFullPath = string.Join("/", tempPaths);
 
                 foreach (var token in tokens)
@@ -128,10 +153,34 @@ namespace LiveDocs.Shared.Services.Search
             }
         }
 
+        private List<SearchMatch> FuzzyIndexesOf(string[] lexical, string term)
+        {
+            List<SearchMatch> matches = new List<SearchMatch>();
+            for (int i = 0; i < lexical.Length; i++)
+            {
+                int distance = StringHelper.DamerauLevenshteinDistance(lexical[i], term);
+                // TODO: Configurable distance.
+                if (distance <= 2)
+                    matches.Add(new SearchMatch
+                    {
+                        Index = i,
+                        Distance = distance
+                    });
+            }
+            return matches;
+        }
+
         public class Element
         {
             public int[] LexicalIndexes { get; set; }
             public string Path { get; set; }
+        }
+
+        private class SearchMatch
+        {
+            public int Distance { get; set; }
+
+            public int Index { get; set; }
         }
     }
 }
