@@ -160,7 +160,8 @@ namespace LiveDocs.Shared.Services.Search
             {
                 int distance = StringHelper.DamerauLevenshteinDistance(lexical[i], term);
                 // TODO: Configurable distance.
-                if (distance <= 2)
+                int max_distance = (int)Math.Round(term.Length / 4d, MidpointRounding.AwayFromZero);
+                if (distance <= max_distance)
                     matches.Add(new SearchMatch
                     {
                         Index = i,
