@@ -3,7 +3,7 @@
 @inject Microsoft.JSInterop.IJSRuntime _JSRuntime
 @inject NavigationManager _NavManager
 @inject HttpClient _HttpClient
-@inject IConfiguration _Configuration
+@inject RemoteConfiguration _Configuration
 
 @if (!landingPage && currentProject != null && !noDocument)
 {
@@ -77,13 +77,13 @@
                     </p>
                 </div>
             }
-            @if (!landingPage && _Configuration.GetValue<bool>("ShowDownloadOriginal"))
+            @if (!landingPage && _Configuration.Documents.ShowDownloadOriginal)
             {
                 <div class="doc-tools"><a class="download-link float-right" href="@documentationDocument.Path" target="_blank" rel="noopener noreferrer" download>Download original</a></div>
             }
             @if (documentationDocument.DocumentType == DocumentationDocumentType.Drawio)
             {
-                <LiveDocs.Shared.Components.DrawioDiagram DocumentName="@documentationDocument.Name">@((MarkupString)renderContent)</LiveDocs.Shared.Components.DrawioDiagram>
+                <DrawioDiagram DocumentName="@documentationDocument.Name" Configuration="@_Configuration.Documents.Drawio">@((MarkupString)renderContent)</DrawioDiagram>
             } else
             {
                 @((MarkupString)renderContent)
@@ -191,7 +191,7 @@
 
     private async Task SetDocumentTitle(string title)
     {
-        await _JSRuntime.InvokeVoidAsync("setDocumentTitle", $"{title} | {_Configuration["ApplicationName"]}");
+        await _JSRuntime.InvokeVoidAsync("setDocumentTitle", $"{title} | {_Configuration.ApplicationName}");
     }
 
     private async Task OnTryReload()

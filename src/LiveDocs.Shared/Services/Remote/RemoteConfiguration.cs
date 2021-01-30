@@ -1,4 +1,6 @@
-﻿namespace LiveDocs.Shared.Services.Remote
+﻿using LiveDocs.Shared.Services.Documents.Configuration;
+
+namespace LiveDocs.Shared.Services.Remote
 {
     public class RemoteConfiguration
     {
@@ -13,8 +15,8 @@
         public RemoteDocumentationIndex Documentation { get; set; }
 
         /// <summary>
-        /// Show the "Download Original" download link above documents.
+        ///
         /// </summary>
-        public bool ShowDownloadOriginal { get; set; }
+        public DocumentConfiguration Documents { get; set; } = new DocumentConfiguration();
     }
 }

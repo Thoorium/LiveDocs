@@ -1,8 +1,12 @@
-﻿@using Microsoft.JSInterop
+﻿@using LiveDocs.Shared.Services.Documents.Configuration
+@using Microsoft.JSInterop
 @inject IJSRuntime _JSRuntime
 @implements IAsyncDisposable
 
-<h1>@DocumentName</h1>
+@if (Configuration.ShowDocumentNameAsTitle)
+{
+    <h1>@DocumentName</h1>
+}
 
 @ChildContent
 
@@ -12,6 +16,9 @@
 
     [Parameter]
     public string DocumentName { get; set; }
+
+    [Parameter]
+    public DrawioDocumentConfiguration Configuration { get; set; }
 
     //[Parameter]
     //public string DocumentXml { get; set; }

@@ -1,4 +1,6 @@
-﻿namespace LiveDocs.Shared.Options
+﻿using LiveDocs.Shared.Services.Documents.Configuration;
+
+namespace LiveDocs.Shared.Options
 {
     public class LiveDocsOptions
     {
@@ -18,13 +20,13 @@
         public string DocumentationFolder { get; set; }
 
         /// <summary>
+        /// Configuration applied to documents.
+        /// </summary>
+        public DocumentConfiguration Documents { get; set; } = new DocumentConfiguration();
+
+        /// <summary>
         /// Name of the document to use as a landing page. If empty, no landing page is shown.
         /// </summary>
         public string LandingPageDocument { get; set; }
-
-        /// <summary>
-        /// Show the "Download Original" download link above documents.
-        /// </summary>
-        public bool ShowDownloadOriginal { get; set; }
     }
 }

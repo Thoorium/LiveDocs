@@ -30,9 +30,10 @@ namespace LiveDocs.Client.Services
                 var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
                 var remoteConfiguration = await httpClient.GetFromJsonAsync<RemoteConfiguration>("app.json");
 
-                var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                configuration["ApplicationName"] = remoteConfiguration.ApplicationName;
-                configuration["ShowDownloadOriginal"] = remoteConfiguration.ShowDownloadOriginal.ToString();
+                var configuration = scope.ServiceProvider.GetRequiredService<RemoteConfiguration>();
+                Console.WriteLine(remoteConfiguration.ApplicationName);
+                configuration.ApplicationName = remoteConfiguration.ApplicationName;
+                configuration.Documents = remoteConfiguration.Documents;
 
                 return remoteConfiguration.Documentation.ToDocumentationIndex<DocumentationIndex, DocumentationProject, DocumentationDocument>(_Services);
             }

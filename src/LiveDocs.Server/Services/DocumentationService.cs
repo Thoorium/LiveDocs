@@ -77,7 +77,7 @@ namespace LiveDocs.Server.Services
             RemoteConfiguration remoteConfiguration = new RemoteConfiguration
             {
                 ApplicationName = _Options.ApplicationName,
-                ShowDownloadOriginal = _Options.ShowDownloadOriginal,
+                Documents = _Options.Documents,
                 Documentation = new RemoteDocumentationIndex(documentationIndex, documentationDirectoryInfo.FullName)
             };
             var json = JsonSerializer.Serialize(remoteConfiguration, new JsonSerializerOptions

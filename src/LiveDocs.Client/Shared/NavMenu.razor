@@ -1,10 +1,10 @@
 ﻿@inject IDocumentationService _DocumentationService
-@inject IConfiguration _Configuration
+@inject RemoteConfiguration _Configuration
 @using LiveDocs.Shared.Services.Search
 @using System.Threading.Tasks
     <div class="fixed-top navbar-dark bg-dark mx-auto">
         <nav class="navbar navbar-expand-lg justify-content-center mx-auto">
-            <a class="navbar-brand mr-auto mr-lg-0" href="">@_Configuration["ApplicationName"]</a>
+            <a class="navbar-brand mr-auto mr-lg-0" href="">@_Configuration.ApplicationName</a>
             <button class="navbar-toggler p-0 border-0" type="button" data-toggle="offcanvas" @onclick="ToggleNavMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
