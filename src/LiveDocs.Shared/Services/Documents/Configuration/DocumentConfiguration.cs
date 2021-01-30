@@ -1,4 +1,6 @@
-﻿namespace LiveDocs.Shared.Services.Documents.Configuration
+﻿using System.Text.Json.Serialization;
+
+namespace LiveDocs.Shared.Services.Documents.Configuration
 {
     public class DocumentConfiguration
     {
@@ -12,6 +14,7 @@
 
         public PdfDocumentConfiguration Pdf { get; set; }
 
+        [JsonIgnore] // TODO: Enable for 1.x.
         public string[] Priority { get; set; }
 
         /// <summary>
