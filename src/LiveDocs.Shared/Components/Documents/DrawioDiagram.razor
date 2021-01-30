@@ -3,7 +3,7 @@
 @inject IJSRuntime _JSRuntime
 @implements IAsyncDisposable
 
-@if (Configuration.ShowDocumentNameAsTitle)
+@if (Configuration?.ShowDocumentNameAsTitle ?? false)
 {
     <h1>@DocumentName</h1>
 }

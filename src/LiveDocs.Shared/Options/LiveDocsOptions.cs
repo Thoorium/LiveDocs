@@ -22,7 +22,7 @@ namespace LiveDocs.Shared.Options
         /// <summary>
         /// Configuration applied to documents.
         /// </summary>
-        public DocumentConfiguration Documents { get; set; } = new DocumentConfiguration();
+        public DocumentConfiguration Documents { get; set; }
 
         /// <summary>
         /// Name of the document to use as a landing page. If empty, no landing page is shown.

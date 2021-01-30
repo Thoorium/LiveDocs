@@ -8,7 +8,7 @@
 
         public HtmlDocumentConfiguration Html { get; set; }
 
-        public MarkdownDocumentConfiguration Mardown { get; set; }
+        public MarkdownDocumentConfiguration Markdown { get; set; }
 
         public PdfDocumentConfiguration Pdf { get; set; }
 

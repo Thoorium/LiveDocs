@@ -21,7 +21,7 @@ namespace LiveDocs.Shared.Services.Documents
             path = UrlHelper.RemoveUrlQueryStrings(path);
 
             string drawioSvgPath = $"{path}.drawio.svg";
-            return Task.FromResult($"<h1>{Name}</h1><img src=\"{drawioSvgPath}\" class=\"img-fluid mx-auto d-block\" />");
+            return Task.FromResult($"<img src=\"{drawioSvgPath}\" class=\"img-fluid mx-auto d-block\" />");
         }
     }
 }

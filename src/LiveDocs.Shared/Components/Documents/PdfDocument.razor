@@ -1,0 +1,19 @@
+﻿@using LiveDocs.Shared.Services.Documents.Configuration
+
+@if (Configuration?.ShowDocumentNameAsTitle ?? false)
+{
+    <h1>@DocumentName</h1>
+}
+
+@ChildContent
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string DocumentName { get; set; }
+
+    [Parameter]
+    public PdfDocumentConfiguration Configuration { get; set; }
+}
