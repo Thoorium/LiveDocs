@@ -76,31 +76,27 @@
                         }
                     </p>
                 </div>
-            }
-            @if (!landingPage && _Configuration.Documents.ShowDownloadOriginal)
-            {
-                <div class="doc-tools"><a class="download-link float-right" href="@documentationDocument.Path" target="_blank" rel="noopener noreferrer" download>Download original</a></div>
-            }
+            }            
 
             @switch(documentationDocument.DocumentType)
             {
                 case DocumentationDocumentType.Markdown:
-                    <MarkdownDocument DocumentName="@documentationDocument.Name" Configuration="@_Configuration.Documents.Markdown">@((MarkupString)renderContent)</MarkdownDocument>
+                    <MarkdownDocument Document="@documentationDocument" Configuration="@_Configuration.Documents.Markdown" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</MarkdownDocument>
                     break;
                 case DocumentationDocumentType.Html:
-                    <HtmlDocument DocumentName="@documentationDocument.Name" Configuration="@_Configuration.Documents.Html">@((MarkupString)renderContent)</HtmlDocument>
+                    <HtmlDocument Document="@documentationDocument" Configuration="@_Configuration.Documents.Html" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</HtmlDocument>
                     break;
                 case DocumentationDocumentType.Pdf:
-                    <PdfDocument DocumentName="@documentationDocument.Name" Configuration="@_Configuration.Documents.Pdf">@((MarkupString)renderContent)</PdfDocument>
+                    <PdfDocument Document="@documentationDocument" Configuration="@_Configuration.Documents.Pdf" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</PdfDocument>
                     break;
                 case DocumentationDocumentType.Word:
-                    <WordDocument DocumentName="@documentationDocument.Name" Configuration="@_Configuration.Documents.Word">@((MarkupString)renderContent)</WordDocument>
+                    <WordDocument Document="@documentationDocument" Configuration="@_Configuration.Documents.Word" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</WordDocument>
                     break;
                 case DocumentationDocumentType.Drawio:
-                    <DrawioDiagram DocumentName="@documentationDocument.Name" Configuration="@_Configuration.Documents.Drawio">@((MarkupString)renderContent)</DrawioDiagram>
+                    <DrawioDiagram Document="@documentationDocument" Configuration="@_Configuration.Documents.Drawio" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</DrawioDiagram>
                     break;
                 case DocumentationDocumentType.DrawioSvg:
-                    <DrawioSvg DocumentName="@documentationDocument.Name" Configuration="@_Configuration.Documents.DrawioSvg">@((MarkupString)renderContent)</DrawioSvg>
+                    <DrawioSvg Document="@documentationDocument" Configuration="@_Configuration.Documents.DrawioSvg" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</DrawioSvg>
                     break;
                 default:
                     @((MarkupString)renderContent)

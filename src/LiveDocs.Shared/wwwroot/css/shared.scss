@@ -252,10 +252,22 @@ textarea.http-response-data[readonly] {
 div.doc-tools {
     display: block;
     height: 12px;
+    text-align: right;
+    margin-bottom: 0.5rem;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-div.doc-tools a.download-link {
+div.doc-tools a.property-link {
     font-size: 12px;
+    color: var(--cyan);
+}
+
+div.doc-tools a.property-link:hover {
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 .language-bash::before, .language-sh::before, .language-powershell::before {
@@ -272,6 +284,14 @@ img.wd-graphic {
 
 .sidebar-toggles {
     display: none;
+}
+
+.svg-background.light {
+    background-color: #EEE;
+}
+
+.svg-background.dark {
+    background-color: #333;
 }
 
 @media (max-width: 991.98px) {

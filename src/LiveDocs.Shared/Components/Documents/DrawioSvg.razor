@@ -1,19 +1,67 @@
-﻿@using LiveDocs.Shared.Services.Documents.Configuration
+﻿@using LiveDocs.Shared.Services
+@using LiveDocs.Shared.Services.Documents.Configuration
+
+@if (!IsLandingPage)
+{
+    <div class="doc-tools">
+        <a class="property-link" @onclick="switchBackground">Background: @backgroundCssClass</a>
+        @if (ShowDownloadOriginal)
+        {
+           <span> | </span><a class="property-link" href="@Document.Path" target="_blank" rel="noopener noreferrer" download>Download original</a>
+        }
+    </div>
+}
 
 @if (Configuration?.ShowDocumentNameAsTitle ?? false)
 {
-    <h1>@DocumentName</h1>
+    <h1>@Document.Name</h1>
 }
-
-@ChildContent
-
+<div class="svg-background @backgroundCssClass">
+    @ChildContent
+</div>
 @code {
     [Parameter]
     public RenderFragment ChildContent { get; set; }
 
     [Parameter]
-    public string DocumentName { get; set; }
+    public IDocumentationDocument Document { get; set; }
 
     [Parameter]
     public DrawioSvgDocumentConfiguration Configuration { get; set; }
+
+    [Parameter]
+    public bool ShowDownloadOriginal { get; set; }
+
+    [Parameter]
+    public bool IsLandingPage { get; set; }
+
+    private string backgroundCssClass => backgroundClass switch
+    {
+        BackgroundClass.Dark => "dark",
+        BackgroundClass.Light => "light",
+        _ => "default"
+    };
+
+    private BackgroundClass backgroundClass = BackgroundClass.Default;
+
+    private void switchBackground()
+    {
+        if (backgroundClass == BackgroundClass.Default)
+            backgroundClass = BackgroundClass.Light;
+        else if(backgroundClass == BackgroundClass.Light)
+            backgroundClass = BackgroundClass.Dark;
+        else
+            backgroundClass = BackgroundClass.Default;
+
+        StateHasChanged();
+    }
+
+    enum BackgroundClass
+    {
+        Light,
+        Dark,
+        Default
+    }
+
+
 }

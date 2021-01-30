@@ -1,8 +1,15 @@
-﻿@using LiveDocs.Shared.Services.Documents.Configuration
+﻿@using LiveDocs.Shared.Services
+@using LiveDocs.Shared.Services.Documents.Configuration
 
+@if (!IsLandingPage && ShowDownloadOriginal)
+{
+    <div class="doc-tools">
+        <a class="property-link" href="@Document.Path" target="_blank" rel="noopener noreferrer" download>Download original</a>
+    </div>
+}
 @if (Configuration?.ShowDocumentNameAsTitle ?? false)
 {
-    <h1>@DocumentName</h1>
+    <h1>@Document.Name</h1>
 }
 
 @ChildContent
@@ -12,8 +19,14 @@
     public RenderFragment ChildContent { get; set; }
 
     [Parameter]
-    public string DocumentName { get; set; }
+    public IDocumentationDocument Document { get; set; }
 
     [Parameter]
     public PdfDocumentConfiguration Configuration { get; set; }
+
+    [Parameter]
+    public bool ShowDownloadOriginal { get; set; }
+
+    [Parameter]
+    public bool IsLandingPage { get; set; }
 }
