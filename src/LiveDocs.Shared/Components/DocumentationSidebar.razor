@@ -1,6 +1,6 @@
 ﻿@inject LiveDocs.Shared.Services.IDocumentationService _DocumentationService
 
-<div class="sidebar">
+<div class="sidebar documents @displayToggleCssClass">
     <ul class="nav flex-column documentation-sidebar text-secondary">
         @foreach (var item in documents)
         {
@@ -13,6 +13,11 @@
 
     [Parameter]
     public LiveDocs.Shared.Services.IDocumentationProject Project { get; set; }
+
+    [Parameter]
+    public bool DisplayToggle { get; set; }
+
+    string displayToggleCssClass => DisplayToggle ? "open" : "";
 
     private LiveDocs.Shared.Services.IDocumentationProject previousProject = null;
 

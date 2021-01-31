@@ -74,13 +74,14 @@ namespace LiveDocs.Server.Services
             }
 
             var documentationDirectoryInfo = _Options.GetDocumentationFolderAsAbsolute(_HostingEnvironment.ContentRootPath);
-            RemoteConfiguration remoteConfiguration = new RemoteConfiguration
+            RemoteLiveDocsOptions remoteOptions = new RemoteLiveDocsOptions
             {
                 ApplicationName = _Options.ApplicationName,
-                ShowDownloadOriginal = _Options.ShowDownloadOriginal,
+                Documents = _Options.Documents,
+                Search = _Options.Search,
                 Documentation = new RemoteDocumentationIndex(documentationIndex, documentationDirectoryInfo.FullName)
             };
-            var json = JsonSerializer.Serialize(remoteConfiguration, new JsonSerializerOptions
+            var json = JsonSerializer.Serialize(remoteOptions, new JsonSerializerOptions
             {
                 IgnoreNullValues = true
             });
@@ -96,8 +97,11 @@ namespace LiveDocs.Server.Services
 
         public async Task RefreshSearchIndex(IDocumentationIndex documentationIndex)
         {
+            if (!_Options.Search?.Enabled ?? false)
+                return;
+
             var documentationDirectoryInfo = _Options.GetDocumentationFolderAsAbsolute(_HostingEnvironment.ContentRootPath);
-            SearchIndex = new BasicSearchIndex(_SearchPipeline, documentationIndex);
+            SearchIndex = new BasicSearchIndex(_SearchPipeline, documentationIndex, _Options);
             await SearchIndex.BuildIndex();
 
             var json = JsonSerializer.Serialize((BasicSearchIndex)SearchIndex, new JsonSerializerOptions
@@ -126,6 +130,8 @@ namespace LiveDocs.Server.Services
                 switch (docType)
                 {
                     case DocumentationDocumentType.Markdown:
+                        if (!_Options.Documents?.Markdown?.Enabled ?? false)
+                            break;
                         // The markdown pipeline isn't needed for the content extraction.
                         project.Documents.Add(new MarkdownDocument(null)
                         {
@@ -135,6 +141,8 @@ namespace LiveDocs.Server.Services
                         break;
 
                     case DocumentationDocumentType.Word:
+                        if (!_Options.Documents?.Word?.Enabled ?? false)
+                            break;
                         project.Documents.Add(new WordDocument
                         {
                             Path = file.FullName,
@@ -143,10 +151,50 @@ namespace LiveDocs.Server.Services
                         break;
 
                     case DocumentationDocumentType.Pdf:
+                        if (!_Options.Documents?.Pdf?.Enabled ?? false)
+                            break;
+                        project.Documents.Add(new DocumentationDocument
+                        {
+                            Path = file.FullName,
+                            DocumentType = docType,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
+
                     case DocumentationDocumentType.Html:
-                    case DocumentationDocumentType.Folder:
+                        if (!_Options.Documents?.Html?.Enabled ?? false)
+                            break;
+                        project.Documents.Add(new DocumentationDocument
+                        {
+                            Path = file.FullName,
+                            DocumentType = docType,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
+
                     case DocumentationDocumentType.Drawio:
+                        if (!_Options.Documents?.Drawio?.Enabled ?? false)
+                            break;
+                        project.Documents.Add(new DocumentationDocument
+                        {
+                            Path = file.FullName,
+                            DocumentType = docType,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
+
                     case DocumentationDocumentType.DrawioSvg:
+                        if (!_Options.Documents?.DrawioSvg?.Enabled ?? false)
+                            break;
+                        project.Documents.Add(new DocumentationDocument
+                        {
+                            Path = file.FullName,
+                            DocumentType = docType,
+                            LastUpdate = file.LastWriteTimeUtc
+                        });
+                        break;
+
+                    case DocumentationDocumentType.Folder:
                         project.Documents.Add(new DocumentationDocument
                         {
                             Path = file.FullName,

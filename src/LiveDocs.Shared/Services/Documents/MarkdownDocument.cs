@@ -10,6 +10,7 @@ namespace LiveDocs.Shared.Services.Documents
     public class MarkdownDocument : IDocumentationDocument, ISearchableDocument
     {
         protected readonly MarkdownPipeline MarkdownPipeline;
+
         public MarkdownDocument(MarkdownPipeline markdownPipeline)
         {
             MarkdownPipeline = markdownPipeline;
@@ -24,9 +25,13 @@ namespace LiveDocs.Shared.Services.Documents
         public string Path { get; set; }
         public IDocumentationDocument[] SubDocuments { get; set; } = null;
         public int SubDocumentsCount => (SubDocuments?.Count(c => c.DocumentType != DocumentationDocumentType.Project && c.DocumentType != DocumentationDocumentType.Project) ?? 0) + SubDocuments?.Sum(s => s.SubDocumentsCount) ?? 0;
-        public Task<string> GetContent()
+
+        public Task<string> GetSearchableContent()
         {
-            return Task.FromResult(string.Join(" ", Markdown.Descendants<LiteralInline>().Select(s => s.ToString())));
+            var text = string.Join(" ", Markdown.Descendants<LiteralInline>().Select(s => s.ToString()));
+            var codeInline = string.Join(" ", Markdown.Descendants<CodeInline>().Select(s => s.Content));
+            var blocks = string.Join(" ", Markdown.Descendants<LeafBlock>().Select(s => s.Lines.ToString()));
+            return Task.FromResult($"{text} {codeInline} {blocks}");
         }
 
         public Task<string> GetTitle()

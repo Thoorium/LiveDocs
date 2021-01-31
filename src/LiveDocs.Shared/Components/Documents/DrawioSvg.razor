@@ -1,0 +1,68 @@
+﻿@using LiveDocs.Shared.Services
+@using LiveDocs.Shared.Services.Documents.Configuration
+
+@if (!IsLandingPage)
+{
+    <div class="doc-tools">
+        <a class="property-link" @onclick="switchBackground">Background: @backgroundCssClass</a>
+        @if (ShowDownloadOriginal)
+        {
+           <span> | </span><a class="property-link" href="@Document.Path" target="_blank" rel="noopener noreferrer" download>Download original</a>
+        }
+    </div>
+}
+
+@if (Configuration?.ShowDocumentNameAsTitle ?? false)
+{
+    <h1>@Document.Name</h1>
+}
+<div class="svg-background @backgroundCssClass">
+    @ChildContent
+</div>
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public IDocumentationDocument Document { get; set; }
+
+    [Parameter]
+    public DrawioSvgDocumentConfiguration Configuration { get; set; }
+
+    [Parameter]
+    public bool ShowDownloadOriginal { get; set; }
+
+    [Parameter]
+    public bool IsLandingPage { get; set; }
+
+    private string backgroundCssClass => backgroundStyle switch
+    {
+        DrawioSvgDocumentConfiguration.BackgroundStyle.Dark => "dark",
+        DrawioSvgDocumentConfiguration.BackgroundStyle.Light => "light",
+        _ => "theme"
+    };
+
+    private DrawioSvgDocumentConfiguration.BackgroundStyle backgroundStyle = DrawioSvgDocumentConfiguration.BackgroundStyle.Theme;
+
+    protected override Task OnParametersSetAsync()
+    {
+        if (Configuration?.DefaultBackground != null)
+        {
+            backgroundStyle = Configuration.DefaultBackground.Value;
+        }
+
+        return base.OnParametersSetAsync();
+    }
+
+    private void switchBackground()
+    {
+        if (backgroundStyle == DrawioSvgDocumentConfiguration.BackgroundStyle.Theme)
+            backgroundStyle = DrawioSvgDocumentConfiguration.BackgroundStyle.Light;
+        else if(backgroundStyle == DrawioSvgDocumentConfiguration.BackgroundStyle.Light)
+            backgroundStyle = DrawioSvgDocumentConfiguration.BackgroundStyle.Dark;
+        else
+            backgroundStyle = DrawioSvgDocumentConfiguration.BackgroundStyle.Theme;
+
+        StateHasChanged();
+    }
+}

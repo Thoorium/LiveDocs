@@ -26,6 +26,7 @@ namespace LiveDocs.Shared.Services
 
         string Path { get; set; }
         List<IDocumentationProject> SubProjects { get; set; }
+
         Task<IDocumentationDocument> GetDocumentationDefaultDocument(string documentType = "");
 
         Task<IDocumentationDocument[]> GetDocumentationDefaultDocuments(string documentType = "");
@@ -99,6 +100,7 @@ namespace LiveDocs.Shared.Services
 
             if (string.IsNullOrWhiteSpace(documentType))
             {
+                // TODO: Use DocumentConfiguration.Priority to select documents in priority order.
                 document = documents.FirstOrDefault(f => f.DocumentType == DocumentationDocumentType.Markdown && f.Key == finalKey);
                 if (document != null)
                     return Task.FromResult(document);
@@ -146,6 +148,7 @@ namespace LiveDocs.Shared.Services
 
             return Task.FromResult(documents.Where(w => w.Key == finalKey && w.DocumentType != DocumentationDocumentType.Folder).ToList());
         }
+
         Task<string> GetFirstAvailableDocumentPath();
     }
 }

@@ -9,7 +9,6 @@ namespace LiveDocs.Shared.Services.Documents
     public class HtmlDocument : IDocumentationDocument
     {
         private static Regex MatchHeaderOneRegex = new Regex("<[hH]1.*>(.*?)<\\/[hH]1>");
-        // TODO: Replace with content cache when it's done.
         private string content = null;
 
         public virtual string Content
@@ -30,6 +29,7 @@ namespace LiveDocs.Shared.Services.Documents
         public string Path { get; set; }
         public IDocumentationDocument[] SubDocuments { get; set; } = null;
         public int SubDocumentsCount => (SubDocuments?.Count(c => c.DocumentType != DocumentationDocumentType.Project && c.DocumentType != DocumentationDocumentType.Project) ?? 0) + SubDocuments?.Sum(s => s.SubDocumentsCount) ?? 0;
+
         public Task<string> GetTitle()
         {
             var match = MatchHeaderOneRegex.Match(Content);

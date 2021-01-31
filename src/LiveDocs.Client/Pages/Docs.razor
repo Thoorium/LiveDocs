@@ -3,16 +3,24 @@
 @inject Microsoft.JSInterop.IJSRuntime _JSRuntime
 @inject NavigationManager _NavManager
 @inject HttpClient _HttpClient
-@inject IConfiguration _Configuration
+@inject RemoteLiveDocsOptions _Configuration
+
+@if (!landingPage && currentProject != null && !noDocument)
+{
+    <div class="sidebar-toggles">
+        <a class="btn btn-outline-info btn-sm @btnDisplayDocumentsListCssClass" @onclick="toggleDocumentsList">Documents List</a>
+        <a class="btn btn-outline-info btn-sm @btnDisplayDocumentTreeCssClass @btnDisplayDocumentTreeDisabledCssClass" @onclick="toggleDocumentTree">Navigation Tree</a>
+    </div>
+}
 
 <div class="content d-flex mx-auto pb-4">
 
     @if (!landingPage && currentProject != null && !noDocument)
     {
-        <LiveDocs.Shared.Components.DocumentationSidebar Project="currentProject" />
+        <LiveDocs.Shared.Components.DocumentationSidebar Project="currentProject" DisplayToggle="displayDocumentsList" />
     }
 
-    <div class="content px-4 align-self-stretch flex-lg-fill overflow-hidden">
+    <div class="content px-4 align-self-stretch flex-lg-fill overflow-hidden @contentDisplayDocumentsListCssClass @contentDisplayDocumentTreeCssClass">
         @if (offline)
         {
             <LiveDocs.Shared.Components.Offline OnTryReload="OnTryReload" documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())" />
@@ -68,23 +76,37 @@
                         }
                     </p>
                 </div>
-            }
-            @if (!landingPage && _Configuration.GetValue<bool>("ShowDownloadOriginal"))
+            }            
+
+            @switch(documentationDocument.DocumentType)
             {
-                <div class="doc-tools"><a class="download-link float-right" href="@documentationDocument.Path" target="_blank" rel="noopener noreferrer" download>Download original</a></div>
-            }
-            @if (documentationDocument.DocumentType == DocumentationDocumentType.Drawio)
-            {
-                <LiveDocs.Shared.Components.DrawioDiagram DocumentName="@documentationDocument.Name">@((MarkupString)renderContent)</LiveDocs.Shared.Components.DrawioDiagram>
-            } else
-            {
-                @((MarkupString)renderContent)
+                case DocumentationDocumentType.Markdown:
+                    <MarkdownDocument Document="@documentationDocument" Configuration="@_Configuration.Documents.Markdown" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</MarkdownDocument>
+                    break;
+                case DocumentationDocumentType.Html:
+                    <HtmlDocument Document="@documentationDocument" Configuration="@_Configuration.Documents.Html" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</HtmlDocument>
+                    break;
+                case DocumentationDocumentType.Pdf:
+                    <PdfDocument Document="@documentationDocument" Configuration="@_Configuration.Documents.Pdf" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</PdfDocument>
+                    break;
+                case DocumentationDocumentType.Word:
+                    <WordDocument Document="@documentationDocument" Configuration="@_Configuration.Documents.Word" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</WordDocument>
+                    break;
+                case DocumentationDocumentType.Drawio:
+                    <DrawioDiagram Document="@documentationDocument" Configuration="@_Configuration.Documents.Drawio" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</DrawioDiagram>
+                    break;
+                case DocumentationDocumentType.DrawioSvg:
+                    <DrawioSvg Document="@documentationDocument" Configuration="@_Configuration.Documents.DrawioSvg" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</DrawioSvg>
+                    break;
+                default:
+                    @((MarkupString)renderContent)
+                    break;
             }
         }
     </div>
     @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !noDocument && !offline)
     {
-        <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument" />
+        <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument" DisplayToggle="displayDocumentTree" />
     }
 </div>
 
@@ -119,6 +141,10 @@
 
     private string relativePath = "";
 
+    private bool displayDocumentsList = false;
+
+    private bool displayDocumentTree = false;
+
     // The current document.
     private IRemoteDocumentationDocument documentationDocument = null;
 
@@ -147,6 +173,31 @@
 
     private IList<IRemoteDocumentationDocument> extraDocuments = null;
 
+    private string contentDisplayDocumentsListCssClass => displayDocumentsList ? "documents-open" : "";
+
+    private string btnDisplayDocumentsListCssClass => displayDocumentsList ? "active" : "";
+
+    private string contentDisplayDocumentTreeCssClass => displayDocumentTree ? "document-tree-open" : "";
+
+    private string btnDisplayDocumentTreeCssClass => displayDocumentTree ? "active" : "";
+
+    private string btnDisplayDocumentTreeDisabledCssClass => documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !offline ? "" : "disabled";
+
+    private void toggleDocumentsList()
+    {
+        displayDocumentTree = false;
+        displayDocumentsList = !displayDocumentsList;
+    }
+
+    private void toggleDocumentTree()
+    {
+        if (documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !offline)
+        {
+            displayDocumentsList = false;
+            displayDocumentTree = !displayDocumentTree;
+        }
+    }
+
     private async Task ScrollTo(string id)
     {
         await _JSRuntime.InvokeAsync<bool>("scrollToElementId", new[] { id });
@@ -154,7 +205,7 @@
 
     private async Task SetDocumentTitle(string title)
     {
-        await _JSRuntime.InvokeVoidAsync("setDocumentTitle", $"{title} | {_Configuration["ApplicationName"]}");
+        await _JSRuntime.InvokeVoidAsync("setDocumentTitle", $"{title} | {_Configuration.ApplicationName}");
     }
 
     private async Task OnTryReload()
@@ -235,7 +286,7 @@
                     previousDocumentType = "";
                     await SetDocumentTitle("Not found");
                 }
-
+                
                 StateHasChanged();
                 return;
             }
@@ -291,6 +342,8 @@
         noDocument = false;
         offline = false;
         landingPage = false;
+        displayDocumentsList = false;
+        displayDocumentTree = false;
         return base.OnParametersSetAsync();
     }
 

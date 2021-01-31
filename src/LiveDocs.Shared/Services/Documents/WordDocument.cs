@@ -19,7 +19,7 @@ namespace LiveDocs.Shared.Services.Documents
         public IDocumentationDocument[] SubDocuments { get; set; } = null;
         public int SubDocumentsCount => (SubDocuments?.Count(c => c.DocumentType != DocumentationDocumentType.Project && c.DocumentType != DocumentationDocumentType.Project) ?? 0) + SubDocuments?.Sum(s => s.SubDocumentsCount) ?? 0;
 
-        public async Task<string> GetContent()
+        public async Task<string> GetSearchableContent()
         {
             return await GetContent(Document.Elements);
         }
@@ -39,10 +39,11 @@ namespace LiveDocs.Shared.Services.Documents
 
         private string GenerateHeaderId(string id, string text)
         {
-            string uniqueHeaderLink = UrlHelper.Urilize(text);
+            string baseHeaderLink = UrlHelper.Urilize(text);
+            string uniqueHeaderLink = baseHeaderLink;
             int numPad = 1;
             while (existingHeaderIds.Contains(uniqueHeaderLink))
-                uniqueHeaderLink += $"-{numPad++}";
+                uniqueHeaderLink = $"{baseHeaderLink}-{numPad++}";
             return uniqueHeaderLink;
         }
 
