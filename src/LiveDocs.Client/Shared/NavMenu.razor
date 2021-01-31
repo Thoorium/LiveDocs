@@ -1,5 +1,5 @@
 ﻿@inject IDocumentationService _DocumentationService
-@inject RemoteConfiguration _Configuration
+@inject RemoteLiveDocsOptions _Configuration
 @using LiveDocs.Shared.Services.Search
 @using System.Threading.Tasks
     <div class="fixed-top navbar-dark bg-dark mx-auto">
@@ -8,8 +8,6 @@
             <button class="navbar-toggler p-0 border-0" type="button" data-toggle="offcanvas" @onclick="ToggleNavMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
-            
 
             <div class="navbar-collapse offcanvas-collapse @NavMenuCssClass" style="max-width:85rem;">
                 <ul class="navbar-nav mr-auto">
@@ -42,6 +40,8 @@
                     }
                 }
             </ul>
+            @if (_Configuration.Search?.Enabled ?? false)
+            {
                 <div class="search-form form-inline my-2 my-lg-0 dropdown">
                     <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" @bind="@SearchQuery" @bind:event="oninput" @onfocus="OnFocus" />
                     <div class="dropdown-menu " aria-labelledby="dropdown" style="width:99%;margin-top:0px">
@@ -49,7 +49,7 @@
                         {
                             int lastIndex = item.KeyPath.LastIndexOf("/");
                             <NavLink class="dropdown-item" href="@(item.KeyPath)">
-                                @if(lastIndex > -1)
+                                @if (lastIndex > -1)
                                 {
                                     <span class="text-muted mr-1">@(item.KeyPath.Substring(0, lastIndex))</span>
                                 }
@@ -58,6 +58,7 @@
                         }
                     </div>
                 </div>
+            }
             </div>
         </nav>
     </div>

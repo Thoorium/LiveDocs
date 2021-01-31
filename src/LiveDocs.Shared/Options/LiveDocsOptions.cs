@@ -1,8 +1,9 @@
 ﻿using LiveDocs.Shared.Services.Documents.Configuration;
+using LiveDocs.Shared.Services.Search.Configuration;
 
 namespace LiveDocs.Shared.Options
 {
-    public class LiveDocsOptions
+    public class LiveDocsOptions : ILiveDocsOptions
     {
         /// <summary>
         /// The name of the application.
@@ -28,5 +29,10 @@ namespace LiveDocs.Shared.Options
         /// Name of the document to use as a landing page. If empty, no landing page is shown.
         /// </summary>
         public string LandingPageDocument { get; set; }
+
+        /// <summary>
+        /// Configuration applied to the search.
+        /// </summary>
+        public SearchConfiguration Search { get; set; }
     }
 }

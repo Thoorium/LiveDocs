@@ -3,10 +3,11 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using LiveDocs.Client.Services.Documents;
+using LiveDocs.Shared.Options;
 using LiveDocs.Shared.Services;
-using LiveDocs.Shared.Services.Remote;
+using LiveDocs.Shared.Services.Documents.Configuration;
 using LiveDocs.Shared.Services.Search;
-using Microsoft.Extensions.Configuration;
+using LiveDocs.Shared.Services.Search.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LiveDocs.Client.Services
@@ -28,12 +29,17 @@ namespace LiveDocs.Client.Services
             using (var scope = _Services.CreateScope())
             {
                 var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
-                var remoteConfiguration = await httpClient.GetFromJsonAsync<RemoteConfiguration>("app.json");
+                var remoteConfiguration = await httpClient.GetFromJsonAsync<RemoteLiveDocsOptions>("app.json");
 
-                var configuration = scope.ServiceProvider.GetRequiredService<RemoteConfiguration>();
+                var configuration = scope.ServiceProvider.GetRequiredService<RemoteLiveDocsOptions>();
                 Console.WriteLine(remoteConfiguration.ApplicationName);
                 configuration.ApplicationName = remoteConfiguration.ApplicationName;
-                configuration.Documents = remoteConfiguration.Documents;
+
+                if (string.IsNullOrWhiteSpace(configuration.ApplicationName))
+                    configuration.ApplicationName = "LiveDocs";
+
+                configuration.Documents = remoteConfiguration.Documents ?? new DocumentConfiguration();
+                configuration.Search = remoteConfiguration.Search ?? new SearchConfiguration();
 
                 return remoteConfiguration.Documentation.ToDocumentationIndex<DocumentationIndex, DocumentationProject, DocumentationDocument>(_Services);
             }
@@ -55,7 +61,8 @@ namespace LiveDocs.Client.Services
                 var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
                 var index = await httpClient.GetFromJsonAsync<BasicSearchIndex>("search.json");
                 var searchPipeline = scope.ServiceProvider.GetRequiredService<SearchPipeline>();
-                index.Setup(searchPipeline, documentationIndex);
+                var options = scope.ServiceProvider.GetRequiredService<RemoteLiveDocsOptions>();
+                index.Setup(searchPipeline, documentationIndex, options);
                 SearchIndex = index;
             }
         }

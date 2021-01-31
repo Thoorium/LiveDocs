@@ -74,13 +74,14 @@ namespace LiveDocs.Server.Services
             }
 
             var documentationDirectoryInfo = _Options.GetDocumentationFolderAsAbsolute(_HostingEnvironment.ContentRootPath);
-            RemoteConfiguration remoteConfiguration = new RemoteConfiguration
+            RemoteLiveDocsOptions remoteOptions = new RemoteLiveDocsOptions
             {
                 ApplicationName = _Options.ApplicationName,
                 Documents = _Options.Documents,
+                Search = _Options.Search,
                 Documentation = new RemoteDocumentationIndex(documentationIndex, documentationDirectoryInfo.FullName)
             };
-            var json = JsonSerializer.Serialize(remoteConfiguration, new JsonSerializerOptions
+            var json = JsonSerializer.Serialize(remoteOptions, new JsonSerializerOptions
             {
                 IgnoreNullValues = true
             });
@@ -96,8 +97,11 @@ namespace LiveDocs.Server.Services
 
         public async Task RefreshSearchIndex(IDocumentationIndex documentationIndex)
         {
+            if (!_Options.Search?.Enabled ?? false)
+                return;
+
             var documentationDirectoryInfo = _Options.GetDocumentationFolderAsAbsolute(_HostingEnvironment.ContentRootPath);
-            SearchIndex = new BasicSearchIndex(_SearchPipeline, documentationIndex);
+            SearchIndex = new BasicSearchIndex(_SearchPipeline, documentationIndex, _Options);
             await SearchIndex.BuildIndex();
 
             var json = JsonSerializer.Serialize((BasicSearchIndex)SearchIndex, new JsonSerializerOptions

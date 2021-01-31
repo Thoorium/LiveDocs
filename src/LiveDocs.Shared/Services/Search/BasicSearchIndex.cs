@@ -3,19 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using LiveDocs.Shared.Options;
 
 namespace LiveDocs.Shared.Services.Search
 {
     public class BasicSearchIndex : ISearchIndex
     {
         private IDocumentationIndex _DocumentationIndex;
-
+        private ILiveDocsOptions _Options;
         private SearchPipeline _SearchPipeline;
 
-        public BasicSearchIndex(SearchPipeline searchPipeline, IDocumentationIndex documentationIndex)
+        public BasicSearchIndex(SearchPipeline searchPipeline, IDocumentationIndex documentationIndex, ILiveDocsOptions options)
         {
             _SearchPipeline = searchPipeline;
             _DocumentationIndex = documentationIndex;
+            _Options = options;
         }
 
         /// <summary>
@@ -107,10 +109,11 @@ namespace LiveDocs.Shared.Services.Search
         /// </summary>
         /// <param name="searchPipeline"></param>
         /// <param name="documentationIndex"></param>
-        public void Setup(SearchPipeline searchPipeline, IDocumentationIndex documentationIndex)
+        public void Setup(SearchPipeline searchPipeline, IDocumentationIndex documentationIndex, ILiveDocsOptions options)
         {
             _SearchPipeline = searchPipeline;
             _DocumentationIndex = documentationIndex;
+            _Options = options;
         }
 
         private async Task AddDocuments(List<string> lexical, List<Element> elements, List<IDocumentationDocument> documentationDocuments, List<string> paths = null)
@@ -159,8 +162,7 @@ namespace LiveDocs.Shared.Services.Search
             for (int i = 0; i < lexical.Length; i++)
             {
                 int distance = StringHelper.DamerauLevenshteinDistance(lexical[i], term);
-                // TODO: Configurable distance.
-                int max_distance = (int)Math.Round(term.Length / 4d, MidpointRounding.AwayFromZero);
+                int max_distance = (int)Math.Round(term.Length * _Options.Search.Tolerance, MidpointRounding.AwayFromZero);
                 if (distance <= max_distance)
                     matches.Add(new SearchMatch
                     {

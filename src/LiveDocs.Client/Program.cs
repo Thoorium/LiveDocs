@@ -2,8 +2,8 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using LiveDocs.Client.Services;
+using LiveDocs.Shared.Options;
 using LiveDocs.Shared.Services;
-using LiveDocs.Shared.Services.Remote;
 using LiveDocs.Shared.Services.Search;
 using Markdig;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -28,7 +28,7 @@ namespace LiveDocs.Client
 
             builder.Services.AddSingleton<IDocumentationService, RemoteDocumentationService>();
 
-            builder.Services.AddSingleton<RemoteConfiguration>();
+            builder.Services.AddSingleton<RemoteLiveDocsOptions>();
 
             await builder.Build().RunAsync();
         }

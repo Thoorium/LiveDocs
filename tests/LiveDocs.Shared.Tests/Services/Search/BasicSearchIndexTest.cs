@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using LiveDocs.Shared.Services.Search;
+using LiveDocs.Shared.Services.Search.Configuration;
 using LiveDocs.Shared.Tests.Services.Documents;
 using Xunit;
 
@@ -13,6 +14,10 @@ namespace LiveDocs.Shared.Tests.Services.Search
 
         public BasicSearchIndexTest()
         {
+            TestLiveDocsOptions options = new TestLiveDocsOptions
+            {
+                Search = new SearchConfiguration()
+            };
             SearchPipeline searchPipeline = new SearchPipelineBuilder().Tokenize().Normalize().RemoveStopWords().Stem().Build();
             TestDocumentationIndex documentationIndex = new TestDocumentationIndex
             {
@@ -21,7 +26,7 @@ namespace LiveDocs.Shared.Tests.Services.Search
 
             documentationIndex.DefaultProject.Documents.Add(new TestDocument());
 
-            basicSearchIndex = new BasicSearchIndex(searchPipeline, documentationIndex)
+            basicSearchIndex = new BasicSearchIndex(searchPipeline, documentationIndex, options)
             {
                 Documents = new[]
                 {
