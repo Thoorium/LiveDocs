@@ -35,33 +35,34 @@
     [Parameter]
     public bool IsLandingPage { get; set; }
 
-    private string backgroundCssClass => backgroundClass switch
+    private string backgroundCssClass => backgroundStyle switch
     {
-        BackgroundClass.Dark => "dark",
-        BackgroundClass.Light => "light",
-        _ => "default"
+        DrawioSvgDocumentConfiguration.BackgroundStyle.Dark => "dark",
+        DrawioSvgDocumentConfiguration.BackgroundStyle.Light => "light",
+        _ => "theme"
     };
 
-    private BackgroundClass backgroundClass = BackgroundClass.Default;
+    private DrawioSvgDocumentConfiguration.BackgroundStyle backgroundStyle = DrawioSvgDocumentConfiguration.BackgroundStyle.Theme;
+
+    protected override Task OnParametersSetAsync()
+    {
+        if (Configuration?.DefaultBackground != null)
+        {
+            backgroundStyle = Configuration.DefaultBackground.Value;
+        }
+
+        return base.OnParametersSetAsync();
+    }
 
     private void switchBackground()
     {
-        if (backgroundClass == BackgroundClass.Default)
-            backgroundClass = BackgroundClass.Light;
-        else if(backgroundClass == BackgroundClass.Light)
-            backgroundClass = BackgroundClass.Dark;
+        if (backgroundStyle == DrawioSvgDocumentConfiguration.BackgroundStyle.Theme)
+            backgroundStyle = DrawioSvgDocumentConfiguration.BackgroundStyle.Light;
+        else if(backgroundStyle == DrawioSvgDocumentConfiguration.BackgroundStyle.Light)
+            backgroundStyle = DrawioSvgDocumentConfiguration.BackgroundStyle.Dark;
         else
-            backgroundClass = BackgroundClass.Default;
+            backgroundStyle = DrawioSvgDocumentConfiguration.BackgroundStyle.Theme;
 
         StateHasChanged();
     }
-
-    enum BackgroundClass
-    {
-        Light,
-        Dark,
-        Default
-    }
-
-
 }
