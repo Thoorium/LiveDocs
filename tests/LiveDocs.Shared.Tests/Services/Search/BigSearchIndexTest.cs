@@ -33,7 +33,7 @@ namespace LiveDocs.Shared.Tests.Services.Search
             _Random = new Random(127442);
 
             List<string> words = new List<string>();
-            for (int i = 0; i < 35000; i++)
+            for (int i = 0; i < 15000; i++)
             {
                 words.Add(WordMaker(_Random.Next(3, 10)));
             }

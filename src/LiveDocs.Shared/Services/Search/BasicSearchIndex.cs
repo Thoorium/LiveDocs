@@ -52,7 +52,7 @@ namespace LiveDocs.Shared.Services.Search
         public async Task<IList<ISearchResult>> Search(string term, CancellationToken cancellationToken)
         {
             var tokens = await _SearchPipeline.Analyse(new string[] { term });
-            List<Element> matchingDocuments = new List<Element>();
+            Dictionary<Element, int> matchingDocuments = new Dictionary<Element, int>();
             foreach (var token in tokens)
             {
                 var fuzzyMatch = FuzzyIndexesOf(Lexical, token);
@@ -65,29 +65,51 @@ namespace LiveDocs.Shared.Services.Search
                             if (cancellationToken.IsCancellationRequested)
                                 return null;
 
-                            if (element.LexicalIndexes.Contains(match.Index) && !matchingDocuments.Contains(element))
-                                matchingDocuments.Add(element);
+                            if (element.LexicalIndexes.Contains(match.Index))
+                            {
+                                if (matchingDocuments.ContainsKey(element) && matchingDocuments[element] >= match.Distance)
+                                    continue;
+
+                                matchingDocuments[element] = match.Distance;
+                            }
                         }
                     }
                 } else
                 {
-                    List<Element> stillMatching = new List<Element>();
+                    Dictionary<Element, int> stillMatching = new Dictionary<Element, int>();
                     foreach (var match in fuzzyMatch)
                     {
-                        foreach (var element in matchingDocuments)
+                        foreach (var element in matchingDocuments.Keys)
                         {
                             if (cancellationToken.IsCancellationRequested)
                                 return null;
 
-                            if (element.LexicalIndexes.Contains(match.Index) && !stillMatching.Contains(element))
-                                stillMatching.Add(element);
+                            if (element.LexicalIndexes.Contains(match.Index))
+                            {
+                                if (stillMatching.ContainsKey(element) && stillMatching[element] >= match.Distance)
+                                    continue;
+
+                                stillMatching[element] = match.Distance;
+                            }
                         }
                     }
-                    matchingDocuments = matchingDocuments.Intersect(stillMatching).ToList();
+                    var ExistingElements = matchingDocuments.Keys.Intersect(stillMatching.Keys).ToArray();
 
                     // At this point if there's no match, no document contains any of the terms.
-                    if (matchingDocuments.Count == 0)
+                    if (ExistingElements.Length == 0)
+                    {
+                        matchingDocuments.Clear();
                         break;
+                    }
+
+                    Dictionary<Element, int> temp = new Dictionary<Element, int>();
+
+                    foreach (var existingElement in ExistingElements)
+                    {
+                        temp[existingElement] = matchingDocuments[existingElement] + stillMatching[existingElement];
+                    }
+
+                    matchingDocuments = temp;
                 }
             }
 
@@ -95,21 +117,21 @@ namespace LiveDocs.Shared.Services.Search
 
             foreach (var element in matchingDocuments)
             {
-                await _DocumentationIndex.GetProjectFor(element.Path.Split("/"), out var project, out var documentPath);
+                await _DocumentationIndex.GetProjectFor(element.Key.Path.Split("/"), out var project, out var documentPath);
 
                 var document = await project.GetDocumentFor(documentPath);
-                if (document != null && !results.Any(a => a.KeyPath == element.Path))
+                if (document != null && !results.Any(a => a.KeyPath == element.Key.Path))
                 {
                     results.Add(new BasicSearchResult
                     {
-                        KeyPath = element.Path,
+                        KeyPath = element.Key.Path,
                         Document = document,
-                        HitCount = 0//matches.Length
+                        HitCount = element.Value
                     });
                 }
             }
             // TODO: Limit search result count?
-            return results.OrderByDescending(o => o.HitCount).Select(s => (ISearchResult)s).ToList();
+            return results.OrderBy(o => o.HitCount).Select(s => (ISearchResult)s).ToList();
         }
 
         /// <summary>
