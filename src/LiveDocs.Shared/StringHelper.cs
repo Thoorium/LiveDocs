@@ -11,8 +11,11 @@ namespace LiveDocs.Shared
         /// <param name="target"></param>
         /// <returns></returns>
         /// <remarks>Source: https://www.csharpstar.com/csharp-string-distance-algorithm/ </remarks>
-        public static int DamerauLevenshteinDistance(string source, string target)
+        public static int DamerauLevenshteinDistance(string source, string target, int maxDistance = int.MaxValue)
         {
+            if (Math.Abs(source.Length - target.Length) > maxDistance)
+                return -1;
+
             var bounds = new { Height = source.Length + 1, Width = target.Length + 1 };
 
             int[,] matrix = new int[bounds.Height, bounds.Width];

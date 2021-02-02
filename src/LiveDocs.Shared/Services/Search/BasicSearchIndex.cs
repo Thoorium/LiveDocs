@@ -161,14 +161,16 @@ namespace LiveDocs.Shared.Services.Search
             List<SearchMatch> matches = new List<SearchMatch>();
             for (int i = 0; i < lexical.Length; i++)
             {
-                int distance = StringHelper.DamerauLevenshteinDistance(lexical[i], term);
                 int max_distance = (int)Math.Round(term.Length * _Options.Search.Tolerance, MidpointRounding.AwayFromZero);
-                if (distance <= max_distance)
+                int distance = StringHelper.DamerauLevenshteinDistance(lexical[i], term, max_distance);
+                if (distance != -1 && distance <= max_distance)
+                {
                     matches.Add(new SearchMatch
                     {
                         Index = i,
                         Distance = distance
                     });
+                }
             }
             return matches;
         }
