@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LiveDocs.Shared.Services.Search;
@@ -33,48 +32,55 @@ namespace LiveDocs.Shared.Tests.Services.Search
 
             _Random = new Random(127442);
 
-            for (int i = 0; i < 1000; i++)
+            List<string> words = new List<string>();
+            for (int i = 0; i < 35000; i++)
             {
-                List<string> words = new List<string>();
-                for (int j = 0; j < _Random.Next(10, 500); j++)
-                {
-                    words.Add(WordMaker(_Random.Next(3, 10)));
-                }
-
-                documentationIndex.DefaultProject.Documents.Add(new TestDocument(string.Join(' ', words)));
+                words.Add(WordMaker(_Random.Next(3, 10)));
             }
 
-            //documentationIndex.DefaultProject.Documents.Add(new TestDocument("Cat cat cat dog."));
+            // Seed a few english words
+            words.Add("person");
+            words.Add("year");
+            words.Add("way");
+            words.Add("day");
+            words.Add("thing");
+            words.Add("man");
+            words.Add("world");
+            words.Add("life");
+            words.Add("hand");
+            words.Add("cat");
+            words.Add("code");
+
+            for (int i = 0; i < 1000; i++)
+            {
+                List<string> content = new List<string>();
+                for (int j = 0; j < _Random.Next(10, 500); j++)
+                {
+                    content.Add(words[_Random.Next(0, words.Count)]);
+                }
+                documentationIndex.DefaultProject.Documents.Add(new TestDocument(string.Join(' ', content)));
+            }
 
             _BigSearchIndex = new BasicSearchIndex(searchPipeline, documentationIndex, options);
             _BigSearchIndex.BuildIndex().Wait();
         }
 
-        [Fact]
-        public async Task Search()
+        [Theory]
+        [InlineData("cat")]
+        [InlineData("code cat")]
+        [InlineData("cat person hand")]
+        [InlineData("hand year world thing")]
+        [InlineData("person life hand cat way")]
+        [InlineData("man life day life thing person")]
+        public async Task SearchPerformance(string term)
         {
-            List<string> words = new List<string>();
-            for (int i = 0; i < 5; i++)
-            {
-                words.Add(_BigSearchIndex.Lexical[_Random.Next(0, _BigSearchIndex.Lexical.Length)]);
-            }
-
             CancellationTokenSource cts = new CancellationTokenSource();
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            await _BigSearchIndex.Search(words[0], cts.Token);
+            await _BigSearchIndex.Search(term, cts.Token);
             sw.Stop();
             _Output.WriteLine(sw.Elapsed.ToString());
-            sw.Reset();
-            sw.Start();
-            await _BigSearchIndex.Search(string.Join(' ', words.Take(2)), cts.Token);
-            _Output.WriteLine(sw.Elapsed.ToString());
-            sw.Start();
-            await _BigSearchIndex.Search(string.Join(' ', words.Take(3)), cts.Token);
-            _Output.WriteLine(sw.Elapsed.ToString());
-            sw.Start();
-            await _BigSearchIndex.Search(string.Join(' ', words.Take(4)), cts.Token);
-            _Output.WriteLine(sw.Elapsed.ToString());
+            Assert.True(sw.ElapsedMilliseconds < 500);
         }
 
         // https://stackoverflow.com/questions/18110243/random-word-generator-2
