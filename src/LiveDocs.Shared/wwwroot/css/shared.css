@@ -265,8 +265,6 @@ img.wd-graphic {
     margin-right: 1rem !important; }
   .nav-content, div.content {
     width: 100vw; }
-  div.content {
-    position: absolute; }
   .sidebar.documents, .sidebar.tree {
     position: fixed; }
   .sidebar.documents, div.content, .sidebar.tree {
@@ -330,7 +328,7 @@ img.wd-graphic {
 @media (min-width: 991.99px) {
   input[type="search"]:focus, input[type="search"]:not(:placeholder-shown) {
     width: 33vw !important; }
-  .navbar-nav .nav-item:first-child {
+  .navbar-nav .nav-item {
     margin-left: 1em; }
   /*ul.navbar-nav li.dropdown:hover > .dropdown-menu {
         display: block;

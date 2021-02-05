@@ -31,6 +31,11 @@ namespace LiveDocs.Shared.Options
         public string LandingPageDocument { get; set; }
 
         /// <summary>
+        /// Configuration applied to menu elements and other navigation components.
+        /// </summary>
+        public NavigationConfiguration Navigation { get; set; }
+
+        /// <summary>
         /// Configuration applied to the search.
         /// </summary>
         public SearchConfiguration Search { get; set; }

@@ -28,16 +28,20 @@
         else if (notFound)
         {
             <LiveDocs.Shared.Components.DocumentNotFound documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())" />
-        } else if (noDocument) {
+        }
+        else if (noDocument)
+        {
             <LiveDocs.Shared.Components.NoDocumentFound />
-        } else if (string.IsNullOrWhiteSpace(renderContent))
+        }
+        else if (string.IsNullOrWhiteSpace(renderContent))
         {
             <div class="loading-document-wrapper mx-auto mt-4">
                 <div class="loading-document mx-auto">
                     <img src="_content/LiveDocs.Shared/img/content.svg" onerror="this.onerror=null; this.src='_content/LiveDocs.Shared/img/content.png'">
                 </div>
             </div>
-        } else
+        }
+        else
         {
             if (!string.IsNullOrWhiteSpace(previousDocumentType))
             {
@@ -76,9 +80,9 @@
                         }
                     </p>
                 </div>
-            }            
+            }
 
-            @switch(documentationDocument.DocumentType)
+            @switch (documentationDocument.DocumentType)
             {
                 case DocumentationDocumentType.Markdown:
                     <MarkdownDocument Document="@documentationDocument" Configuration="@_Configuration.Documents.Markdown" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</MarkdownDocument>
@@ -110,9 +114,20 @@
     }
 </div>
 
-@if(!landingPage && !string.IsNullOrWhiteSpace(renderContent))
+@if (!landingPage && !string.IsNullOrWhiteSpace(renderContent))
 {
     <footer>
+        @if (_Configuration.Navigation != null)
+        {
+            @foreach (var element in _Configuration.Navigation?.Footer)
+            {
+                <div>
+                    <NavLink href="@element.Url" Match="NavLinkMatch.Prefix" target="@(element.NewTab ? "_blank" : "_self")">
+                        @element.Text
+                    </NavLink>
+                </div>
+            }
+        }
         <div class="about-livedocs">Made with <NavLink href="about-livedocs">LiveDocs</NavLink>.</div>
     </footer>
 }
@@ -257,14 +272,15 @@
             if (document == null)
             {
                 if (hasDocumentType)
-                    document = (IRemoteDocumentationDocument) await currentProject.GetDocumentationDefaultDocument(documentType);
-                else document = (IRemoteDocumentationDocument) await currentProject.GetDocumentationDefaultDocument();
-            } else landingPage = true;
+                    document = (IRemoteDocumentationDocument)await currentProject.GetDocumentationDefaultDocument(documentType);
+                else document = (IRemoteDocumentationDocument)await currentProject.GetDocumentationDefaultDocument();
+            }
+            else landingPage = true;
 
         }
         // Document type is specified.
         else if (hasDocumentType)
-            document = (IRemoteDocumentationDocument) await currentProject.GetDocumentFor(documentPath, documentType);
+            document = (IRemoteDocumentationDocument)await currentProject.GetDocumentFor(documentPath, documentType);
 
         // Document type is not specified and the specified type had no document, let's find the default document instead.
         if (document == null)
@@ -272,8 +288,8 @@
             previousDocumentType = documentType;
 
             if (documentPath.Length == 0)
-                document = (IRemoteDocumentationDocument) await currentProject.GetDocumentationDefaultDocument();
-            else document = (IRemoteDocumentationDocument) await currentProject.GetDocumentFor(documentPath);
+                document = (IRemoteDocumentationDocument)await currentProject.GetDocumentationDefaultDocument();
+            else document = (IRemoteDocumentationDocument)await currentProject.GetDocumentFor(documentPath);
 
             if (document == null)
             {
@@ -287,13 +303,14 @@
                         await SetDocumentTitle("No document found");
                         noDocument = true;
                     }
-                } else if (document == null)
+                }
+                else if (document == null)
                 {
                     notFound = true;
                     previousDocumentType = "";
                     await SetDocumentTitle("Not found");
                 }
-                
+
                 StateHasChanged();
                 return;
             }
@@ -306,7 +323,7 @@
             documentationDocument = document;
 
             var cacheSuccess = await documentationDocument.TryCache();
-            if(!cacheSuccess)
+            if (!cacheSuccess)
             {
                 offline = true;
                 renderContent = "";
@@ -366,7 +383,8 @@
 
             // Do not call .Wait() here, it is blocking.
             ScrollTo(urlId);
-        } else
+        }
+        else
         {
             // We went to a new page, let's load it.
             loadNewContent = true;

@@ -79,7 +79,8 @@ namespace LiveDocs.Server.Services
                 ApplicationName = _Options.ApplicationName,
                 Documents = _Options.Documents,
                 Search = _Options.Search,
-                Documentation = new RemoteDocumentationIndex(documentationIndex, documentationDirectoryInfo.FullName)
+                Documentation = new RemoteDocumentationIndex(documentationIndex, documentationDirectoryInfo.FullName),
+                Navigation = _Options.Navigation
             };
             var json = JsonSerializer.Serialize(remoteOptions, new JsonSerializerOptions
             {

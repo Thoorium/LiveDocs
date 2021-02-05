@@ -332,7 +332,7 @@ img.wd-graphic {
     }
 
     div.content {
-        position: absolute;
+        // position: absolute;
     }
 
     .sidebar.documents, .sidebar.tree {
@@ -436,7 +436,7 @@ img.wd-graphic {
         width: 33vw !important;
     }
 
-    .navbar-nav .nav-item:first-child {
+    .navbar-nav .nav-item {
         margin-left: 1em;
     }
     /*ul.navbar-nav li.dropdown:hover > .dropdown-menu {

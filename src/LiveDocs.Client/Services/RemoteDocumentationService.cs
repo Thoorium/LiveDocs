@@ -40,6 +40,7 @@ namespace LiveDocs.Client.Services
 
                 configuration.Documents = remoteConfiguration.Documents ?? new DocumentConfiguration();
                 configuration.Search = remoteConfiguration.Search ?? new SearchConfiguration();
+                configuration.Navigation = remoteConfiguration.Navigation ?? new NavigationConfiguration();
 
                 return remoteConfiguration.Documentation.ToDocumentationIndex<DocumentationIndex, DocumentationProject, DocumentationDocument>(_Services);
             }
