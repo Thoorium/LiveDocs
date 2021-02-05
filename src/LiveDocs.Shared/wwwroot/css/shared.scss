@@ -10,6 +10,7 @@ object.pdf {
 
 .nav-content, div.content {
     max-width: 95rem;
+    min-height: calc(100vh - 65px);
 }
 
 nav.navbar {
@@ -148,7 +149,8 @@ ul.document-tree a {
 }
 
 ul.documentation-sidebar, ul.document-tree {
-    position: fixed;
+    position: sticky;
+    top: 5rem;
     overflow-y: auto;
     max-height: calc(100vh - 6rem);
     flex-wrap: nowrap;
@@ -251,7 +253,7 @@ textarea.http-response-data[readonly] {
 
 div.doc-tools {
     display: block;
-    height: 12px;
+    // height: 12px;
     text-align: right;
     margin-bottom: 0.5rem;
     -moz-user-select: none;

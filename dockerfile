@@ -6,6 +6,7 @@ COPY *.sln .
 COPY src/LiveDocs.Shared/*.csproj src/LiveDocs.Shared/
 COPY src/LiveDocs.Server/*.csproj src/LiveDocs.Server/
 COPY src/LiveDocs.Client/*.csproj src/LiveDocs.Client/
+COPY tests/LiveDocs.Shared.Tests/*.csproj tests/LiveDocs.Shared.Tests/
 RUN dotnet restore LiveDocs.sln
 
 # Copy everything else and build

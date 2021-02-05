@@ -110,6 +110,13 @@
     }
 </div>
 
+@if(!landingPage && !string.IsNullOrWhiteSpace(renderContent))
+{
+    <footer>
+        <div class="about-livedocs">Made with <NavLink href="about-livedocs">LiveDocs</NavLink>.</div>
+    </footer>
+}
+
 @code {
     [Parameter]
     public string path1 { get; set; }

@@ -54,7 +54,7 @@ namespace LiveDocs.Shared.Tests.Services.Search
             for (int i = 0; i < 1000; i++)
             {
                 List<string> content = new List<string>();
-                for (int j = 0; j < _Random.Next(10, 500); j++)
+                for (int j = 0; j < _Random.Next(10, 5000); j++)
                 {
                     content.Add(words[_Random.Next(0, words.Count)]);
                 }
@@ -77,9 +77,10 @@ namespace LiveDocs.Shared.Tests.Services.Search
             CancellationTokenSource cts = new CancellationTokenSource();
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            await _BigSearchIndex.Search(term, cts.Token);
+            var results = await _BigSearchIndex.Search(term, cts.Token);
             sw.Stop();
-            _Output.WriteLine(sw.Elapsed.ToString());
+            _Output.WriteLine($"Time: {sw.Elapsed}");
+            _Output.WriteLine($"Results: {results.Count}");
             Assert.True(sw.ElapsedMilliseconds < 500);
         }
 
