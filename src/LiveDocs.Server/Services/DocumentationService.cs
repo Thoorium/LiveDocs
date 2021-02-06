@@ -60,8 +60,12 @@ namespace LiveDocs.Server.Services
                 _Logger.LogInformation($"Initializing documentation index. {documentCountAfter} documents added.");
             else
             {
+                int documentToSkip = 1; // app.json
+                if (_Options.Search?.Enabled ?? true) // Search is enabled by default.
+                    documentToSkip += 1; // search.json
+
                 int documentCountBefore = DocumentationIndex.DefaultProject.DocumentCount + DocumentationIndex.Projects.Sum(s => s.DocumentCount);
-                _Logger.LogInformation($"Refreshing documentation index. Before {documentCountBefore}; After {documentCountAfter}.");
+                _Logger.LogInformation($"Refreshing documentation index. Before {documentCountBefore - documentToSkip}; After {documentCountAfter}.");
             }
 
             DocumentationIndex = documentationIndex;
