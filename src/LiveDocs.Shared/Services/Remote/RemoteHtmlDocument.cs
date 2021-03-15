@@ -28,22 +28,22 @@ namespace LiveDocs.Shared.Services.Remote
         public async Task<string> GetTitle()
         {
             var cacheResult = await TryCache();
-            if (!cacheResult)
+            if (cacheResult != DocumentCacheResult.Success)
                 return "";
 
             return await base.GetTitle();
         }
 
-        public async Task<bool> TryCache()
+        public async Task<DocumentCacheResult> TryCache()
         {
             if (content != null)
-                return true;
+                return DocumentCacheResult.Success;
 
             while (readingCache)
                 await Task.Delay(5);
 
             if (content != null)
-                return true;
+                return DocumentCacheResult.Success;
 
             readingCache = true;
 
@@ -54,24 +54,27 @@ namespace LiveDocs.Shared.Services.Remote
                     var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
                     content = await httpClient.GetStringAsync(Path);
                 }
+            } catch (HttpRequestException)
+            {
+                return DocumentCacheResult.Offline;
             } catch
             {
-                return false;
+                return DocumentCacheResult.Error;
             } finally
             {
                 readingCache = false;
             }
-            return true;
+            return DocumentCacheResult.Success;
         }
 
         public async Task<(bool, string)> TryToHtml(IDocumentationProject documentationProject, string baseUri)
         {
             var cacheResult = await TryCache();
             string htmlString = "";
-            if (cacheResult)
+            if (cacheResult == DocumentCacheResult.Success)
                 htmlString = await ToHtml(documentationProject, baseUri);
 
-            return (cacheResult, htmlString);
+            return (cacheResult == DocumentCacheResult.Success, htmlString);
         }
     }
 }

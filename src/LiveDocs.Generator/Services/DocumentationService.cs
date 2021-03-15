@@ -96,7 +96,7 @@ namespace LiveDocs.Generator.Services
             _Logger.LogInformation("Building search index.");
 
             var documentationDirectoryInfo = _Options.GetDocumentationFolderAsAbsolute(_HostingEnvironment.ContentRootPath);
-            SearchIndex = new BasicSearchIndex(_SearchPipeline, documentationIndex, _Options);
+            SearchIndex = new BasicSearchIndex(_SearchPipeline, documentationIndex, _Options, _Logger);
             await SearchIndex.BuildIndex();
 
             var json = JsonSerializer.Serialize((BasicSearchIndex)SearchIndex, new JsonSerializerOptions

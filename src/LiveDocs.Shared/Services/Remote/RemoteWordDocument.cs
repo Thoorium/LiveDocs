@@ -28,7 +28,7 @@ namespace LiveDocs.Shared.Services.Remote
                 return documentTree;
 
             var cacheResult = await TryCache();
-            if (!cacheResult)
+            if (cacheResult != DocumentCacheResult.Success)
                 return documentTree;
 
             foreach (var element in Document.Elements)
@@ -48,16 +48,16 @@ namespace LiveDocs.Shared.Services.Remote
             return documentTree;
         }
 
-        public async Task<bool> TryCache()
+        public async Task<DocumentCacheResult> TryCache()
         {
             if (Document != null)
-                return true;
+                return DocumentCacheResult.Success;
 
             while (readingCache)
                 await Task.Delay(5);
 
             if (Document != null)
-                return true;
+                return DocumentCacheResult.Success;
 
             readingCache = true;
             try
@@ -67,25 +67,28 @@ namespace LiveDocs.Shared.Services.Remote
                     var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
                     document = await Thoorium.WordLib.WordDocument.LoadAsync(await httpClient.GetStreamAsync(Path));
                 }
+            } catch (HttpRequestException)
+            {
+                return DocumentCacheResult.Offline;
             } catch
             {
-                return false;
+                return DocumentCacheResult.Error;
             } finally
             {
                 readingCache = false;
             }
 
-            return true;
+            return DocumentCacheResult.Success;
         }
 
         public async Task<(bool, string)> TryToHtml(IDocumentationProject documentationProject, string baseUri)
         {
             var cacheResult = await TryCache();
             string htmlString = "";
-            if (cacheResult)
+            if (cacheResult == DocumentCacheResult.Success)
                 htmlString = await ToHtml(documentationProject, baseUri);
 
-            return (cacheResult, htmlString);
+            return (cacheResult == DocumentCacheResult.Success, htmlString);
         }
     }
 }

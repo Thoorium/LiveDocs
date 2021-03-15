@@ -11,9 +11,9 @@ namespace LiveDocs.Shared.Services.Remote
             throw new System.NotImplementedException();
         }
 
-        public Task<bool> TryCache()
+        public Task<DocumentCacheResult> TryCache()
         {
-            return Task.FromResult(true);
+            return Task.FromResult(DocumentCacheResult.Success);
         }
 
         public async Task<(bool, string)> TryToHtml(IDocumentationProject documentationProject, string baseUri)

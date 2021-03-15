@@ -4,20 +4,23 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LiveDocs.Shared.Options;
+using Microsoft.Extensions.Logging;
 
 namespace LiveDocs.Shared.Services.Search
 {
     public class BasicSearchIndex : ISearchIndex
     {
+        private readonly ILogger _Logger;
         private IDocumentationIndex _DocumentationIndex;
         private ILiveDocsOptions _Options;
         private SearchPipeline _SearchPipeline;
 
-        public BasicSearchIndex(SearchPipeline searchPipeline, IDocumentationIndex documentationIndex, ILiveDocsOptions options)
+        public BasicSearchIndex(SearchPipeline searchPipeline, IDocumentationIndex documentationIndex, ILiveDocsOptions options, ILogger logger)
         {
             _SearchPipeline = searchPipeline;
             _DocumentationIndex = documentationIndex;
             _Options = options;
+            _Logger = logger;
         }
 
         /// <summary>
@@ -164,7 +167,15 @@ namespace LiveDocs.Shared.Services.Search
                 }
 
                 ISearchableDocument searchableDocument = (ISearchableDocument)document;
-                string content = await searchableDocument.GetSearchableContent();
+                string content = "";
+                try
+                {
+                    content = await searchableDocument.GetSearchableContent();
+                } catch (Exception exception)
+                {
+                    _Logger?.LogWarning($"Unable to get searchable content for document \"{document.Path}\". Skipping. Reason: {exception.Message}");
+                }
+
                 var tokens = await _SearchPipeline.Analyse(new string[] { document.Name, content });
                 List<string> tempPaths = new List<string>(paths)
                 {

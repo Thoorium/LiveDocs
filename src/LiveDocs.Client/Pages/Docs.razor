@@ -25,6 +25,10 @@
         {
             <LiveDocs.Shared.Components.Offline OnTryReload="OnTryReload" documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())" />
         }
+        else if (faulted)
+        {
+            <LiveDocs.Shared.Components.Faulted OnTryReload="OnTryReload" documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())" />
+        }
         else if (notFound)
         {
             <LiveDocs.Shared.Components.DocumentNotFound documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())" />
@@ -108,7 +112,7 @@
             }
         }
     </div>
-    @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !noDocument && !offline)
+    @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !noDocument && !offline && !faulted)
     {
         <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument" DisplayToggle="displayDocumentTree" />
     }
@@ -188,6 +192,9 @@
     // The client is disconnected from the server or has no network connection
     private bool offline = false;
 
+    // The document resulted in errors during parsing.
+    private bool faulted = false;
+
     // Is the current page the landing page.
     private bool landingPage = false;
 
@@ -213,7 +220,7 @@
 
     private void toggleDocumentTree()
     {
-        if (documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !offline)
+        if (documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !offline && !faulted)
         {
             displayDocumentsList = false;
             displayDocumentTree = !displayDocumentTree;
@@ -233,6 +240,7 @@
     private async Task OnTryReload()
     {
         offline = false;
+        faulted = false;
         loadNewContent = true;
         StateHasChanged();
     }
@@ -322,13 +330,19 @@
             documentType = document.DocumentType.ToString();
             documentationDocument = document;
 
-            var cacheSuccess = await documentationDocument.TryCache();
-            if (!cacheSuccess)
+            var cacheResult = await documentationDocument.TryCache();
+            switch (cacheResult)
             {
-                offline = true;
-                renderContent = "";
-                StateHasChanged();
-                return;
+                case DocumentCacheResult.Offline:
+                    offline = true;
+                    renderContent = "";
+                    StateHasChanged();
+                    return;
+                case DocumentCacheResult.Error:
+                    faulted = true;
+                    renderContent = "";
+                    StateHasChanged();
+                    return;
             }
 
             renderContent = await documentationDocument.ToHtml(currentProject, _NavManager.Uri);
@@ -365,6 +379,7 @@
         notFound = false;
         noDocument = false;
         offline = false;
+        faulted = false;
         landingPage = false;
         displayDocumentsList = false;
         displayDocumentTree = false;
