@@ -121,9 +121,9 @@
 @if (!landingPage && !string.IsNullOrWhiteSpace(renderContent))
 {
     <footer>
-        @if (_Configuration.Navigation != null)
+        @if (_Configuration.Navigation != null && _Configuration.Navigation.Footer != null)
         {
-            @foreach (var element in _Configuration.Navigation?.Footer)
+            @foreach (var element in _Configuration.Navigation.Footer)
             {
                 <div>
                     <NavLink href="@element.Url" Match="NavLinkMatch.Prefix" target="@(element.NewTab ? "_blank" : "_self")">

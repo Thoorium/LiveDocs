@@ -39,9 +39,9 @@
                         </li>
                     }
                 }
-                @if (_Configuration.Navigation != null)
+                @if (_Configuration.Navigation != null && _Configuration.Navigation.Header != null)
                 {
-                    @foreach (var element in _Configuration.Navigation?.Header)
+                    @foreach (var element in _Configuration.Navigation.Header)
                     {
                         @if (element.SubElements != null)
                         {
