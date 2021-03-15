@@ -61,7 +61,7 @@ namespace LiveDocs.Shared.Tests.Services.Search
                 documentationIndex.DefaultProject.Documents.Add(new TestDocument(string.Join(' ', content)));
             }
 
-            _BigSearchIndex = new BasicSearchIndex(searchPipeline, documentationIndex, options);
+            _BigSearchIndex = new BasicSearchIndex(searchPipeline, documentationIndex, options, null);
             _BigSearchIndex.BuildIndex().Wait();
         }
 
