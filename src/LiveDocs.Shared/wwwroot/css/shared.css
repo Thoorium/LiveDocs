@@ -353,6 +353,10 @@ img.wd-graphic {
     color: var(--cyan);
     border-left-color: var(--cyan); } }
 
+@media print {
+  .sidebar, nav, footer, .sidebar-toggles, .bd-callout, .doc-tools {
+    display: none !important; } }
+
 @-webkit-keyframes phAnimation {
   0% {
     transform: translate3d(-30%, 0, 0); }
