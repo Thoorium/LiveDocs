@@ -48,7 +48,7 @@
                             <LiveDocs.Shared.Components.NavLinkDropdownItem Text="@element.Text" BaseRoute="@element.Url" NewTab="@element.NewTab">
                                 @foreach (var subelement in element.SubElements)
                                 {
-                                    <NavLink class="dropdown-item" href="@(subelement.Url)" @onclick="CloseNavMenu" rel="noopener noreferrer">@subelement.Text</NavLink>
+                                    <NavLink class="dropdown-item" href="@(subelement.Url)" @onclick="CloseNavMenu" rel="noopener noreferrer" target="@(subelement.NewTab ? "_blank" : "_self")">@subelement.Text</NavLink>
                                 }
                             </LiveDocs.Shared.Components.NavLinkDropdownItem>
                         }

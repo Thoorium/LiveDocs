@@ -279,7 +279,7 @@ img.wd-graphic {
     visibility: hidden;
     transform: translateX(100vw); }
   .sidebar.documents, div.content, .sidebar.tree {
-    margin-top: 1.5rem; }
+    margin-top: 2.0rem; }
   .sidebar.documents.open, .sidebar.tree.open {
     display: block;
     visibility: visible; }
@@ -304,7 +304,7 @@ img.wd-graphic {
     display: flex;
     justify-content: center;
     background: #fff;
-    margin-top: -1.5rem;
+    margin-top: -2.0rem;
     padding-top: 1rem;
     padding-bottom: 1rem;
     z-index: 100; }
