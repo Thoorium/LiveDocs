@@ -12,6 +12,11 @@ namespace LiveDocs.Generator
     {
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.AddEnvironmentVariables(prefix: "LiveDocs_");
+                    config.AddCommandLine(args);
+                })
                 .ConfigureHostConfiguration(configHost =>
                 {
                     configHost.AddJsonFile("livedocs.json");

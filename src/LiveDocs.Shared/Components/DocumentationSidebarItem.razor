@@ -1,10 +1,10 @@
 ﻿@if (Item.DocumentType == Services.DocumentationDocumentType.Folder)
 {
-    <DocumentationSidebarFolder Item="Item" Path="@($"{Path}/{Item.Key}")"></DocumentationSidebarFolder>
+    <DocumentationSidebarFolder Item="Item" Path="@(string.IsNullOrWhiteSpace(Path) ? Item.Key : $"{Path}/{Item.Key}")"></DocumentationSidebarFolder>
 } else
 {
     <li class="nav-item pt-1">
-        <NavLink href="@($"{Path}/{Item.Key}")">
+        <NavLink href="@(string.IsNullOrWhiteSpace(Path) ? Item.Key : $"{Path}/{Item.Key}")">
             @Item.Name
         </NavLink>
     </li>
