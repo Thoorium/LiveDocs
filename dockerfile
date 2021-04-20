@@ -11,9 +11,10 @@ RUN dotnet restore LiveDocs.WebApp.sln
 # Copy everything else and build
 COPY . ./
 RUN dotnet publish src/LiveDocs.Server/*.csproj -c Release -o out
+RUN mv entrypoint.sh out/.
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:5.0.0-alpine3.12
 WORKDIR /app
 COPY --from=build-env /app/out .
-ENTRYPOINT ["dotnet", "LiveDocs.Server.dll"]
+ENTRYPOINT ["/app/entrypoint.sh"]

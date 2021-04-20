@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveDocs.Generator", "src\L
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveDocs.Shared", "src\LiveDocs.Shared\LiveDocs.Shared.csproj", "{E765E218-3E00-4844-ABD7-4C31F8AC9735}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveDocs.Client", "src\LiveDocs.Client\LiveDocs.Client.csproj", "{EE646A0C-F812-4B03-B4F1-BA987EDA1668}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,9 +48,22 @@ Global
 		{E765E218-3E00-4844-ABD7-4C31F8AC9735}.Release|x64.Build.0 = Release|Any CPU
 		{E765E218-3E00-4844-ABD7-4C31F8AC9735}.Release|x86.ActiveCfg = Release|Any CPU
 		{E765E218-3E00-4844-ABD7-4C31F8AC9735}.Release|x86.Build.0 = Release|Any CPU
+		{EE646A0C-F812-4B03-B4F1-BA987EDA1668}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE646A0C-F812-4B03-B4F1-BA987EDA1668}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE646A0C-F812-4B03-B4F1-BA987EDA1668}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EE646A0C-F812-4B03-B4F1-BA987EDA1668}.Debug|x64.Build.0 = Debug|Any CPU
+		{EE646A0C-F812-4B03-B4F1-BA987EDA1668}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EE646A0C-F812-4B03-B4F1-BA987EDA1668}.Debug|x86.Build.0 = Debug|Any CPU
+		{EE646A0C-F812-4B03-B4F1-BA987EDA1668}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE646A0C-F812-4B03-B4F1-BA987EDA1668}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE646A0C-F812-4B03-B4F1-BA987EDA1668}.Release|x64.ActiveCfg = Release|Any CPU
+		{EE646A0C-F812-4B03-B4F1-BA987EDA1668}.Release|x64.Build.0 = Release|Any CPU
+		{EE646A0C-F812-4B03-B4F1-BA987EDA1668}.Release|x86.ActiveCfg = Release|Any CPU
+		{EE646A0C-F812-4B03-B4F1-BA987EDA1668}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{48C7CCBB-974C-445B-9D5B-F64CC9766400} = {B9E4304A-1113-4205-9EDA-BF13CE9C7531}
 		{E765E218-3E00-4844-ABD7-4C31F8AC9735} = {B9E4304A-1113-4205-9EDA-BF13CE9C7531}
+		{EE646A0C-F812-4B03-B4F1-BA987EDA1668} = {B9E4304A-1113-4205-9EDA-BF13CE9C7531}
 	EndGlobalSection
 EndGlobal
