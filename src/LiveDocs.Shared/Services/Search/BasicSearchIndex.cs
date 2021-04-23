@@ -4,20 +4,23 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LiveDocs.Shared.Options;
+using Microsoft.Extensions.Logging;
 
 namespace LiveDocs.Shared.Services.Search
 {
     public class BasicSearchIndex : ISearchIndex
     {
+        private readonly ILogger _Logger;
         private IDocumentationIndex _DocumentationIndex;
         private ILiveDocsOptions _Options;
         private SearchPipeline _SearchPipeline;
 
-        public BasicSearchIndex(SearchPipeline searchPipeline, IDocumentationIndex documentationIndex, ILiveDocsOptions options)
+        public BasicSearchIndex(SearchPipeline searchPipeline, IDocumentationIndex documentationIndex, ILiveDocsOptions options, ILogger logger)
         {
             _SearchPipeline = searchPipeline;
             _DocumentationIndex = documentationIndex;
             _Options = options;
+            _Logger = logger;
         }
 
         /// <summary>
@@ -52,56 +55,86 @@ namespace LiveDocs.Shared.Services.Search
         public async Task<IList<ISearchResult>> Search(string term, CancellationToken cancellationToken)
         {
             var tokens = await _SearchPipeline.Analyse(new string[] { term });
-            List<List<SearchMatch>> tokenMatches = new List<List<SearchMatch>>();
+            Dictionary<Element, int> matchingDocuments = new Dictionary<Element, int>();
             foreach (var token in tokens)
             {
                 var fuzzyMatch = FuzzyIndexesOf(Lexical, token);
-                tokenMatches.Add(fuzzyMatch);
-            }
-            var matchGroup = tokenMatches.CartesianProduct();
+                if (matchingDocuments.Count == 0)
+                {
+                    foreach (var match in fuzzyMatch)
+                    {
+                        foreach (var element in Documents)
+                        {
+                            if (cancellationToken.IsCancellationRequested)
+                                return null;
 
-            // For debug purposes.
-            // TODO: Remove.
-            //Console.WriteLine(string.Join(',', tokens));
-            //int[] lexicalIds1 = tokens.Select(s => Array.IndexOf(Lexical, s)).ToArray();
-            //Console.WriteLine("Direct: " + string.Join(',', lexicalIds1.Select(s => s.ToString())));
-            //foreach (var match in matchGroup)
-            //{
-            //    Console.WriteLine("Fuzzy : " + string.Join(',', match.Select(s => s.Index)));
-            //}
+                            if (element.LexicalIndexes.Contains(match.Index))
+                            {
+                                if (matchingDocuments.ContainsKey(element) && matchingDocuments[element] >= match.Distance)
+                                    continue;
+
+                                matchingDocuments[element] = match.Distance;
+                            }
+                        }
+                    }
+                } else
+                {
+                    Dictionary<Element, int> stillMatching = new Dictionary<Element, int>();
+                    foreach (var match in fuzzyMatch)
+                    {
+                        foreach (var element in matchingDocuments.Keys)
+                        {
+                            if (cancellationToken.IsCancellationRequested)
+                                return null;
+
+                            if (element.LexicalIndexes.Contains(match.Index))
+                            {
+                                if (stillMatching.ContainsKey(element) && stillMatching[element] >= match.Distance)
+                                    continue;
+
+                                stillMatching[element] = match.Distance;
+                            }
+                        }
+                    }
+                    var ExistingElements = matchingDocuments.Keys.Intersect(stillMatching.Keys).ToArray();
+
+                    // At this point if there's no match, no document contains any of the terms.
+                    if (ExistingElements.Length == 0)
+                    {
+                        matchingDocuments.Clear();
+                        break;
+                    }
+
+                    Dictionary<Element, int> temp = new Dictionary<Element, int>();
+
+                    foreach (var existingElement in ExistingElements)
+                    {
+                        temp[existingElement] = matchingDocuments[existingElement] + stillMatching[existingElement];
+                    }
+
+                    matchingDocuments = temp;
+                }
+            }
 
             IList<BasicSearchResult> results = new List<BasicSearchResult>();
 
-            foreach (var match in matchGroup.OrderBy(o => o.Sum(su => su.Distance)))
+            foreach (var element in matchingDocuments)
             {
-                foreach (var element in Documents)
+                await _DocumentationIndex.GetProjectFor(element.Key.Path.Split("/"), out var project, out var documentPath);
+
+                var document = await project.GetDocumentFor(documentPath);
+                if (document != null && !results.Any(a => a.KeyPath == element.Key.Path))
                 {
-                    var lexicalIds = match.Select(s => s.Index);
-                    if (cancellationToken.IsCancellationRequested)
-                        return null;
-
-                    var matches = lexicalIds.Intersect(element.LexicalIndexes).ToArray();
-
-                    // Inclusive search
-                    if (lexicalIds.Any(a => !matches.Contains(a)))
-                        continue;
-
-                    await _DocumentationIndex.GetProjectFor(element.Path.Split("/"), out var project, out var documentPath);
-
-                    var document = await project.GetDocumentFor(documentPath);
-                    if (document != null && !results.Any(a => a.KeyPath == element.Path))
+                    results.Add(new BasicSearchResult
                     {
-                        results.Add(new BasicSearchResult
-                        {
-                            KeyPath = element.Path,
-                            Document = document,
-                            HitCount = matches.Length
-                        });
-                    }
+                        KeyPath = element.Key.Path,
+                        Document = document,
+                        HitCount = element.Value
+                    });
                 }
             }
             // TODO: Limit search result count?
-            return results.OrderByDescending(o => o.HitCount).Select(s => (ISearchResult)s).ToList();
+            return results.OrderBy(o => o.HitCount).Select(s => (ISearchResult)s).ToList();
         }
 
         /// <summary>
@@ -134,7 +167,15 @@ namespace LiveDocs.Shared.Services.Search
                 }
 
                 ISearchableDocument searchableDocument = (ISearchableDocument)document;
-                string content = await searchableDocument.GetSearchableContent();
+                string content = "";
+                try
+                {
+                    content = await searchableDocument.GetSearchableContent();
+                } catch (Exception exception)
+                {
+                    _Logger?.LogWarning($"Unable to get searchable content for document \"{document.Path}\". Skipping. Reason: {exception.Message}");
+                }
+
                 var tokens = await _SearchPipeline.Analyse(new string[] { document.Name, content });
                 List<string> tempPaths = new List<string>(paths)
                 {
@@ -161,14 +202,16 @@ namespace LiveDocs.Shared.Services.Search
             List<SearchMatch> matches = new List<SearchMatch>();
             for (int i = 0; i < lexical.Length; i++)
             {
-                int distance = StringHelper.DamerauLevenshteinDistance(lexical[i], term);
                 int max_distance = (int)Math.Round(term.Length * _Options.Search.Tolerance, MidpointRounding.AwayFromZero);
-                if (distance <= max_distance)
+                int distance = StringHelper.DamerauLevenshteinDistance(lexical[i], term, max_distance);
+                if (distance != -1 && distance <= max_distance)
+                {
                     matches.Add(new SearchMatch
                     {
                         Index = i,
                         Distance = distance
                     });
+                }
             }
             return matches;
         }
@@ -177,6 +220,19 @@ namespace LiveDocs.Shared.Services.Search
         {
             public int[] LexicalIndexes { get; set; }
             public string Path { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null || obj is not Element element)
+                    return false;
+
+                return Path == element.Path;
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
         }
 
         private class SearchMatch

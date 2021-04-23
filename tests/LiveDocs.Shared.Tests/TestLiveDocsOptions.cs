@@ -8,6 +8,7 @@ namespace LiveDocs.Shared.Tests
     {
         public string ApplicationName { get; set; }
         public DocumentConfiguration Documents { get; set; }
+        public NavigationConfiguration Navigation { get; set; }
         public SearchConfiguration Search { get; set; }
     }
 }

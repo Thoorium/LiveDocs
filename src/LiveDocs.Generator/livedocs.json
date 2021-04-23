@@ -1,0 +1,17 @@
+{
+  "LiveDocs": {
+    "ApplicationName": "LiveDocs",
+    "DocumentationFolder": "/docs",
+    "DefaultDocuments": [
+      "readme",
+      "index"
+    ],
+    "LandingPageDocument": "landing",
+    "Documents": {
+      "ShowDownloadOriginal": true,
+      "Drawio": {
+        "Enabled": false
+      }
+    }
+  }
+}

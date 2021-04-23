@@ -36,9 +36,9 @@ namespace LiveDocs.Client.Services.Documents
             throw new NotImplementedException();
         }
 
-        public Task<bool> TryCache()
+        public Task<DocumentCacheResult> TryCache()
         {
-            return Task.FromResult(true);
+            return Task.FromResult(DocumentCacheResult.Success);
         }
 
         public Task<(bool, string)> TryToHtml(IDocumentationProject documentationProject, string baseUri)

@@ -2,15 +2,15 @@
 @inject RemoteLiveDocsOptions _Configuration
 @using LiveDocs.Shared.Services.Search
 @using System.Threading.Tasks
-    <div class="fixed-top navbar-dark bg-dark mx-auto">
-        <nav class="navbar navbar-expand-lg justify-content-center mx-auto">
-            <a class="navbar-brand mr-auto mr-lg-0" href="">@_Configuration.ApplicationName</a>
-            <button class="navbar-toggler p-0 border-0" type="button" data-toggle="offcanvas" @onclick="ToggleNavMenu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+<div class="fixed-top navbar-dark bg-dark mx-auto">
+    <nav class="navbar navbar-expand-lg justify-content-center mx-auto">
+        <a class="navbar-brand mr-auto mr-lg-0" href="">@_Configuration.ApplicationName</a>
+        <button class="navbar-toggler p-0 border-0" type="button" data-toggle="offcanvas" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <div class="navbar-collapse offcanvas-collapse @NavMenuCssClass" style="max-width:85rem;">
-                <ul class="navbar-nav mr-auto">
+        <div class="navbar-collapse offcanvas-collapse @NavMenuCssClass" style="max-width:85rem;">
+            <ul class="navbar-nav mr-auto">
                 @if (_DocumentationService.DocumentationIndex != null)
                 {
                     @if (_DocumentationService.DocumentationIndex.Projects.Count > 0)
@@ -21,22 +21,45 @@
                                 <NavLink class="dropdown-item" href="@(item.Key + "/")" @onclick="CloseNavMenu">@item.Name</NavLink>
                             }
                         </LiveDocs.Shared.Components.NavLinkDropdownItem>
-                    } else if (_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.Count > 0 && _DocumentationService.DocumentationIndex.DefaultProject.LandingPage != null)
+                    }
+                    else if (_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.Count > 0 && _DocumentationService.DocumentationIndex.DefaultProject.LandingPage != null)
                     {
-                        
                         <li class="nav-item">
                             <NavLink class="nav-link" href="@(_DocumentationService.DocumentationIndex.DefaultProject.DefaultDocuments.First().Key + "/")" Match="NavLinkMatch.Prefix">
                                 Documentation
                             </NavLink>
                         </li>
-                    } else
+                    }
+                    else
                     {
-                        
                         <li class="nav-item">
                             <NavLink class="nav-link" href="" Match="NavLinkMatch.Prefix">
                                 Documentation
                             </NavLink>
                         </li>
+                    }
+                }
+                @if (_Configuration.Navigation != null && _Configuration.Navigation.Header != null)
+                {
+                    @foreach (var element in _Configuration.Navigation.Header)
+                    {
+                        @if (element.SubElements != null)
+                        {
+                            <LiveDocs.Shared.Components.NavLinkDropdownItem Text="@element.Text" BaseRoute="@element.Url" NewTab="@element.NewTab">
+                                @foreach (var subelement in element.SubElements)
+                                {
+                                    <NavLink class="dropdown-item" href="@(subelement.Url)" @onclick="CloseNavMenu" rel="noopener noreferrer" target="@(subelement.NewTab ? "_blank" : "_self")">@subelement.Text</NavLink>
+                                }
+                            </LiveDocs.Shared.Components.NavLinkDropdownItem>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <NavLink class="nav-link" href="@element.Url" Match="NavLinkMatch.Prefix" target="@(element.NewTab ? "_blank" : "_self")">
+                                    @element.Text
+                                </NavLink>
+                            </li>
+                        }
                     }
                 }
             </ul>
@@ -48,7 +71,7 @@
                         @foreach (var item in documents)
                         {
                             int lastIndex = item.KeyPath.LastIndexOf("/");
-                            <NavLink class="dropdown-item" href="@(item.KeyPath)">
+                            <NavLink class="dropdown-item" href="@(item.KeyPath)" title="@item.KeyPath">
                                 @if (lastIndex > -1)
                                 {
                                     <span class="text-muted mr-1">@(item.KeyPath.Substring(0, lastIndex))</span>
@@ -59,9 +82,9 @@
                     </div>
                 </div>
             }
-            </div>
-        </nav>
-    </div>
+        </div>
+    </nav>
+</div>
 @code {
     bool collapseNavMenu = false;
 
@@ -98,7 +121,8 @@
             if (!string.IsNullOrEmpty(searchQuery))
             {
                 _ = SearchDebounced(searchQuery);
-            } else documents = new ISearchResult[0];
+            }
+            else documents = new ISearchResult[0];
         }
     }
 
@@ -125,7 +149,9 @@
             }
 
             StateHasChanged();
-        } catch (OperationCanceledException) { } catch (Exception ex)
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
         {
             Console.Error.WriteLine(ex.StackTrace);
         }

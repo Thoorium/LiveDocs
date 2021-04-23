@@ -6,7 +6,8 @@ object.pdf {
   min-height: 100vh; }
 
 .nav-content, div.content {
-  max-width: 95rem; }
+  max-width: 95rem;
+  min-height: calc(100vh - 65px); }
 
 nav.navbar {
   max-width: 100rem; }
@@ -21,7 +22,9 @@ li.dropdown:hover > div.dropdown-menu {
   margin-top: -1px; }
 
 .dropdown-item {
-  padding-left: 10px; }
+  padding-left: 10px;
+  overflow-x: hidden;
+  text-overflow: ellipsis; }
 
 .dropdown-item:focus, .dropdown-item:hover {
   border-left: 5px solid var(--cyan);
@@ -117,7 +120,8 @@ ul.document-tree a {
   display: block; }
 
 ul.documentation-sidebar, ul.document-tree {
-  position: fixed;
+  position: sticky;
+  top: 5rem;
   overflow-y: auto;
   max-height: calc(100vh - 6rem);
   flex-wrap: nowrap;
@@ -202,7 +206,6 @@ textarea.http-response-data[readonly] {
 
 div.doc-tools {
   display: block;
-  height: 12px;
   text-align: right;
   margin-bottom: 0.5rem;
   -moz-user-select: none;
@@ -264,8 +267,6 @@ img.wd-graphic {
     margin-right: 1rem !important; }
   .nav-content, div.content {
     width: 100vw; }
-  div.content {
-    position: absolute; }
   .sidebar.documents, .sidebar.tree {
     position: fixed; }
   .sidebar.documents, div.content, .sidebar.tree {
@@ -280,7 +281,7 @@ img.wd-graphic {
     visibility: hidden;
     transform: translateX(100vw); }
   .sidebar.documents, div.content, .sidebar.tree {
-    margin-top: 1.5rem; }
+    margin-top: 2.0rem; }
   .sidebar.documents.open, .sidebar.tree.open {
     display: block;
     visibility: visible; }
@@ -305,7 +306,7 @@ img.wd-graphic {
     display: flex;
     justify-content: center;
     background: #fff;
-    margin-top: -1.5rem;
+    margin-top: -2.0rem;
     padding-top: 1rem;
     padding-bottom: 1rem;
     z-index: 100; }
@@ -329,7 +330,7 @@ img.wd-graphic {
 @media (min-width: 991.99px) {
   input[type="search"]:focus, input[type="search"]:not(:placeholder-shown) {
     width: 33vw !important; }
-  .navbar-nav .nav-item:first-child {
+  .navbar-nav .nav-item {
     margin-left: 1em; }
   /*ul.navbar-nav li.dropdown:hover > .dropdown-menu {
         display: block;
@@ -353,6 +354,10 @@ img.wd-graphic {
   ul.document-tree ul:hover, ul.document-tree li:hover {
     color: var(--cyan);
     border-left-color: var(--cyan); } }
+
+@media print {
+  .sidebar, nav, footer, .sidebar-toggles, .bd-callout, .doc-tools {
+    display: none !important; } }
 
 @-webkit-keyframes phAnimation {
   0% {

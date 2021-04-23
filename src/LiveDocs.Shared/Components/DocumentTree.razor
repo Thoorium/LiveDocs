@@ -44,8 +44,8 @@
 
         if(Document is LiveDocs.Shared.Services.Remote.IRemoteDocumentationDocument remoteDocument)
         {
-            var success = await remoteDocument.TryCache();
-            if(!success)
+            var cacheResult = await remoteDocument.TryCache();
+            if(cacheResult != Services.Remote.DocumentCacheResult.Success)
                 return;
 
             documentTree.AddRange(await remoteDocument.GetDocumentTree());

@@ -60,7 +60,7 @@ namespace LiveDocs.Shared.Services.Remote
 
             if (DefaultProject.LandingPage != null)
             {
-                documentationIndex.DefaultProject.LandingPage = CreatRemoteDocument<TDocumentationDocument>(DefaultProject.LandingPage, serviceProvider);
+                documentationIndex.DefaultProject.LandingPage = CreateRemoteDocument<TDocumentationDocument>(DefaultProject.LandingPage, serviceProvider);
             }
 
             documentationIndex.Projects = new List<IDocumentationProject>();
@@ -73,7 +73,7 @@ namespace LiveDocs.Shared.Services.Remote
                 project.DefaultDocuments = CopyDocuments<TDocumentationDocument>(remoteProject.DefaultDocuments, serviceProvider).ToList();
 
                 if (remoteProject.LandingPage != null)
-                    project.LandingPage = CreatRemoteDocument<TDocumentationDocument>(remoteProject.LandingPage, serviceProvider);
+                    project.LandingPage = CreateRemoteDocument<TDocumentationDocument>(remoteProject.LandingPage, serviceProvider);
 
                 documentationIndex.Projects.Add(project);
             }
@@ -85,7 +85,7 @@ namespace LiveDocs.Shared.Services.Remote
             List<IDocumentationDocument> finalDocumentationDocuments = new List<IDocumentationDocument>();
             foreach (var item in sourceDocumentationDocuments)
             {
-                IDocumentationDocument doc = CreatRemoteDocument<TDocumentationDocument>(item, serviceProvider);
+                IDocumentationDocument doc = CreateRemoteDocument<TDocumentationDocument>(item, serviceProvider);
                 finalDocumentationDocuments.Add(doc);
             }
 
@@ -102,6 +102,10 @@ namespace LiveDocs.Shared.Services.Remote
                     Path = item.Path.Replace(documentationRootPath, "").Replace("\\", "/"),
                     LastUpdate = item.LastUpdate
                 };
+
+                if (doc.Path.StartsWith("/"))
+                    doc.Path = doc.Path.Substring(1, doc.Path.Length - 1);
+
                 if (item.SubDocumentsCount > 0)
                     doc.SubDocuments = CopyDocuments(item.SubDocuments, documentationRootPath).ToArray();
 
@@ -111,7 +115,7 @@ namespace LiveDocs.Shared.Services.Remote
             return finalDocumentationDocuments;
         }
 
-        private IDocumentationDocument CreatRemoteDocument<TDocumentationDocument>(RemoteDocumentationDocument remoteDocumentationDocument, IServiceProvider serviceProvider) where TDocumentationDocument : IDocumentationDocument, new()
+        private IDocumentationDocument CreateRemoteDocument<TDocumentationDocument>(RemoteDocumentationDocument remoteDocumentationDocument, IServiceProvider serviceProvider) where TDocumentationDocument : IDocumentationDocument, new()
         {
             if (remoteDocumentationDocument.SubDocumentsCount > 0)
             {

@@ -25,19 +25,27 @@
         {
             <LiveDocs.Shared.Components.Offline OnTryReload="OnTryReload" documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())" />
         }
+        else if (faulted)
+        {
+            <LiveDocs.Shared.Components.Faulted OnTryReload="OnTryReload" documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())" />
+        }
         else if (notFound)
         {
             <LiveDocs.Shared.Components.DocumentNotFound documentName="@(new[] { path1, path2, path3, path4, path5, path6, path7, path8 }.Where(w => !string.IsNullOrWhiteSpace(w)).LastOrDefault())" />
-        } else if (noDocument) {
+        }
+        else if (noDocument)
+        {
             <LiveDocs.Shared.Components.NoDocumentFound />
-        } else if (string.IsNullOrWhiteSpace(renderContent))
+        }
+        else if (string.IsNullOrWhiteSpace(renderContent))
         {
             <div class="loading-document-wrapper mx-auto mt-4">
                 <div class="loading-document mx-auto">
                     <img src="_content/LiveDocs.Shared/img/content.svg" onerror="this.onerror=null; this.src='_content/LiveDocs.Shared/img/content.png'">
                 </div>
             </div>
-        } else
+        }
+        else
         {
             if (!string.IsNullOrWhiteSpace(previousDocumentType))
             {
@@ -76,9 +84,9 @@
                         }
                     </p>
                 </div>
-            }            
+            }
 
-            @switch(documentationDocument.DocumentType)
+            @switch (documentationDocument.DocumentType)
             {
                 case DocumentationDocumentType.Markdown:
                     <MarkdownDocument Document="@documentationDocument" Configuration="@_Configuration.Documents.Markdown" ShowDownloadOriginal="_Configuration.Documents.ShowDownloadOriginal" IsLandingPage="landingPage">@((MarkupString)renderContent)</MarkdownDocument>
@@ -104,11 +112,29 @@
             }
         }
     </div>
-    @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !noDocument && !offline)
+    @if (!landingPage && documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !noDocument && !offline && !faulted)
     {
         <LiveDocs.Shared.Components.DocumentTree Document="documentationDocument" DisplayToggle="displayDocumentTree" />
     }
 </div>
+
+@if (!landingPage && !string.IsNullOrWhiteSpace(renderContent))
+{
+    <footer>
+        @if (_Configuration.Navigation != null && _Configuration.Navigation.Footer != null)
+        {
+            @foreach (var element in _Configuration.Navigation.Footer)
+            {
+                <div>
+                    <NavLink href="@element.Url" Match="NavLinkMatch.Prefix" target="@(element.NewTab ? "_blank" : "_self")">
+                        @element.Text
+                    </NavLink>
+                </div>
+            }
+        }
+        <div class="about-livedocs">Made with <NavLink href="about-livedocs">LiveDocs</NavLink>.</div>
+    </footer>
+}
 
 @code {
     [Parameter]
@@ -166,6 +192,9 @@
     // The client is disconnected from the server or has no network connection
     private bool offline = false;
 
+    // The document resulted in errors during parsing.
+    private bool faulted = false;
+
     // Is the current page the landing page.
     private bool landingPage = false;
 
@@ -191,7 +220,7 @@
 
     private void toggleDocumentTree()
     {
-        if (documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !offline)
+        if (documentationDocument?.DocumentType == DocumentationDocumentType.Markdown && !offline && !faulted)
         {
             displayDocumentsList = false;
             displayDocumentTree = !displayDocumentTree;
@@ -211,6 +240,7 @@
     private async Task OnTryReload()
     {
         offline = false;
+        faulted = false;
         loadNewContent = true;
         StateHasChanged();
     }
@@ -250,14 +280,15 @@
             if (document == null)
             {
                 if (hasDocumentType)
-                    document = (IRemoteDocumentationDocument) await currentProject.GetDocumentationDefaultDocument(documentType);
-                else document = (IRemoteDocumentationDocument) await currentProject.GetDocumentationDefaultDocument();
-            } else landingPage = true;
+                    document = (IRemoteDocumentationDocument)await currentProject.GetDocumentationDefaultDocument(documentType);
+                else document = (IRemoteDocumentationDocument)await currentProject.GetDocumentationDefaultDocument();
+            }
+            else landingPage = true;
 
         }
         // Document type is specified.
         else if (hasDocumentType)
-            document = (IRemoteDocumentationDocument) await currentProject.GetDocumentFor(documentPath, documentType);
+            document = (IRemoteDocumentationDocument)await currentProject.GetDocumentFor(documentPath, documentType);
 
         // Document type is not specified and the specified type had no document, let's find the default document instead.
         if (document == null)
@@ -265,8 +296,8 @@
             previousDocumentType = documentType;
 
             if (documentPath.Length == 0)
-                document = (IRemoteDocumentationDocument) await currentProject.GetDocumentationDefaultDocument();
-            else document = (IRemoteDocumentationDocument) await currentProject.GetDocumentFor(documentPath);
+                document = (IRemoteDocumentationDocument)await currentProject.GetDocumentationDefaultDocument();
+            else document = (IRemoteDocumentationDocument)await currentProject.GetDocumentFor(documentPath);
 
             if (document == null)
             {
@@ -280,13 +311,14 @@
                         await SetDocumentTitle("No document found");
                         noDocument = true;
                     }
-                } else if (document == null)
+                }
+                else if (document == null)
                 {
                     notFound = true;
                     previousDocumentType = "";
                     await SetDocumentTitle("Not found");
                 }
-                
+
                 StateHasChanged();
                 return;
             }
@@ -298,13 +330,19 @@
             documentType = document.DocumentType.ToString();
             documentationDocument = document;
 
-            var cacheSuccess = await documentationDocument.TryCache();
-            if(!cacheSuccess)
+            var cacheResult = await documentationDocument.TryCache();
+            switch (cacheResult)
             {
-                offline = true;
-                renderContent = "";
-                StateHasChanged();
-                return;
+                case DocumentCacheResult.Offline:
+                    offline = true;
+                    renderContent = "";
+                    StateHasChanged();
+                    return;
+                case DocumentCacheResult.Error:
+                    faulted = true;
+                    renderContent = "";
+                    StateHasChanged();
+                    return;
             }
 
             renderContent = await documentationDocument.ToHtml(currentProject, _NavManager.Uri);
@@ -341,6 +379,7 @@
         notFound = false;
         noDocument = false;
         offline = false;
+        faulted = false;
         landingPage = false;
         displayDocumentsList = false;
         displayDocumentTree = false;
@@ -359,7 +398,8 @@
 
             // Do not call .Wait() here, it is blocking.
             ScrollTo(urlId);
-        } else
+        }
+        else
         {
             // We went to a new page, let's load it.
             loadNewContent = true;

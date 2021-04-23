@@ -7,7 +7,7 @@ namespace LiveDocs.Shared.Options
     {
         public string ApplicationName { get; set; }
         public DocumentConfiguration Documents { get; set; }
-
+        public NavigationConfiguration Navigation { get; set; }
         public SearchConfiguration Search { get; set; }
     }
 }

@@ -1,5 +1,5 @@
 <li class="nav-item dropdown">
-    <NavLink href="@(string.IsNullOrWhiteSpace(BaseRoute) ? Text : BaseRoute)" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+    <NavLink href="@(string.IsNullOrWhiteSpace(BaseRoute) ? Text : BaseRoute)" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false" rel="noopener noreferrer" target="@(NewTab ? "_blank" : "_self")">
         @if (!string.IsNullOrWhiteSpace(IconName))
         {
             <span class="oi @($"oi-{IconName}")" aria-hidden="true"></span>
@@ -23,4 +23,7 @@
 
     [Parameter]
     public string IconName { get; set; } = "";
+
+    [Parameter]
+    public bool NewTab { get; set; } = false;
 }

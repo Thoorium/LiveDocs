@@ -22,7 +22,12 @@ namespace LiveDocs.Shared.Options
         public DocumentConfiguration Documents { get; set; }
 
         /// <summary>
-        ///Configuration applied to the search.
+        /// Configuration applied to menu elements and other navigation components.
+        /// </summary>
+        public NavigationConfiguration Navigation { get; set; }
+
+        /// <summary>
+        /// Configuration applied to the search.
         /// </summary>
         public SearchConfiguration Search { get; set; }
     }

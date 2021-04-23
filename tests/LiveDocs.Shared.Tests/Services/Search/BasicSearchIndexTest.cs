@@ -24,9 +24,9 @@ namespace LiveDocs.Shared.Tests.Services.Search
                 DefaultProject = new TestDocumentationProject()
             };
 
-            documentationIndex.DefaultProject.Documents.Add(new TestDocument());
+            documentationIndex.DefaultProject.Documents.Add(new TestDocument("Cat cat cat dog."));
 
-            basicSearchIndex = new BasicSearchIndex(searchPipeline, documentationIndex, options)
+            basicSearchIndex = new BasicSearchIndex(searchPipeline, documentationIndex, options, null)
             {
                 Documents = new[]
                 {

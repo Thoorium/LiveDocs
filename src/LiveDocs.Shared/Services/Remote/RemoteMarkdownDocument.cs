@@ -49,16 +49,16 @@ namespace LiveDocs.Shared.Services.Remote
             return Task.FromResult(documentTree);
         }
 
-        public async Task<bool> TryCache()
+        public async Task<DocumentCacheResult> TryCache()
         {
             if (markdown != null)
-                return true;
+                return DocumentCacheResult.Success;
 
             while (readingCache)
                 await Task.Delay(5);
 
             if (markdown != null)
-                return true;
+                return DocumentCacheResult.Success;
 
             readingCache = true;
             try
@@ -69,25 +69,28 @@ namespace LiveDocs.Shared.Services.Remote
                     var markdownPipeline = scope.ServiceProvider.GetRequiredService<MarkdownPipeline>();
                     markdown = Markdig.Markdown.Parse(await httpClient.GetStringAsync(Path), markdownPipeline);
                 }
+            } catch (HttpRequestException)
+            {
+                return DocumentCacheResult.Offline;
             } catch
             {
-                return false;
+                return DocumentCacheResult.Error;
             } finally
             {
                 readingCache = false;
             }
 
-            return true;
+            return DocumentCacheResult.Success;
         }
 
         public async Task<(bool, string)> TryToHtml(IDocumentationProject documentationProject, string baseUri)
         {
             var cacheResult = await TryCache();
             string htmlString = "";
-            if (cacheResult)
+            if (cacheResult == DocumentCacheResult.Success)
                 htmlString = await ToHtml(documentationProject, baseUri);
 
-            return (cacheResult, htmlString);
+            return (cacheResult == DocumentCacheResult.Success, htmlString);
         }
 
         private string ExtractLiterals(Markdig.Syntax.Inlines.ContainerInline parentInline, string text = "")
