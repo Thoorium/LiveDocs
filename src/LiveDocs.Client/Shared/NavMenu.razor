@@ -71,7 +71,7 @@
                         @foreach (var item in documents)
                         {
                             int lastIndex = item.KeyPath.LastIndexOf("/");
-                            <NavLink class="dropdown-item" href="@(item.KeyPath)">
+                            <NavLink class="dropdown-item" href="@(item.KeyPath)" title="@item.KeyPath">
                                 @if (lastIndex > -1)
                                 {
                                     <span class="text-muted mr-1">@(item.KeyPath.Substring(0, lastIndex))</span>

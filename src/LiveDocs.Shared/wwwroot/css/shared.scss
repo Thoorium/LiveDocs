@@ -31,6 +31,8 @@ li.dropdown:hover > div.dropdown-menu {
 
 .dropdown-item {
     padding-left: 10px;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
 }
 
 .dropdown-item:focus, .dropdown-item:hover {

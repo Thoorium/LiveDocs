@@ -22,7 +22,9 @@ li.dropdown:hover > div.dropdown-menu {
   margin-top: -1px; }
 
 .dropdown-item {
-  padding-left: 10px; }
+  padding-left: 10px;
+  overflow-x: hidden;
+  text-overflow: ellipsis; }
 
 .dropdown-item:focus, .dropdown-item:hover {
   border-left: 5px solid var(--cyan);
