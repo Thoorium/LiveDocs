@@ -45,9 +45,9 @@ else
     echo "Updating application path to '$APPLICATION_BASE_URL'."
     sed -i "s/base href=\"\/\"/base href=\"\/"${APPLICATION_BASE_URL}"\/\"/g" "${WWW_ROOT}/index.html"
   fi 
-fi
 
-touch "/app/.application_lock"
-echo "Setup done."
+  touch "/app/.application_lock"
+  echo "Setup done."
+fi
 
 dotnet LiveDocs.Server.dll
