@@ -160,7 +160,7 @@ namespace LiveDocs.Shared
                 return text;
 
             // TODO: Removing the dot fixes something but also breaks navigation...to figure out.
-            return Markdig.Helpers.LinkHelper.Urilize(text, true);//?.Replace(".", "");
+            return Markdig.Helpers.LinkHelper.Urilize(text, true)?.Replace(".", "");
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using LiveDocs.Shared;
 using LiveDocs.Shared.Options;
 using LiveDocs.Shared.Services;
 using Microsoft.AspNetCore.Hosting;
@@ -56,7 +57,7 @@ namespace LiveDocs.Server.Controllers
 
             var found = System.IO.File.Exists(path);
 
-            if (!found && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (!found)
                 found = TryFindFileCaseInsensitive();
 
             if (!found)
@@ -81,7 +82,7 @@ namespace LiveDocs.Server.Controllers
 
             bool TryFindFileCaseInsensitive()
             {
-                _Logger.LogInformation($"Searching for file {string.Join("/", paths)}.{ext} with insensitive case.");
+                _Logger.LogDebug($"Searching for file {string.Join("/", paths)}.{ext} with insensitive case.");
 
                 var dirInfo = new DirectoryInfo(_Options.GetDocumentationFolderAsAbsolute(_HostEnvironment.ContentRootPath).FullName);
                 var dirEnumOptions = new EnumerationOptions { MatchCasing = MatchCasing.CaseInsensitive };
@@ -89,7 +90,9 @@ namespace LiveDocs.Server.Controllers
                 // Manually scan the path to the file due to case sensitivity.
                 for (int i = 0; i < paths.Length - 1; i++)
                 {
-                    var subDirInfo = dirInfo.GetDirectories(paths[i], dirEnumOptions);
+                    // Urilize the on-disk directories to match the path requested by the browser.
+                    // TODO: Let the browser request the non-urilized file path instead?
+                    var subDirInfo = dirInfo.GetDirectories().Where(w => UrlHelper.Urilize(w.Name).Equals(UrlHelper.Urilize(paths[i]), System.StringComparison.InvariantCultureIgnoreCase)).ToArray();
                     _Logger.LogDebug($"Found {subDirInfo.Length} matching directory for path {dirInfo.FullName}/{paths[i]}.");
 
                     if (subDirInfo.Length == 0)
